@@ -1,4 +1,11 @@
 Provisioning::Application.routes.draw do
+
+  root :to => 'servers#index'
+
+  resources :images
+
+  resources :servers
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
