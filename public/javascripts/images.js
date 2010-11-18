@@ -14,8 +14,10 @@ var showImages = function() {
 	    method: 'GET',
 	    success: function(res, opts) {
 		result = Ext.decode(res.responseText);
-		setComboItems('formOs', result.comboItems.os);
-		setComboItems('formIqn', result.comboItems.iqn);
+		setComboItems('form_os', result.comboItems.os);
+		setComboItems('form_iqn', result.comboItems.iqn);
+
+		formWindow.form.getForm().reset();
 
 		formWindow.show();
 	    },
@@ -28,7 +30,7 @@ var showImages = function() {
     var createImage = function() {
 	formWindow.form.getForm().submit({
             url: paths.images.index,
-            method: 'post',
+            method: 'POST',
             waitMsg: 'Creating...',
             success: function(f, action) {
 		var data = action.result.image;
@@ -38,7 +40,6 @@ var showImages = function() {
 		var record = new RecordType(data);
 		store.add(record);
 
-		formWindow.form.getForm().reset();
 		formWindow.hide();
             },
             failure: function(f, action) {
@@ -47,8 +48,73 @@ var showImages = function() {
 	});
     };
 
+    var editImage = function() {
+	formWindow.setTitle('Update Image');
+	formWindow.submitButton.setText('Update');
+	formWindow.submitButton.setHandler(updateImage);
+
+	var record = indexGrid.selectedRecord();
+	Ext.Ajax.request({
+	    url: record.get('paths').edit,
+	    method: 'GET',
+	    success: function(res, opts) {
+		result = Ext.decode(res.responseText);
+		setComboItems('form_os', result.comboItems.os);
+		setComboItems('form_iqn', result.comboItems.iqn);
+
+		for (var field in result.values) {
+		    var cmp = Ext.getCmp('form_' + field);
+		    if (cmp)
+			cmp.setValue(result.values[field]);
+		}
+
+		formWindow.show();
+	    },
+	    failure: function(res, opts) {
+		alert('Error');
+	    }
+	});
+    };
+
+    var updateImage = function() {
+	var record = indexGrid.selectedRecord();
+	formWindow.form.getForm().submit({
+            url: record.get('paths').image,
+            method: 'PUT',
+            waitMsg: 'Updating...',
+            success: function(f, action) {
+		var data = action.result.data;
+		for (var field in data) {
+                    record.set(field, data[field]);
+		}
+		record.commit();
+
+		formWindow.hide();
+            },
+            failure: function(form, action) {
+		alert('Failed to update image');
+            }
+	});
+    };
+
+    var destroyImage = function() {
+	var record = indexGrid.selectedRecord();
+	Ext.Ajax.request({
+	    url: record.get('paths').image,
+	    method: 'DELETE',
+	    success: function(res, opts) {
+		indexGrid.getStore().remove(record);
+	    },
+	    failure: function(res, opts) {
+		alert('Error');
+	    }
+	});
+    };
+
     var setComboItems = function(comboId, items) {
 	var store = Ext.getCmp(comboId).getStore();
+	store.removeAll();
+
 	var RecordType = store.recordType;
 	for (var i = 0; i < items.length; i++) {
 	    var record = new RecordType({ value: items[i] });
@@ -125,11 +191,38 @@ var showImages = function() {
 	    ]
 	});
 
+	var contextMenu = new Ext.menu.Menu({
+	    style: {
+		overflow: 'visible'
+	    },
+	    items: [
+		{
+		    text: 'Edit',
+		    handler: editImage
+		},
+		{
+		    text: 'Destroy',
+		    handler: destroyImage
+		}
+	    ]
+	});
+
 	var grid = new Ext.grid.GridPanel({
 	    colModel: colModel,
 	    store: store,
-	    autoHeight: true
+	    autoHeight: true,
+	    listeners: {
+		rowcontextmenu: function(g, row, e) {
+		    grid.getSelectionModel().selectRow(row);
+		    e.stopEvent();
+		    contextMenu.showAt(e.getXY());
+		}
+	    }
 	});
+
+	grid.selectedRecord = function() {
+	    return grid.getSelectionModel().getSelected();
+	};
 
 	return grid;
     })();
@@ -154,14 +247,14 @@ var showImages = function() {
 	    {
 		xtype: 'textfield',
 		name: 'image[title]',
-		id: 'formTitle',
+		id: 'form_title',
 		fieldLabel: 'Title',
 		width: 200,
 		msgTarget: 'qtip'
 	    },
 	    new Ext.form.ComboBox({
 		name: 'image[os]',
-		id: 'formOs',
+		id: 'form_os',
 		fieldLabel: 'OS',
 		width: 200,
 		mode: 'local',
@@ -176,7 +269,7 @@ var showImages = function() {
 	    }),
 	    new Ext.form.ComboBox({
 		name: 'image[iqn]',
-		id: 'formIqn',
+		id: 'form_iqn',
 		fieldLabel: 'IQN',
 		width: 500,
 		mode: 'local',
@@ -192,7 +285,7 @@ var showImages = function() {
 	    {
 		xtype: 'textarea',
 		name: 'image[comment]',
-		id: 'formComment',
+		id: 'form_comment',
 		fieldLabel: 'Comment',
 		width: 300,
 		height: 100
@@ -206,6 +299,12 @@ var showImages = function() {
 	});
 
 	var submitButton = new Ext.Button();
+	var closeButton = new Ext.Button({
+	    text: 'Close',
+	    handler: function() {
+		wdw.hide();
+	    }
+	});
 
 	var wdw = new Ext.Window({
 	    modal: true,
@@ -218,13 +317,7 @@ var showImages = function() {
 	    buttonAlign: 'center',
 	    buttons: [
 		submitButton,
-		{
-		    text: 'Close',
-		    handler: function() {
-			form.getForm().reset();
-			wdw.hide();
-		    }
-		}
+		closeButton
 	    ]
 	});
 

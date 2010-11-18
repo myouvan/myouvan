@@ -16,14 +16,14 @@ var showViewport = function() {
 		    style: {
 			padding: '5px'
 		    },
-                    html: '<a id="nav-images" href="">Images</a>'
+                    html: '<a id="nav-images" href="#">Images</a>'
 		},
 		{
 		    border: false,
 		    style: {
 			padding: '5px'
 		    },
-                    html: '<a id="nav-servers" href="">Servers</a>'
+                    html: '<a id="nav-servers" href="#">Servers</a>'
 		}
 	    ]
 	},
@@ -67,6 +67,7 @@ var showViewport = function() {
 };
 
 Ext.onReady(function() {
-    showViewport();
+    Ext.Ajax.diableCaching = false;
     Ext.QuickTips.init();
+    showViewport();
 });
