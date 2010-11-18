@@ -8,6 +8,49 @@ var showServers = function() {
 	formWindow.show();
     };
 
+    var createServer = function() {
+	formWindow.form.getForm().submit({
+            url: paths.servers.index,
+            method: 'POST',
+            waitMsg: 'Creating...',
+            success: function(f, action) {
+		var data = action.result.data;
+		var store = indexGrid.getStore();
+
+		var RecordType = store.recordType;
+		var newRecord = new RecordType(data);
+		store.add(newRecord);
+
+		formWindow.hide();
+            },
+            failure: function(f, action) {
+		Ext.MessageBox.alert('Error', 'Failed to create server');
+            }
+	});
+    };
+
+    var showServer = function() {
+	var record = indexGrid.selectedRecord();
+	Ext.Ajax.request({
+	    url: record.get('paths').server,
+	    method: 'GET',
+	    success: function(res, opts) {
+		result = Ext.decode(res.responseText);
+		tableItems = buildTableItems(result.server, result.interfaces);
+
+		description.removeAll();
+		description.add(tableItems);
+
+		tab.show();
+
+		Ext.getCmp('content-container').doLayout();
+	    },
+	    failure: function(res, opts) {
+		alert('Error');
+	    }
+	});
+    };
+
     //------------------------------
     //   create button
     //------------------------------
@@ -23,6 +66,14 @@ var showServers = function() {
     //------------------------------
 
     var indexGrid = (function() {
+	var imagePaths = {
+	    Starting: 'status_changing.gif',
+	    Running: 'status_running.gif',
+	    Terminating: 'status_changing.gif',
+	    Terminated: 'status_terminated.gif',
+	    Error: 'status_error.gif',
+	};
+
 	var colModel = new Ext.grid.ColumnModel([
 	    {
 		header: 'ID',
@@ -40,7 +91,11 @@ var showServers = function() {
 		header: 'Name',
 		dataIndex: 'name',
 		width: 120,
-		sortable: true
+		sortable: true,
+		renderer: function(value, metadata, record) {
+		    url = record.get('paths').avatarIcon;
+		    return '<img src="' + url + '" width="32" height="32" style="vertical-align: top" /> ' + value;
+		}
 	    },
 	    {
 		header: 'Title',
@@ -52,7 +107,11 @@ var showServers = function() {
 		header: 'Status',
 		dataIndex: 'status',
 		width: 100,
-		sortable: true
+		sortable: true,
+		renderer: function(value, metadata, record) {
+		    var url = '/images/' + imagePaths[value];
+		    return '<img src="' + url + '" width="16" height="16" style="vertical-align: top" /> ' + value;
+		}
 	    },
 	    {
 		header: 'Physical Server',
@@ -95,10 +154,17 @@ var showServers = function() {
 	var grid = new Ext.grid.GridPanel({
 	    colModel: colModel,
 	    store: store,
-	    autoHeight: true
+	    autoHeight: true,
+	    listeners: {
+		rowclick: showServer
+	    }
 	});
 
-	grid.getStore().load();
+	store.load();
+
+	grid.selectedRecord = function() {
+	    return grid.getSelectionModel().getSelected();
+	};
 
 	return grid;
     })();
@@ -314,6 +380,26 @@ var showServers = function() {
 	    items: formItems
 	});
 
+	//--- flash panel
+
+	var flash = new Ext.Panel({
+	    layout: 'fit',
+	    border: false,
+	    html: '<div id="avatar-flash" />'
+	});
+
+	var showAvatarFlash = function() {
+	    swfobject.embedSWF('/ova.swf', 'avatar-flash', '630', '400', '9.0.0');
+	};
+
+	var setAvatar = function(thumb, icon) {
+	    Ext.getCmp('avatar_thumb').setValue(thumb);
+	    Ext.getCmp('avatar_icon').setValue(icon);
+	    nextButton.enable();
+	};
+
+	ovater_set = setAvatar;
+
 	//--- card
 
 	var activeItem = 0;
@@ -324,23 +410,50 @@ var showServers = function() {
 	    items: [
 		selectImage,
 		form,
+		flash
 	    ],
 	    width: 400
 	});
 
 	var prevCard = function() {
 	    if (activeItem == 1) {
+		prevButton.disable();
+
 		card.layout.setActiveItem(0);
 		activeItem = 0;
-		prevButton.disable();
+	    } else if (activeItem == 2) {
+		nextButton.setText('Next');
+		nextButton.enable();
+
+		card.layout.setActiveItem(1);
+		activeItem = 1;
 	    }
 	};
 
 	var nextCard = function() {
 	    if (activeItem == 0) {
+		if (!imagesGrid.getSelectionModel().hasSelection()) {
+		    Ext.MessageBox.alert('Error', 'Select an image');
+		    return;
+		}
+		var id = imagesGrid.getSelectionModel().getSelected().get('id');
+		Ext.getCmp('image-id').setValue(id);
+
+		prevButton.enable();
+
 		card.layout.setActiveItem(1);
 		activeItem = 1;
-		prevButton.enable();
+	    } else if (activeItem == 1) {
+		showAvatarFlash();
+
+		nextButton.setText('Create');
+		nextButton.disable();
+
+		card.layout.setActiveItem(2);
+		activeItem = 2;
+	    } else if (activeItem == 2) {
+		prevCard();
+		createServer();
 	    }
 	};
 
@@ -348,7 +461,6 @@ var showServers = function() {
 
 	var prevButton = new Ext.Button({
 	    text: 'Prev',
-	    disabled: true,
 	    handler: prevCard
 	});
 
@@ -382,8 +494,16 @@ var showServers = function() {
 		closeButton
 	    ],
 	    listeners: {
-		show: function() {
+		beforeshow: function() {
+		    activeItem = 0;
+		    card.layout.setActiveItem(0);
+
+		    prevButton.disable();
+		    nextButton.setText('Next');
+		    nextButton.enable();
+
 		    imagesGrid.getStore().load();
+		    form.getForm().reset();
 		}
 	    }
 	});
@@ -394,12 +514,106 @@ var showServers = function() {
     })();
 
     //------------------------------
+    //   subconte-tab
+    //------------------------------
+
+    //--- description
+
+    var description = new Ext.Panel({
+	layout: 'table',
+	defaults: {
+	    padding: '3px',
+	    border: false
+	},
+	layoutConfig: {
+	    columns: 4
+	},
+	border: false
+    });
+
+    var titleCell = function(str) {
+	return '<p style="font-weight: bold; width: 150px; text-align: right">' + str + '</p>';
+    };
+
+    var valueCell = function(str) {
+	return '<p style="width: 180px">' + str + '</p>';
+    };
+
+    var buildTableItems = function(server, interfaces) {
+	var tableItems = [
+	    { html: titleCell('Name:') },
+	    { html: server.name, colspan: 3 },
+	    { html: titleCell('UUID') },
+	    { html: server.uuid, colspan: 3 },
+	    { html: titleCell('Title:') },
+	    { html: server.title, colspan: 3 },
+	    { html: titleCell('Zone:') },
+	    { html: valueCell(server.zone) },
+	    { html: titleCell('Virtualization:') },
+	    { html: valueCell(server.virtualization) },
+	    { html: titleCell('Physical Server:') },
+	    { html: valueCell(server.physical_server) },
+	    { html: titleCell('Pool:') },
+	    { html: valueCell(server.pool) },
+	    { html: titleCell('Storage IQN:') },
+	    { html: server.storage_iqn, colspan: 3 },
+	    { html: titleCell('CPUs:') },
+	    { html: valueCell(server.cpus) },
+	    { html: titleCell('Memory(MB):') },
+	    { html: valueCell(server.memory) }
+	];
+
+	for (var i = 0; i < interfaces.length; ++i) {
+	    var interface = interfaces[i];
+	    tableItems.push([
+		{ html: titleCell('IP Address(' + (i + 1) + '):') },
+		{ html: valueCell(interface.ip_address) },
+		{ html: titleCell('Mac Address(' + (i + 1) + '):') },
+		{ html: valueCell(interface.mac_address) },
+	    ]);
+	}
+
+	tableItems.push([
+	    { html: titleCell('Avatar:') },
+	    {
+		html: valueCell('<img src="' + server.paths.avatarThumb + '" width="150" height="150" />'),
+		colspan: 3
+	    }
+	]);
+
+	return tableItems;
+    };
+
+    //--- tab
+
+    var tab = new Ext.TabPanel({
+	activeTab: 0,
+	layoutOnTabChange: true,
+	border: false,
+	items: [
+	    {
+		title: 'Description',
+		autoScroll: true,
+		items: description,
+		border: false,
+		bodyStyle: 'padding: 10px'
+            }
+	]
+    });
+
+    //------------------------------
     //   layout
     //------------------------------
 
     Ext.getCmp('subcontent').show();
+    Ext.getCmp('subcontent').removeAll();
+    Ext.getCmp('subcontent').add(tab);
+    tab.hide();
+
     Ext.getCmp('content').removeAll();
     Ext.getCmp('content').add(indexPanel);
     Ext.getCmp('content-container').doLayout();
-
 };
+
+// call from avatar flash
+var ovater_set;

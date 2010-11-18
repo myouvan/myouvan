@@ -14,6 +14,17 @@ class Server < ActiveRecord::Base
   validates :cpus, :inclusion => { :in => 1..Settings.max_cpus }
   validates :memory, :inclusion => { :in => Settings.min_memory..Settings.max_memory }
 
+  before_validation :set_uuid
+
+  def set_uuid
+    if self.uuid.blank?
+      generator = UUID.new
+      begin
+        self.uuid = generator.generate
+      end until Server.where(:uuid => self.uuid).count == 0
+    end
+  end
+
   def errors_for_ext
     hs = errors.collect {|field, error|
       ["server[#{field}]", error]

@@ -37,6 +37,6 @@ module Provisioning
     config.encoding = "utf-8"
 
     # Configure sensitive parameters which will be filtered from the log file.
-    config.filter_parameters += [:password]
+    config.filter_parameters += [:password, :thumb, :icon]
   end
 end

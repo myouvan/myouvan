@@ -56,12 +56,12 @@ class ImagesController < ApplicationController
   end
 
   def attributes_with_paths(image)
-    h = image.attributes
-    h[:paths] = {
-      :image => url_for(image),
-      :edit => edit_image_path(image)
-    }
-    h
+    image.attributes.merge({
+      :paths => {
+        :image => url_for(image),
+        :edit => edit_image_path(image)
+      }
+    })
   end
 
 end

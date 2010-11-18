@@ -2,19 +2,32 @@ Provisioning::Application.routes.draw do
 
   root :to => 'servers#index'
 
-  resources :images do
+  resources :images, :except => [:new] do
     collection do
       get :oss
       get :iqns
     end
   end
 
-  resources :servers do
+  resources :servers, :except => [:new, :edit, :update, :destroy] do
+    member do
+      post :reboot
+      post :terminate
+      post :migrate
+    end
+
     collection do
       get :zones
       get :physical_servers
       get :pools
       get :virtualizations
+    end
+  end
+
+  resources :avatars, :only => [] do
+    member do
+      get :thumb
+      get :icon
     end
   end
 
