@@ -68,4 +68,5 @@ var showViewport = function() {
 
 Ext.onReady(function() {
     showViewport();
+    Ext.QuickTips.init();
 });

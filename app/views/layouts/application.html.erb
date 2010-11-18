@@ -13,8 +13,13 @@
   <%= csrf_meta_tag %>
   <script type="text/javascript">
     var paths = {
-        images: '<%= images_path %>',
-        servers: '<%= servers_path %>'
+        images: {
+            index: '<%= images_path %>',
+            new: '<%= new_image_path %>'
+        },
+        servers: {
+           index: '<%= servers_path %>'
+        }
     }
   </script>
 </head>

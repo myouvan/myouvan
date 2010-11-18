@@ -1,6 +1,15 @@
 var showServers = function() {
 
     //------------------------------
+    //   create button
+    //------------------------------
+
+    var createButton = new Ext.Button({
+	text: 'Create Server',
+	border: false
+    });
+
+    //------------------------------
     //   index grid
     //------------------------------
 
@@ -66,7 +75,7 @@ var showServers = function() {
 	    autoLoad: true,
 	    autoSave: false,
 	    proxy: new Ext.data.HttpProxy({
-		url: paths.servers,
+		url: paths.servers.index,
 		method: 'GET',
 		headers: {
 		    Accept: 'application/json'
@@ -101,10 +110,7 @@ var showServers = function() {
 
     var indexPanel = new Ext.Panel({
 	items: [
-	    new Ext.Button({
-		text: 'Create Server',
-		border: false
-	    }),
+	    createButton,
 	    indexGrid
 	]
     });
@@ -117,4 +123,5 @@ var showServers = function() {
     Ext.getCmp('content').removeAll();
     Ext.getCmp('content').add(indexPanel);
     Ext.getCmp('content-container').doLayout();
+
 };
