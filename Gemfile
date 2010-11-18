@@ -38,3 +38,7 @@ gem 'uuid'
 
 # use ssh
 gem 'net-ssh'
+
+# running background
+gem 'starling'
+gem 'daemonz'
