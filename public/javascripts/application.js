@@ -14,14 +14,14 @@ var showViewport = function() {
 		{
 		    border: false,
 		    style: {
-			padding: '10px'
+			padding: '5px'
 		    },
                     html: '<a id="nav-images" href="">Images</a>'
 		},
 		{
 		    border: false,
 		    style: {
-			padding: '10px'
+			padding: '5px'
 		    },
                     html: '<a id="nav-servers" href="">Servers</a>'
 		}
