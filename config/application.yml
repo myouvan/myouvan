@@ -1,0 +1,27 @@
+defaults: &defaults
+  max_cpus: 16
+  min_memory: 512
+  max_memory: 4096
+
+  storage:
+    server: stoiw-grp02
+    account: shigitani
+    password: 69H96Cb5
+    chap_user: vmconnector
+    allow_ipaddress: 172.29.*.*
+
+  pools_for_instance:
+    - backup-pool02
+
+  physical_servers:
+    - pmiw-kvm018
+    - pmiw-kvm019
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults

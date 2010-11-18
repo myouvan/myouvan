@@ -29,3 +29,12 @@ gem 'sqlite3-ruby', :require => 'sqlite3'
 # group :development, :test do
 #   gem 'webrat'
 # end
+
+# settings
+gem 'settingslogic'
+
+# generate uuid
+gem 'uuid'
+
+# use ssh
+gem 'net-ssh'

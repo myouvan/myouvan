@@ -5,7 +5,10 @@ class Image < ActiveRecord::Base
   validates :iqn, :presence => true
 
   def errors_for_ext
-    Hash[errors.collect {|field, error| ["image[#{field}]", error] }]
+    h = errors.collect {|field, error|
+      ["image[#{field}]", error]
+    }
+    Hash[h]
   end
 
 end

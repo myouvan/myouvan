@@ -11,6 +11,12 @@
   <%= javascript_include_tag 'servers' %>
   <%= javascript_include_tag :defaults %>
   <%= csrf_meta_tag %>
+  <script type="text/javascript">
+    var paths = {
+        images: '<%= images_path %>',
+        servers: '<%= servers_path %>'
+    }
+  </script>
 </head>
 <body>
 
