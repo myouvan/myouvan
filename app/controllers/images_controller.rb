@@ -1,5 +1,7 @@
 class ImagesController < ApplicationController
 
+  include ApplicationHelper
+
   def index
     respond_to do |format|
       format.html
@@ -7,14 +9,20 @@ class ImagesController < ApplicationController
         images = Image.all.collect {|image|
           attributes_with_paths(image)
         }
-        render :json => { :success => true, :images => images }
+        render :json => { :success => true, :items => images }
       }
     end
   end
 
-  def new
-    comboItems = { :os => ['CentOS'], :iqn => get_iqns }
-    render :json => { :success => true, :comboItems => comboItems }
+  def oss
+    oss = ['CentOS']
+    render :json => { :success => true }.merge(combo_items(oss))
+  end
+
+  def iqns
+    lines = `sudo /sbin/iscsiadm -m discovery -t sendtargets -p #{Settings.storage.server}`
+    iqns = lines.split(/\r\n/).collect {|line| line.split(/\s+/)[1] }
+    render :json => { :success => true }.merge(combo_items(iqns))
   end
 
   def create
@@ -28,8 +36,7 @@ class ImagesController < ApplicationController
 
   def edit
     image = Image.find(params[:id])
-    comboItems = { :os => ['CentOS'], :iqn => get_iqns }
-    render :json => { :success => true, :comboItems => comboItems, :values => image.attributes }
+    render :json => { :success => true, :values => image.attributes }
   end
 
   def update
@@ -55,11 +62,6 @@ class ImagesController < ApplicationController
       :edit => edit_image_path(image)
     }
     h
-  end
-
-  def get_iqns
-    lines = `sudo /sbin/iscsiadm -m discovery -t sendtargets -p #{Settings.storage.server}`
-    lines.split(/\r\n/).collect {|line| line.split(/\s+/)[1] }
   end
 
 end

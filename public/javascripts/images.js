@@ -9,22 +9,7 @@ var showImages = function() {
 	formWindow.submitButton.setText('Create');
 	formWindow.submitButton.setHandler(createImage);
 
-	Ext.Ajax.request({
-	    url: paths.images.new,
-	    method: 'GET',
-	    success: function(res, opts) {
-		result = Ext.decode(res.responseText);
-		setComboItems('form_os', result.comboItems.os);
-		setComboItems('form_iqn', result.comboItems.iqn);
-
-		formWindow.form.getForm().reset();
-
-		formWindow.show();
-	    },
-	    failure: function(res, opts) {
-		alert('Error');
-	    }
-	});
+	formWindow.show();
     };
 
     var createImage = function() {
@@ -59,8 +44,6 @@ var showImages = function() {
 	    method: 'GET',
 	    success: function(res, opts) {
 		result = Ext.decode(res.responseText);
-		setComboItems('form_os', result.comboItems.os);
-		setComboItems('form_iqn', result.comboItems.iqn);
 
 		for (var field in result.values) {
 		    var cmp = Ext.getCmp('form_' + field);
@@ -111,17 +94,6 @@ var showImages = function() {
 	});
     };
 
-    var setComboItems = function(comboId, items) {
-	var store = Ext.getCmp(comboId).getStore();
-	store.removeAll();
-
-	var RecordType = store.recordType;
-	for (var i = 0; i < items.length; i++) {
-	    var record = new RecordType({ value: items[i] });
-	    store.add(record);
-	}
-    };
-
     //------------------------------
     //   create button
     //------------------------------
@@ -169,28 +141,6 @@ var showImages = function() {
 	    }
 	]);
 
-	var store = new Ext.data.JsonStore({
-	    autoDestroy: true,
-	    autoLoad: true,
-	    autoSave: false,
-	    proxy: new Ext.data.HttpProxy({
-		url: paths.images.index,
-		method: 'GET',
-		headers: {
-		    Accept: 'application/json'
-		}
-	    }),
-	    root: 'images',
-	    fields: [
-		'id',
-		'title',
-		'os',
-		'iqn',
-		'comment',
-		'paths'
-	    ]
-	});
-
 	var contextMenu = new Ext.menu.Menu({
 	    style: {
 		overflow: 'visible'
@@ -207,6 +157,15 @@ var showImages = function() {
 	    ]
 	});
 
+	var store = itemsStore(paths.images.index, [
+	    'id',
+	    'title',
+	    'os',
+	    'iqn',
+	    'comment',
+	    'paths'
+	]);
+
 	var grid = new Ext.grid.GridPanel({
 	    colModel: colModel,
 	    store: store,
@@ -219,6 +178,8 @@ var showImages = function() {
 		}
 	    }
 	});
+
+	store.load();
 
 	grid.selectedRecord = function() {
 	    return grid.getSelectionModel().getSelected();
@@ -243,6 +204,9 @@ var showImages = function() {
     //------------------------------
 
     var formWindow = (function() {
+
+	//--- form
+
 	var formItems = [
 	    {
 		xtype: 'textfield',
@@ -257,13 +221,10 @@ var showImages = function() {
 		id: 'form_os',
 		fieldLabel: 'OS',
 		width: 200,
-		mode: 'local',
 		editable: false,
 		forceSelection: false,
 		triggerAction: 'all',
-		store: new Ext.data.ArrayStore({
-		    fields: [{ name: 'value' }]
-		}),
+		store: comboItemsStore(paths.images.oss),
 		displayField: 'value',
 		msgTarget: 'qtip'
 	    }),
@@ -272,13 +233,10 @@ var showImages = function() {
 		id: 'form_iqn',
 		fieldLabel: 'IQN',
 		width: 500,
-		mode: 'local',
 		editable: false,
 		forceSelection: false,
 		triggerAction: 'all',
-		store: new Ext.data.ArrayStore({
-		    fields: [{ name: 'value' }]
-		}),
+		store: comboItemsStore(paths.images.iqns),
 		displayField: 'value',
 		msgTarget: 'qtip'
 	    }),
@@ -298,6 +256,8 @@ var showImages = function() {
 	    items: formItems
 	});
 
+	//--- buttons
+
 	var submitButton = new Ext.Button();
 	var closeButton = new Ext.Button({
 	    text: 'Close',
@@ -305,6 +265,8 @@ var showImages = function() {
 		wdw.hide();
 	    }
 	});
+
+	//--- window
 
 	var wdw = new Ext.Window({
 	    modal: true,

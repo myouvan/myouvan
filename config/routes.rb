@@ -2,9 +2,21 @@ Provisioning::Application.routes.draw do
 
   root :to => 'servers#index'
 
-  resources :images
+  resources :images do
+    collection do
+      get :oss
+      get :iqns
+    end
+  end
 
-  resources :servers
+  resources :servers do
+    collection do
+      get :zones
+      get :physical_servers
+      get :pools
+      get :virtualizations
+    end
+  end
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

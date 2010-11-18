@@ -15,12 +15,17 @@
     var paths = {
         images: {
             index: '<%= images_path %>',
-            new: '<%= new_image_path %>'
+            oss: '<%= oss_images_path %>',
+            iqns: '<%= iqns_images_path %>'
         },
         servers: {
-           index: '<%= servers_path %>'
+           index: '<%= servers_path %>',
+           zones: '<%= zones_servers_path %>',
+           physical_servers: '<%= physical_servers_servers_path %>',
+           pools: '<%= pools_servers_path %>',
+           virtualizations: '<%= virtualizations_servers_path %>'
         }
-    }
+    };
   </script>
 </head>
 <body>
