@@ -16,13 +16,13 @@ end
 
 
 require 'simple-daemon'
-class ServerDaemon < SimpleDaemon::Base
+class CputimeDaemon < SimpleDaemon::Base
   SimpleDaemon::WORKING_DIRECTORY = Rails.root.join 'log'
   
   def self.start    
     STDOUT.sync = true
     @logger = Logger.new(STDOUT)
-    @logger.level = Rails.env.production? ? Logger::INFO : Logger::DEBUG
+    @logger.level = Rails.env.production?
     if Rails.env.development?
       # Disable SQL logging in debugging.
 			# This is handy if your daemon queries the database often.
@@ -30,38 +30,12 @@ class ServerDaemon < SimpleDaemon::Base
     end
 		
     @logger.info "Starting daemon #{self.name}"		
-    starling = Starling.new(Settings.starling.server)
         
     loop do 
       begin
-        begin
-          item = starling.get(Settings.starling.queue)
-        rescue MemCache::MemCacheError => v
-          raise unless v.message == 'No servers available (all dead)'
-        end
-
-        if item
-          fork {
-            server = Server.find(item[:server_id])
-            begin
-              @logger.info item.inspect
-              ps = PhysicalServer.new(@logger)
-
-              case item[:command]
-              when 'create_server'
-                ps.create_server(server, item[:domain_xml])
-              when 'terminate_server'
-                ps.terminate_server(server)
-              when 'migrate_server'
-                ps.migrate_server(server, item[:new_physical_server])
-              end
-            rescue Exception => e
-              server.status = 'Error'
-              server.save
-              raise
-            end
-          }
-        end
+        # TODO: execute some tasks in the background repeatedly
+        
+        # YOUR CODE HERE
         
         # Optional. Sleep between tasks.
         Kernel.sleep 1
@@ -84,4 +58,4 @@ class ServerDaemon < SimpleDaemon::Base
   end
 end
 
-ServerDaemon.daemonize
+CputimeDaemon.daemonize

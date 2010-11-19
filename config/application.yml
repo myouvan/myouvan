@@ -1,4 +1,8 @@
 defaults: &defaults
+  starling:
+    server: localhost:16020
+    queue: provisioning_queue
+
   max_cpus: 16
   min_memory: 512
   max_memory: 4096

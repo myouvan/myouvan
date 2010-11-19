@@ -141,6 +141,15 @@ var showImages = function() {
 	    }
 	]);
 
+	var store = itemsStore(paths.images.index, [
+	    'id',
+	    'title',
+	    'os',
+	    'iqn',
+	    'comment',
+	    'paths'
+	]);
+
 	var contextMenu = new Ext.menu.Menu({
 	    style: {
 		overflow: 'visible'
@@ -156,15 +165,6 @@ var showImages = function() {
 		}
 	    ]
 	});
-
-	var store = itemsStore(paths.images.index, [
-	    'id',
-	    'title',
-	    'os',
-	    'iqn',
-	    'comment',
-	    'paths'
-	]);
 
 	var grid = new Ext.grid.GridPanel({
 	    colModel: colModel,

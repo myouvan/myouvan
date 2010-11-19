@@ -51,6 +51,36 @@ var showServers = function() {
 	});
     };
 
+    var terminateServer = function() {
+	var record = indexGrid.selectedRecord();
+	Ext.Ajax.request({
+	    url: record.get('paths').terminate,
+	    method: 'POST',
+	    success: function(res, opts) {
+		record.set('status', 'Terminating');
+		record.commit();
+	    },
+	    failure: function(res, opts) {
+		Ext.MessageBox.alert('Error', 'Failed to terminate server');
+	    }
+	});
+    };
+
+    var migrateServer = function() {
+	var record = indexGrid.selectedRecord();
+	Ext.Ajax.request({
+	    url: record.get('paths').migrate,
+	    method: 'POST',
+	    success: function(res, opts) {
+		record.set('status', 'Migrating');
+		record.commit();
+	    },
+	    failure: function(res, opts) {
+		Ext.MessageBox.alert('Error', 'Failed to migrate server');
+	    }
+	});
+    };
+
     //------------------------------
     //   create button
     //------------------------------
@@ -71,6 +101,7 @@ var showServers = function() {
 	    Running: 'status_running.gif',
 	    Terminating: 'status_changing.gif',
 	    Terminated: 'status_terminated.gif',
+	    Migrating: 'status_changing.gif',
 	    Error: 'status_error.gif',
 	};
 
@@ -151,12 +182,35 @@ var showServers = function() {
 	    'paths'
 	]);
 
+	var contextMenu = new Ext.menu.Menu({
+	    style: {
+		overflow: 'visible'
+	    },
+	    items: [
+		{
+		    text: 'Reboot'
+		},
+		{
+		    text: 'Terminate',
+		    handler: terminateServer
+		},
+		{
+		    text: 'Migrate',
+		    handler: migrateServer
+		}
+	    ]
+	});
+
 	var grid = new Ext.grid.GridPanel({
 	    colModel: colModel,
 	    store: store,
-	    autoHeight: true,
 	    listeners: {
-		rowclick: showServer
+		rowclick: showServer,
+		rowcontextmenu: function(g, row, e) {
+		    grid.getSelectionModel().selectRow(row);
+		    e.stopEvent();
+		    contextMenu.showAt(e.getXY());
+		}
 	    }
 	});
 
@@ -174,9 +228,18 @@ var showServers = function() {
     //------------------------------
 
     var indexPanel = new Ext.Panel({
+	layout: 'border',
 	items: [
-	    createButton,
-	    indexGrid
+	    {
+		region: 'north',
+		height: 30,
+		items: createButton
+	    },
+	    new Ext.Panel({
+		region: 'center',
+		layout: 'fit',
+		items: indexGrid
+	    })
 	]
     });
 
@@ -564,12 +627,11 @@ var showServers = function() {
 	];
 
 	for (var i = 0; i < interfaces.length; ++i) {
-	    var interface = interfaces[i];
 	    tableItems.push([
 		{ html: titleCell('IP Address(' + (i + 1) + '):') },
-		{ html: valueCell(interface.ip_address) },
+		{ html: valueCell(interfaces[i].ip_address) },
 		{ html: titleCell('Mac Address(' + (i + 1) + '):') },
-		{ html: valueCell(interface.mac_address) },
+		{ html: valueCell(interfaces[i].mac_address) },
 	    ]);
 	}
 

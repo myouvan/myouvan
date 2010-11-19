@@ -19,7 +19,7 @@ class ServersController < ApplicationController
     render :json => {
       :success => true,
       :server => attributes_with_paths(server),
-      :interfaces => server.interfaces
+      :interfaces => server.interfaces.collect {|interface| interface.attributes }
     }
   end
 
@@ -58,6 +58,58 @@ class ServersController < ApplicationController
     else
       render :json => { :success => false, :errors => server.errors_for_ext }
     end
+
+    @server = server
+    domain_xml = '' # because render_to_string returns ActionView::Buffer
+    domain_xml << (render_to_string :action => 'domain', :layout => false)
+
+    item = {
+      :command => 'create_server',
+      :server_id => server.id,
+      :domain_xml => domain_xml
+    }
+
+    starling = Starling.new(Settings.starling.server)
+    starling.set(Settings.starling.queue, item)
+  end
+
+  def terminate
+    server = Server.find(params[:id])
+    server.status = 'Terminating'
+    server.save
+
+    render :json => { :success => true }
+
+    item = {
+      :command => 'terminate_server',
+      :server_id => server.id
+    }
+
+    starling = Starling.new(Settings.starling.server)
+    starling.set(Settings.starling.queue, item)
+  end
+
+  def migrate
+    new_physical_server = params[:physical_server]
+    if new_physical_server.blank?
+      render :json => { :success => false, :errors => { :physical_server => "can't be blank" } }
+      return
+    end
+
+    server = Server.find(params[:id])
+    server.status = 'Migrating'
+    server.save
+
+    render :json => { :success => true }
+
+    item = {
+      :command => 'migrate_server',
+      :server_id => server.id,
+      :new_physical_server => new_physical_server
+    }
+
+    starling = Starling.new(Settings.starling.server)
+    starling.set(Settings.starling.queue, item)
   end
 
   def attributes_with_paths(server)
