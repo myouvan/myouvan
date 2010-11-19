@@ -5,23 +5,23 @@ var showServers = function() {
     //------------------------------
 
     var newServer = function() {
-	formWindow.show();
+	newServerWindow.show();
     };
 
     var createServer = function() {
-	formWindow.form.getForm().submit({
+	newServerWindow.form.getForm().submit({
             url: paths.servers.index,
             method: 'POST',
             waitMsg: 'Creating...',
             success: function(f, action) {
-		var data = action.result.data;
+		var server = action.result.server;
 		var store = indexGrid.getStore();
 
 		var RecordType = store.recordType;
-		var newRecord = new RecordType(data);
+		var newRecord = new RecordType(server);
 		store.add(newRecord);
 
-		formWindow.hide();
+		newServerWindow.hide();
             },
             failure: function(f, action) {
 		Ext.MessageBox.alert('Error', 'Failed to create server');
@@ -49,6 +49,35 @@ var showServers = function() {
 		alert('Error');
 	    }
 	});
+
+	var store = new itemsStore(record.get('paths').monitor, [
+	    'time',
+	    'cpu_use'
+	]);
+	store.load();
+
+	var chart = new Ext.chart.LineChart({
+	    store: store,
+	    xField: "time",
+	    yField: "cpu_use",
+	    extraStyle: {
+		animationEnabled: false,
+		xAxis: {
+		    showLabels:false
+		}
+	    },
+	    xAxis: new Ext.chart.NumericAxis({
+		labelRenderer: null
+	    }),
+	    yAxis: new Ext.chart.NumericAxis({
+		maximum: 100,
+		minimum: 0
+	    })
+	});
+
+	chartPanel.removeAll();
+	chartPanel.add(chart);
+	chartPanel.store = store;
     };
 
     var terminateServer = function() {
@@ -66,19 +95,58 @@ var showServers = function() {
 	});
     };
 
+    var migrateSelectServer = function() {
+	migrateSelectServerWindow.show();
+    };
+
     var migrateServer = function() {
 	var record = indexGrid.selectedRecord();
-	Ext.Ajax.request({
-	    url: record.get('paths').migrate,
-	    method: 'POST',
-	    success: function(res, opts) {
+	migrateSelectServerWindow.form.getForm().submit({
+            url: record.get('paths').migrate,
+            method: 'POST',
+            waitMsg: 'Migrating...',
+            success: function(f, action) {
 		record.set('status', 'Migrating');
 		record.commit();
-	    },
-	    failure: function(res, opts) {
-		Ext.MessageBox.alert('Error', 'Failed to migrate server');
-	    }
+
+		migrateSelectServerWindow.hide();
+            },
+            failure: function(f, action) {
+		Ext.MessageBox.alert('Error', 'Failed to create server');
+            }
 	});
+    };
+
+    var updateStatus = function() {
+	Ext.Ajax.request({
+            url: paths.servers.status,
+            method: 'GET',
+            success: function(res, opts) {
+		var items = Ext.decode(res.responseText).items;
+		var store = indexGrid.getStore();
+		var deletedRecords = new Array();
+		indexGrid.getStore().each(function(record) {
+                    var id = record.get('id');
+                    if (items[id]) {
+			for (var field in items[id])
+			    record.set(field, items[id][field]);
+			record.commit();
+                    } else {
+			deletedRecords.push(record);
+                    }
+		});
+		for (var i = 0; i < deletedRecords.length; ++i) {
+                    store.remove(deletedRecords[i]);
+		}
+            },
+            failure: function(res, opts) {
+            }
+	});
+    };
+
+    var updateMonitor = function() {
+	if (chartPanel.store)
+	    chartPanel.store.reload();
     };
 
     //------------------------------
@@ -196,7 +264,7 @@ var showServers = function() {
 		},
 		{
 		    text: 'Migrate',
-		    handler: migrateServer
+		    handler: migrateSelectServer
 		}
 	    ]
 	});
@@ -238,6 +306,7 @@ var showServers = function() {
 	    new Ext.Panel({
 		region: 'center',
 		layout: 'fit',
+		border: false,
 		items: indexGrid
 	    })
 	]
@@ -247,7 +316,7 @@ var showServers = function() {
     //   form window
     //------------------------------
 
-    var formWindow = (function() {
+    var newServerWindow = (function() {
 
 	//--- select image card
 
@@ -577,6 +646,77 @@ var showServers = function() {
     })();
 
     //------------------------------
+    //   migrate select server form
+    //------------------------------
+
+    var migrateSelectServerWindow = (function() {
+	
+	//----- form
+
+	var formItems = [
+	    new Ext.form.ComboBox({
+		name: 'physical_server',
+		fieldLabel: 'Physical Server',
+		width: 150,
+		editable: false,
+		forceSelection: false,
+		triggerAction: 'all',
+		store: comboItemsStore(paths.servers.physical_servers),
+		displayField: 'value',
+		msgTarget: 'qtip'
+	    }),
+	];
+
+	var form = new Ext.form.FormPanel({
+	    labelWidth: 100,
+	    bodyStyle: { padding: '5px 10px' },
+	    border: false,
+	    autoScroll: true,
+	    items: formItems
+	});
+
+	//--- buttons
+
+	var submitButton = new Ext.Button({
+	    text: 'Migrate',
+	    handler: migrateServer
+	});
+	var closeButton = new Ext.Button({
+	    text: 'Close',
+	    handler: function() {
+		wdw.hide();
+	    }
+	});
+
+	//----- window
+
+	var wdw = new Ext.Window({
+	    title: 'Migrate Server',
+	    modal: true,
+	    width: 291,
+	    height: 119,
+	    layout: 'fit',
+	    plain: true,
+	    closable: false,
+	    items: form,
+	    buttonAlign: 'center',
+	    buttons: [
+		submitButton,
+		closeButton
+	    ],
+	    listeners: {
+		beforeshow: function() {
+		    form.getForm().reset();
+		}
+	    }
+	});
+
+	wdw.form = form;
+
+	return wdw;
+    })();
+
+    //------------------------------
     //   subconte-tab
     //------------------------------
 
@@ -646,6 +786,14 @@ var showServers = function() {
 	return tableItems;
     };
 
+    //--- chart panel
+
+    var chartPanel = new Ext.Panel({
+	width: 600,
+	height: 400,
+	layout: "fit"
+    });
+
     //--- tab
 
     var tab = new Ext.TabPanel({
@@ -659,7 +807,14 @@ var showServers = function() {
 		items: description,
 		border: false,
 		bodyStyle: 'padding: 10px'
-            }
+            },
+	    {
+		title: 'Monitoring',
+		autoScroll: true,
+		items: chartPanel,
+		border: false,
+		bodyStyle: 'padding: 10px'
+	    }
 	]
     });
 
@@ -675,6 +830,9 @@ var showServers = function() {
     Ext.getCmp('content').removeAll();
     Ext.getCmp('content').add(indexPanel);
     Ext.getCmp('content-container').doLayout();
+
+    var updateStatusTimer = setInterval(updateStatus, 15000);
+    var updateMonitorTimer = setInterval(updateMonitor, 5000);
 };
 
 // call from avatar flash

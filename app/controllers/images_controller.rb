@@ -43,7 +43,7 @@ class ImagesController < ApplicationController
     image = Image.find(params[:id])
     image.attributes = params[:image]
     if image.save
-      render :json => { :success => true, :data => image.attributes }
+      render :json => { :success => true, :image => image.attributes }
     else
       render :json => { :success => false, :errors => image.errors_for_ext }
     end

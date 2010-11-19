@@ -25,7 +25,7 @@ class ServerDaemon < SimpleDaemon::Base
     @logger.level = Rails.env.production? ? Logger::INFO : Logger::DEBUG
     if Rails.env.development?
       # Disable SQL logging in debugging.
-			# This is handy if your daemon queries the database often.
+      # This is handy if your daemon queries the database often.
       ActiveRecord::Base.logger.level = Logger::INFO
     end
 		

@@ -5,27 +5,27 @@ var showImages = function() {
     //------------------------------
 
     var newImage = function() {
-	formWindow.setTitle('Create Image');
-	formWindow.submitButton.setText('Create');
-	formWindow.submitButton.setHandler(createImage);
+	newImageWindow.setTitle('Create Image');
+	newImageWindow.submitButton.setText('Create');
+	newImageWindow.submitButton.setHandler(createImage);
 
-	formWindow.show();
+	newImageWindow.show();
     };
 
     var createImage = function() {
-	formWindow.form.getForm().submit({
+	newImageWindow.form.getForm().submit({
             url: paths.images.index,
             method: 'POST',
             waitMsg: 'Creating...',
             success: function(f, action) {
-		var data = action.result.image;
+		var image = action.result.image;
 		var store = indexGrid.getStore();
 
 		var RecordType = store.recordType;
-		var record = new RecordType(data);
+		var record = new RecordType(image);
 		store.add(record);
 
-		formWindow.hide();
+		newImageWindow.hide();
             },
             failure: function(f, action) {
 		Ext.MessageBox.alert('Error', 'Failed to create image');
@@ -34,9 +34,9 @@ var showImages = function() {
     };
 
     var editImage = function() {
-	formWindow.setTitle('Update Image');
-	formWindow.submitButton.setText('Update');
-	formWindow.submitButton.setHandler(updateImage);
+	newImageWindow.setTitle('Update Image');
+	newImageWindow.submitButton.setText('Update');
+	newImageWindow.submitButton.setHandler(updateImage);
 
 	var record = indexGrid.selectedRecord();
 	Ext.Ajax.request({
@@ -51,7 +51,7 @@ var showImages = function() {
 			cmp.setValue(result.values[field]);
 		}
 
-		formWindow.show();
+		newImageWindow.show();
 	    },
 	    failure: function(res, opts) {
 		alert('Error');
@@ -61,18 +61,17 @@ var showImages = function() {
 
     var updateImage = function() {
 	var record = indexGrid.selectedRecord();
-	formWindow.form.getForm().submit({
+	newImageWindow.form.getForm().submit({
             url: record.get('paths').image,
             method: 'PUT',
             waitMsg: 'Updating...',
             success: function(f, action) {
-		var data = action.result.data;
-		for (var field in data) {
-                    record.set(field, data[field]);
-		}
+		var image = action.result.image;
+		for (var field in image)
+                    record.set(field, image[field]);
 		record.commit();
 
-		formWindow.hide();
+		newImageWindow.hide();
             },
             failure: function(form, action) {
 		alert('Failed to update image');
@@ -194,8 +193,17 @@ var showImages = function() {
 
     var indexPanel = new Ext.Panel({
 	items: [
-	    createButton,
-	    indexGrid
+	    {
+		region: 'north',
+		height: 30,
+		items: createButton
+	    },
+	    new Ext.Panel({
+		region: 'center',
+		layout: 'fit',
+		border: false,
+		items: indexGrid
+	    })
 	]
     });
 
@@ -203,7 +211,7 @@ var showImages = function() {
     //   form window
     //------------------------------
 
-    var formWindow = (function() {
+    var newImageWindow = (function() {
 
 	//--- form
 

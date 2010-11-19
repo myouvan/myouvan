@@ -11,12 +11,14 @@ Provisioning::Application.routes.draw do
 
   resources :servers, :except => [:new, :edit, :update, :destroy] do
     member do
+      get :monitor
       post :reboot
       post :terminate
       post :migrate
     end
 
     collection do
+      get :status
       get :zones
       get :physical_servers
       get :pools

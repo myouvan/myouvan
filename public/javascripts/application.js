@@ -69,6 +69,8 @@ var showViewport = function() {
 Ext.onReady(function() {
     Ext.Ajax.diableCaching = false;
     Ext.QuickTips.init();
+    Ext.chart.Chart.CHART_URL = '/javascripts/ext-3.3.0/resources/charts.swf';
+
     showViewport();
 });
 

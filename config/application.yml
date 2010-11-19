@@ -3,6 +3,12 @@ defaults: &defaults
     server: localhost:16020
     queue: provisioning_queue
 
+  memcached:
+    server: localhost:11211
+    key:
+      cpus: provisioning_cpus
+      monitor: provisioning_monitor
+
   max_cpus: 16
   min_memory: 512
   max_memory: 4096
@@ -20,6 +26,11 @@ defaults: &defaults
   physical_servers:
     - pmiw-kvm018
     - pmiw-kvm019
+
+  virtual_server:
+    centos:
+      account: root
+      password: iwroot
 
 development:
   <<: *defaults

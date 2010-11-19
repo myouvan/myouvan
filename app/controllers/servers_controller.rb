@@ -14,6 +14,31 @@ class ServersController < ApplicationController
     end
   end
 
+  def status
+    servers = Server.select([:id, :status, :physical_server]).all
+    h = servers.collect {|server|
+      [server.id, server.attributes]
+    }
+    render :json => { :success => true, :items => Hash[h] }
+  end
+
+  def monitor
+    memcache = MemCache.new(Settings.memcached.server)
+    monitors = memcache.get("#{Settings.memcached.key.monitor}:#{params[:id]}") || Array.new
+    cpus =  memcache.get("#{Settings.memcached.key.cpus}:#{params[:id]}") || 1
+
+    monitors.reverse_each do |monitor|
+      monitor[:time] = (monitor[:time] - monitors.first[:time]) * 1000000 + monitor[:usec]
+    end
+    items = monitors.each_cons(2).collect {|m1, m2|
+      time_diff = m2[:time] - m1[:time]
+      cpu_time_diff = m2[:cpu_time] - m1[:cpu_time]
+      cpu_use = cpu_time_diff / time_diff / cpus / 10
+      { :time => m2[:time], :cpu_use => [cpu_use, 100].min }
+    }
+    render :json => { :success => true, :items => items }
+  end
+
   def show
     server = Server.includes(:interfaces).find(params[:id])
     render :json => {
@@ -54,7 +79,7 @@ class ServersController < ApplicationController
     server.avatar = Avatar.new(params[:avatar])
 
     if server.save
-      render :json => { :success => true, :data => attributes_with_paths(server) }
+      render :json => { :success => true, :server => attributes_with_paths(server) }
     else
       render :json => { :success => false, :errors => server.errors_for_ext }
     end
@@ -117,6 +142,7 @@ class ServersController < ApplicationController
     server.attributes.merge({
       :paths => {
         :server => url_for(server),
+        :monitor => monitor_server_path(server),
         :reboot => reboot_server_path(server),
         :terminate => terminate_server_path(server),
         :migrate => migrate_server_path(server),

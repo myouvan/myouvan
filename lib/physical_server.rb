@@ -27,10 +27,13 @@ class PhysicalServer
 
     virt_create_server(server, domain_xml)
 
+    virtual_server = Centos.new(@logger)
+    virtual_server.config_server(server)
+
     server.status = 'Running'
     server.save
 
-    @logger.info "finish creating server #{server.name}"
+    @logger.info "finished creating server #{server.name}"
   end
 
   def terminate_server(server)
@@ -45,7 +48,7 @@ class PhysicalServer
     server.status = 'Terminated'
     server.save
 
-    @logger.info "finish terminating server #{server.name}"
+    @logger.info "finished terminating server #{server.name}"
 
     sleep 60
     server.destroy
@@ -57,14 +60,22 @@ class PhysicalServer
     @logger.info "start migrating server #{server.name} to #{new_physical_server}"
 
     iscsi_login(new_physical_server, server.storage_iqn)
-    virsh_migrate_server(server, new_physical_server)
+
+    begin
+      virsh_migrate_server(server, new_physical_server)
+    rescue Libvirt::Error
+      virsh_rollback_migrate_server(server, new_physical_server)
+      iscsi_logout(new_physical_server, server.storage>iqn)
+      raise
+    end
+
     iscsi_logout(server.physical_server, server.storage_iqn)
 
     server.physical_server = new_physical_server
     server.status = 'Running'
     server.save
 
-    @logger.info "finish migrated server #{server.name} to #{new_physical_server}"
+    @logger.info "finished migrated server #{server.name} to #{new_physical_server}"
   end
   
   #------------------------------
@@ -147,9 +158,25 @@ class PhysicalServer
     domain = conn_src.lookup_domain_by_name(server.name)
     conn_dst = Libvirt::open("qemu+ssh://root@#{new_physical_server}/system")
     conn_dst.define_domain_xml(domain.xml_desc)
+
     domain.migrate(conn_dst, Libvirt::Domain::MIGRATE_LIVE)
+
     domain.undefine
     @logger.debug "migrated server #{server.name} to #{new_physical_server}"
+  end
+
+  def virsh_rollback_migrate_server(server, new_physical_server)
+    conn_dst = Libvirt::open("qemu+ssh://root@#{new_physical_server}/system")
+    begin
+      domain_dst = conn_dst.lookup_domain_by_name(server.name)
+      domain_dst.destroy unless domain.info.state == Libvirt::Domain::SHUTOFF
+      domain_dst.undefine
+    rescue Libvirt::RetrieveError
+    end
+
+    conn_src = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
+    domain_src = conn_src.lookup_domain_by_name(server.name)
+    domain_src.create if domain_src.info.state == Libvirt::Domain::SHUTOFF
   end
 
 end
