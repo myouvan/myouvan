@@ -64,12 +64,12 @@ class MonitorDaemon < SimpleDaemon::Base
           time = Time.now
           monitors << { :time => time.to_i, :usec => time.usec, :cpu_time => domain.info.cpu_time }
 
-          monitors.shift if monitors.size > 100
+          monitors.shift if monitors.size > Settings.monitor_caches
           memcache.set("#{Settings.memcached.key.monitor}:#{server.id}", monitors)
         end
         
         # Optional. Sleep between tasks.
-        Kernel.sleep 1
+        Kernel.sleep 2
       rescue Exception => e
         # This gets thrown when we need to get out.
         raise if e.kind_of? SystemExit

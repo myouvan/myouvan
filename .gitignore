@@ -2,6 +2,7 @@
 Gemfile.lock
 db/*.sqlite3
 log/*.log
+log/*.pid
 public/javascripts/ext-3.3.0
 public/stylesheets/ext-3.3.0
 public/stylesheets/images

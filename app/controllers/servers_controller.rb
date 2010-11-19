@@ -30,12 +30,28 @@ class ServersController < ApplicationController
     monitors.reverse_each do |monitor|
       monitor[:time] = (monitor[:time] - monitors.first[:time]) * 1000000 + monitor[:usec]
     end
+
     items = monitors.each_cons(2).collect {|m1, m2|
       time_diff = m2[:time] - m1[:time]
       cpu_time_diff = m2[:cpu_time] - m1[:cpu_time]
       cpu_use = cpu_time_diff / time_diff / cpus / 10
-      { :time => m2[:time], :cpu_use => [cpu_use, 100].min }
+      { :cpu_use => [cpu_use, 100].min }
     }
+
+    if items.size < Settings.monitor_caches
+      items.each_with_index do |item, i|
+        item[:index] = i + Settings.monitor_caches - items.size
+      end
+      items = (0...(Settings.monitor_caches - items.size)).collect {|i|
+        { :index => i, :cpu_use => 0 }
+      } + items
+    else
+      items = items[-Settings.monitor_caches..-1]
+      items.each_with_index do |item, i|
+        item[:index] = i
+      end
+    end
+
     render :json => { :success => true, :items => items }
   end
 

@@ -9,6 +9,8 @@ defaults: &defaults
       cpus: provisioning_cpus
       monitor: provisioning_monitor
 
+  monitor_caches: 50
+
   max_cpus: 16
   min_memory: 512
   max_memory: 4096

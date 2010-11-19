@@ -51,15 +51,22 @@ var showServers = function() {
 	});
 
 	var store = new itemsStore(record.get('paths').monitor, [
-	    'time',
+	    'index',
 	    'cpu_use'
 	]);
 	store.load();
 
 	var chart = new Ext.chart.LineChart({
 	    store: store,
-	    xField: "time",
-	    yField: "cpu_use",
+	    xField: 'index',
+	    series: [
+		{
+		    yField: "cpu_use",
+		    style: {
+			size: 0
+		    }
+		}
+	    ],
 	    extraStyle: {
 		animationEnabled: false,
 		xAxis: {
@@ -67,7 +74,8 @@ var showServers = function() {
 		}
 	    },
 	    xAxis: new Ext.chart.NumericAxis({
-		labelRenderer: null
+		maximum: 49,
+		minimum: 0
 	    }),
 	    yAxis: new Ext.chart.NumericAxis({
 		maximum: 100,
@@ -75,8 +83,8 @@ var showServers = function() {
 	    })
 	});
 
-	chartPanel.removeAll();
-	chartPanel.add(chart);
+	chartContainer.removeAll();
+	chartContainer.add(chart);
 	chartPanel.store = store;
     };
 
@@ -788,10 +796,25 @@ var showServers = function() {
 
     //--- chart panel
 
+    var chartContainer = new Ext.Panel({
+	layout: "fit",
+	border: false,
+	width: 400,
+	height: 250
+    });
+
     var chartPanel = new Ext.Panel({
-	width: 600,
-	height: 400,
-	layout: "fit"
+	border: false,
+	items: [
+	    {
+		html: 'CPU use',
+		bodyStyle: {
+		    padding: '3px'
+		},
+		border: false
+	    },
+	    chartContainer
+	]
     });
 
     //--- tab
@@ -831,7 +854,7 @@ var showServers = function() {
     Ext.getCmp('content').add(indexPanel);
     Ext.getCmp('content-container').doLayout();
 
-    var updateStatusTimer = setInterval(updateStatus, 15000);
+    var updateStatusTimer = setInterval(updateStatus, 10000);
     var updateMonitorTimer = setInterval(updateMonitor, 5000);
 };
 
