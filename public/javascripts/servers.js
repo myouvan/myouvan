@@ -476,16 +476,23 @@ var showServers = function() {
 	})();
 
 	var selectImage = new Ext.Panel({
+	    layout: 'border',
 	    border: false,
 	    items: [
 		{
+		    region: 'north',
+		    height: 20,
 		    html: 'Select Image',
 		    bodyStyle: {
 			padding: '3px'
 		    },
 		    border: false
 		},
-		imagesGrid
+		{
+		    region: 'center',
+		    layout: 'fit',
+		    items: imagesGrid
+		}
 	    ]
 	});
 
@@ -630,6 +637,11 @@ var showServers = function() {
 	    },
 	    {
 		xtype: 'hidden',
+		name: 'tags',
+		id: 'form_tags'
+	    },
+	    {
+		xtype: 'hidden',
 		name: 'avatar[thumb]',
 		id: 'avatar_thumb'
 	    },
@@ -656,7 +668,7 @@ var showServers = function() {
 		{
 		    header: 'Value',
 		    dataIndex: 'value',
-		    width: 450,
+		    width: 250,
 		    sortable: true
 		}
 	    ]);
@@ -683,7 +695,6 @@ var showServers = function() {
 	    var grid = new Ext.grid.GridPanel({
 		colModel: colModel,
 		store: store,
-		autoHeight: true,
 		listeners: {
 		    rowcontextmenu: function(g, row, e) {
 			grid.getSelectionModel().selectRow(row);
@@ -701,21 +712,25 @@ var showServers = function() {
 	})();
 
 	var addTagCombo = new Ext.form.ComboBox({
-	    id: 'form_tags',
-	    width: 150,
+	    width: 250,
 	    editable: true,
 	    triggerAction: 'all',
 	    store: comboItemsStore(paths.tags.index),
-	    displayField: 'value',
+	    displayField: 'value'
 	});
 
 	var addTagButton = new Ext.Button({
 	    text: 'Add Tag',
+	    width: 70,
 	    handler: function() {
+		var value = addTagCombo.getValue();
+		if (value == '')
+		    return;
+
 		var store = tagsGrid.getStore();
 		var RecordType = store.recordType;
 		var record = new RecordType({
-		    value: addTagCombo.getValue()
+		    value: value
 		});
 		store.add(record);
 		addTagCombo.reset();
@@ -723,18 +738,41 @@ var showServers = function() {
 	});
 
 	var tagsPanel = new Ext.Panel({
+	    layout: 'border',
 	    border: false,
 	    items: [
 		{
+		    region: 'north',
+		    height: 20,
 		    html: 'Add Tags',
+		    border: false,
 		    bodyStyle: {
 			padding: '3px'
-		    },
-		    border: false
+		    }
 		},
-		tagsGrid,
-		addTagCombo,
-		addTagButton
+		new Ext.Panel({
+		    region: 'center',
+		    layout: 'fit',
+		    border: false,
+		    items: tagsGrid
+		}),
+		new Ext.Panel({
+		    region: 'south',
+		    layout: 'hbox',
+		    height: 30,
+		    border: false,
+		    bodyStyle: {
+			padding: '5px 0 0 0'
+		    },
+		    items: [
+			addTagCombo,
+			{
+			    border: false,
+			    padding: '0 0 0 5px',
+			    items: addTagButton
+			}
+		    ]
+		})
 	    ]
 	});
 
@@ -809,6 +847,12 @@ var showServers = function() {
 		card.layout.setActiveItem(2);
 		activeItem = 2;
 	    } else if (activeItem == 2) {
+		var tags = new Array();
+		tagsGrid.getStore().each(function(record) {
+		    tags.push({ value: record.get('value') });
+		});
+		Ext.getCmp('form_tags').setValue(Ext.encode(tags));
+
 		showAvatarFlash();
 
 		nextButton.setText('Create');
@@ -869,8 +913,12 @@ var showServers = function() {
 
 		    imagesGrid.getStore().load();
 		    imagesGrid.getSelectionModel().clearSelections();
+
 		    form.getForm().reset();
 		    Ext.getCmp('form_physical_server').disable();
+
+		    tagsGrid.getStore().removeAll();
+		    addTagCombo.reset();
 		}
 	    }
 	});

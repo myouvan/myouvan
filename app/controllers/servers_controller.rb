@@ -107,6 +107,10 @@ class ServersController < ApplicationController
 
     server.avatar = Avatar.new(params[:avatar])
 
+    JSON.parse(params[:tags]).each do |params_tag|
+      server.tags << Tag.new(params_tag)
+    end
+
     if server.save
       render :json => { :success => true, :server => attributes_with_paths(server) }
     else
