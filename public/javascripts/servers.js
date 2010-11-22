@@ -317,7 +317,19 @@ var showServers = function() {
 		border: false,
 		items: indexGrid
 	    })
-	]
+	],
+	listeners: {
+	    added: function() {
+		this.updateStatusTimer = setInterval(updateStatus, 10000);
+		this.updateMonitorTimer = setInterval(updateMonitor, 5000);
+	    },
+	    destroy: function() {
+		clearInterval(this.updateStatusTimer);
+		clearInterval(this.updateMonitorTimer);
+		newServerWindow.destroy();
+		migrateSelectServerWindow.destroy();
+	    }
+	}
     });
 
     //------------------------------
@@ -400,6 +412,7 @@ var showServers = function() {
 	    {
 		xtype: 'textfield',
 		name: 'server[name]',
+		id: 'form_name',
 		fieldLabel: 'Name',
 		width: 100,
 		msgTarget: 'qtip'
@@ -407,12 +420,14 @@ var showServers = function() {
 	    {
 		xtype: 'textfield',
 		name: 'server[title]',
+		id: 'form_title',
 		fieldLabel: 'Title',
 		width: 200,
 		msgTarget: 'qtip'
 	    },
 	    new Ext.form.ComboBox({
 		name: 'server[zone]',
+		id: 'form_zone',
 		fieldLabel: 'Zone',
 		width: 150,
 		editable: false,
@@ -420,12 +435,23 @@ var showServers = function() {
 		triggerAction: 'all',
 		store: comboItemsStore(paths.servers.zones),
 		displayField: 'value',
-		msgTarget: 'qtip'
+		msgTarget: 'qtip',
+		listeners: {
+		    select: function(combo, record, index) {
+			var psCombo = Ext.getCmp('form_physical_server');
+			psCombo.getStore().baseParams['zone'] = record.get('value');
+			psCombo.getStore().load();
+			psCombo.reset();
+			psCombo.enable();
+		    }
+		}
 	    }),
 	    new Ext.form.ComboBox({
 		name: 'server[physical_server]',
+		id: 'form_physical_server',
 		fieldLabel: 'Physical Server',
 		width: 150,
+		disabled: true,
 		editable: false,
 		forceSelection: false,
 		triggerAction: 'all',
@@ -435,6 +461,7 @@ var showServers = function() {
 	    }),
 	    new Ext.form.ComboBox({
 		name: 'server[pool]',
+		id: 'form_pool',
 		fieldLabel: 'Pool',
 		width: 150,
 		editable: false,
@@ -446,6 +473,7 @@ var showServers = function() {
 	    }),
 	    new Ext.form.ComboBox({
 		name: 'server[virtualization]',
+		id: 'form_virtualization',
 		fieldLabel: 'Virtualization',
 		width: 200,
 		editable: false,
@@ -457,6 +485,7 @@ var showServers = function() {
 	    }),
 	    new Ext.form.NumberField({
 		name: 'server[cpus]',
+		id: 'form_cpus',
 		fieldLabel: 'CPUs',
 		width: 100,
 		allowDecimals: false,
@@ -464,6 +493,7 @@ var showServers = function() {
 	    }),
 	    new Ext.form.NumberField({
 		name: 'server[memory]',
+		id: 'form_memory',
 		fieldLabel: 'Memory(MB)',
 		width: 100,
 		allowDecimals: false,
@@ -477,6 +507,7 @@ var showServers = function() {
 	    {
 		xtype: 'textfield',
 		name: 'interface[0][ip_address]',
+		id: 'form_ip_address0',
 		fieldLabel: 'IP Address(1)',
 		width: 150,
 		msgTarget: 'qtip'
@@ -489,6 +520,7 @@ var showServers = function() {
 	    {
 		xtype: 'textfield',
 		name: 'interface[1][ip_address]',
+		id: 'form_ip_address1',
 		fieldLabel: 'IP Address(2)',
 		width: 150,
 		msgTarget: 'qtip'
@@ -496,6 +528,7 @@ var showServers = function() {
 	    {
 		xtype: 'textarea',
 		name: 'server[comment]',
+		id: 'form_comment',
 		fieldLabel: 'Comment',
 		width: 300,
 		height: 100
@@ -643,7 +676,9 @@ var showServers = function() {
 		    nextButton.enable();
 
 		    imagesGrid.getStore().load();
+		    imagesGrid.getSelectionModel().clearSelections();
 		    form.getForm().reset();
+		    Ext.getCmp('form_physical_server').disable();
 		}
 	    }
 	});
@@ -853,9 +888,6 @@ var showServers = function() {
     Ext.getCmp('content').removeAll();
     Ext.getCmp('content').add(indexPanel);
     Ext.getCmp('content-container').doLayout();
-
-    var updateStatusTimer = setInterval(updateStatus, 10000);
-    var updateMonitorTimer = setInterval(updateMonitor, 5000);
 };
 
 // call from avatar flash

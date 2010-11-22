@@ -5,6 +5,7 @@ var showImages = function() {
     //------------------------------
 
     var newImage = function() {
+	newImageWindow.form.getForm().reset();
 	newImageWindow.setTitle('Create Image');
 	newImageWindow.submitButton.setText('Create');
 	newImageWindow.submitButton.setHandler(createImage);
@@ -34,6 +35,7 @@ var showImages = function() {
     };
 
     var editImage = function() {
+	newImageWindow.form.getForm().reset();
 	newImageWindow.setTitle('Update Image');
 	newImageWindow.submitButton.setText('Update');
 	newImageWindow.submitButton.setHandler(updateImage);
@@ -204,7 +206,12 @@ var showImages = function() {
 		border: false,
 		items: indexGrid
 	    })
-	]
+	],
+	listeners: {
+	    destroy: function() {
+		newImageWindow.destroy();
+	    }
+	}
     });
 
     //------------------------------

@@ -65,12 +65,13 @@ class ServersController < ApplicationController
   end
 
   def zones
-    zones = ['Defaule']
+    zones = Settings.physical_server.collect {|ps| ps['zone'] }
     render :json => { :success => true }.merge(combo_items(zones))
   end
 
   def physical_servers
-    physical_servers = Settings.physical_servers
+    ps = Settings.physical_server.find {|ps| ps['zone'] == params[:zone] }
+    physical_servers = ps ? ps['physical_servers'] : Array.new
     render :json => { :success => true }.merge(combo_items(physical_servers))
   end
 
@@ -98,6 +99,7 @@ class ServersController < ApplicationController
       render :json => { :success => true, :server => attributes_with_paths(server) }
     else
       render :json => { :success => false, :errors => server.errors_for_ext }
+      return
     end
 
     @server = server

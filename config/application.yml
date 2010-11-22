@@ -25,9 +25,11 @@ defaults: &defaults
   pools_for_instance:
     - backup-pool02
 
-  physical_servers:
-    - pmiw-kvm018
-    - pmiw-kvm019
+  physical_server:
+    - zone: Iwamizawa
+      physical_servers:
+        - pmiw-kvm018
+        - pmiw-kvm019
 
   virtual_server:
     centos:
