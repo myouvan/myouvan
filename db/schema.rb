@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20101118013748) do
+ActiveRecord::Schema.define(:version => 20101122092815) do
 
   create_table "avatars", :force => true do |t|
     t.integer  "server_id"
@@ -54,6 +54,13 @@ ActiveRecord::Schema.define(:version => 20101118013748) do
     t.text     "comment"
     t.boolean  "auto_restart"
     t.boolean  "user_terminate"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "tags", :force => true do |t|
+    t.integer  "server_id"
+    t.string   "value"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

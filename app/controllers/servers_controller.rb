@@ -179,6 +179,7 @@ class ServersController < ApplicationController
   def terminate
     server = Server.find(params[:id])
     server.status = 'Terminating'
+    server.user_terminate = true
     server.save
 
     render :json => { :success => true }
@@ -247,6 +248,7 @@ class ServersController < ApplicationController
         :resume => resume_server_path(server),
         :reboot => reboot_server_path(server),
         :terminate => terminate_server_path(server),
+        :restart => restart_server_path(server),
         :migrate => migrate_server_path(server),
         :avatarThumb => thumb_avatar_path(avatar.id),
         :avatarIcon => icon_avatar_path(avatar.id)

@@ -3,6 +3,7 @@ class Server < ActiveRecord::Base
   belongs_to :image
   has_many :interfaces, :dependent => :destroy
   has_one :avatar, :dependent => :destroy
+  has_many :tags, :dependent => :destroy
 
   validates :name, :presence => true, :uniqueness => true
   validates :uuid, :presence => true

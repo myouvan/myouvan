@@ -31,13 +31,14 @@ class MonitorDaemon < SimpleDaemon::Base
     end
 		
     @logger.info "Starting daemon #{self.name}"
+    @starling = Starling.new(Settings.starling.server)
     @memcache = MemCache.new(Settings.memcached.server)
     @monitoring = Hash.new
     conn_pool = Hash.new
         
     loop do
       begin
-        servers = Server.select([:id, :name, :physical_server, :cpus]).all
+        servers = Server.all
         servers.each do |server|
           if conn_pool.has_key?(server.physical_server)
             conn = conn_pool[server.physical_server]
@@ -98,6 +99,21 @@ class MonitorDaemon < SimpleDaemon::Base
   def self.set_status(server, domain)
     state = domain.info.state
     @memcache.set("#{Settings.memcached.key.state}:#{server.id}", STATES[state])
+
+    if state == Libvirt::Domain::SHUTOFF and
+        server.status == 'Running' and
+        server.auto_restart and
+        not server.user_terminate
+      server.status = 'Restarting'
+      server.save
+
+      item = {
+        :command => 'restart_server',
+        :server_id => server.id
+      }
+
+      @starling.set(Settings.starling.queue, item)
+    end
   end
   
   def self.stop

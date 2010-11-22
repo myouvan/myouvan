@@ -92,7 +92,7 @@ class PhysicalServer
     server.status = 'Running'
     server.save
 
-    @logger.info "finished rebooting server #{server.name}"
+    @logger.info "finished restarting server #{server.name}"
   end
 
   def migrate_server(server, new_physical_server)
