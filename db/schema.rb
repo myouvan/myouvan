@@ -52,6 +52,8 @@ ActiveRecord::Schema.define(:version => 20101118013748) do
     t.integer  "memory"
     t.string   "storage_iqn"
     t.text     "comment"
+    t.boolean  "auto_restart"
+    t.boolean  "user_terminate"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

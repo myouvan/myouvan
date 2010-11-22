@@ -50,8 +50,16 @@ class ServerDaemon < SimpleDaemon::Base
               case item[:command]
               when 'create_server'
                 ps.create_server(server, item[:domain_xml])
+              when 'suspend_server'
+                ps.suspend_server(server)
+              when 'resume_server'
+                ps.resume_server(server)
+              when 'reboot_server'
+                ps.reboot_server(server)
               when 'terminate_server'
                 ps.terminate_server(server)
+              when 'restart_server'
+                ps.restart_server(server)
               when 'migrate_server'
                 ps.migrate_server(server, item[:new_physical_server])
               end

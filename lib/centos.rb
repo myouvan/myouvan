@@ -7,7 +7,7 @@ class Centos
     @logger = logger
   end
 
-  def config_server(server)
+  def connect(server)
     @prompt = /.*\[root@vmiw-tmp01 ~\]# /
     ssh_cmd = "ssh -t -l root #{server.physical_server} virsh console #{server.name}"
 
@@ -23,34 +23,40 @@ class Centos
 
         @logger.debug "starting up server #{server.name}"
 
-        r.expect(/login: /, 300) {|m|
-          w.cmd Settings.virtual_server.centos.account
-        }
-        r.expect(/Password: /, 20) {|m|
-          w.cmd Settings.virtual_server.centos.password
-        }
-
-        @logger.debug "logged in to server #{server.name}"
-
-        config_hostname(server, r, w)
-        config_network(server, r, w)
-
-        @logger.debug "modified files on server #{server.name}"
-
-        r.expect(@prompt, 20) {|m|
-          w.cmd '/sbin/shutdown -r now'
-        }
-
-        @logger.debug "rebooting server #{server.name}"
-
-        r.expect(/login: /, 300) {|m|
-          w.print "\C-]"
-        }
-
-        @logger.debug "finished config server #{server.name}"
+        yield r, w
       ensure
         Process.kill(:KILL, pid)
       end
+    }
+  end
+
+  def config_server(server)
+    connect(server) {|r, w|
+      r.expect(/login: /, 300) {|m|
+        w.cmd Settings.virtual_server.centos.account
+      }
+      r.expect(/Password: /, 20) {|m|
+        w.cmd Settings.virtual_server.centos.password
+      }
+
+      @logger.debug "logged in to server #{server.name}"
+
+      config_hostname(server, r, w)
+      config_network(server, r, w)
+
+      @logger.debug "modified files on server #{server.name}"
+
+      r.expect(@prompt, 20) {|m|
+        w.cmd '/sbin/shutdown -r now'
+      }
+
+      @logger.debug "rebooting server #{server.name}"
+
+      r.expect(/login: /, 300) {|m|
+        w.print "\C-]"
+      }
+
+      @logger.debug "finished config server #{server.name}"
     }
   end
 
@@ -83,6 +89,13 @@ class Centos
         w.print "\C-d"
       }
     end
+  end
+
+  def wait_for_started(server)
+    connect(server) {|r, w|
+      r.expect(/login: /, 300) {|m|
+      }
+    }
   end
 
 end

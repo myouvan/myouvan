@@ -31,9 +31,9 @@ class MonitorDaemon < SimpleDaemon::Base
     end
 		
     @logger.info "Starting daemon #{self.name}"
-    memcache = MemCache.new(Settings.memcached.server)
+    @memcache = MemCache.new(Settings.memcached.server)
+    @monitoring = Hash.new
     conn_pool = Hash.new
-    monitoring = Hash.new
         
     loop do
       begin
@@ -53,19 +53,8 @@ class MonitorDaemon < SimpleDaemon::Base
             next
           end
 
-          if monitoring.has_key?(server.id)
-            monitors = memcache.get("#{Settings.memcached.key.monitor}:#{server.id}") || Array.new
-          else
-            memcache.set("#{Settings.memcached.key.cpus}:#{server.id}", server.cpus)
-            monitoring[server.id] = true
-            monitors = Array.new
-          end
-
-          time = Time.now
-          monitors << { :time => time.to_i, :usec => time.usec, :cpu_time => domain.info.cpu_time }
-
-          monitors.shift if monitors.size > Settings.monitor_caches
-          memcache.set("#{Settings.memcached.key.monitor}:#{server.id}", monitors)
+          set_monitor(server, domain)
+          set_status(server, domain)
         end
         
         # Optional. Sleep between tasks.
@@ -82,6 +71,33 @@ class MonitorDaemon < SimpleDaemon::Base
         Kernel.sleep 5
       end
     end
+  end
+
+  def self.set_monitor(server, domain)
+    if @monitoring.has_key?(server.id)
+      monitors = @memcache.get("#{Settings.memcached.key.monitor}:#{server.id}") || Array.new
+    else
+      @memcache.set("#{Settings.memcached.key.cpus}:#{server.id}", server.cpus)
+      @monitoring[server.id] = true
+      monitors = Array.new
+    end
+
+    time = Time.now
+    monitors << { :time => time.to_i, :usec => time.usec, :cpu_time => domain.info.cpu_time }
+
+    monitors.shift if monitors.size > Settings.monitor_caches
+    @memcache.set("#{Settings.memcached.key.monitor}:#{server.id}", monitors)
+  end
+
+  STATES = {
+    Libvirt::Domain::RUNNING => 'Running',
+    Libvirt::Domain::PAUSED => 'Paused',
+    Libvirt::Domain::SHUTOFF => 'Terminated'
+  }
+
+  def self.set_status(server, domain)
+    state = domain.info.state
+    @memcache.set("#{Settings.memcached.key.state}:#{server.id}", STATES[state])
   end
   
   def self.stop

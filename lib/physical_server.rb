@@ -36,10 +36,37 @@ class PhysicalServer
     @logger.info "finished creating server #{server.name}"
   end
 
+  def suspend_server(server)
+    virt_suspend_server(server)
+
+    server.status = 'Paused'
+    server.save
+
+    @logger.info "finished suspending server #{server.name}"
+  end
+
+  def resume_server(server)
+    virt_resume_server(server)
+
+    server.status = 'Running'
+    server.save
+
+    @logger.info "finished resuming server #{server.name}"
+  end
+
+  def reboot_server(server)
+    virt_reboot_server(server)
+
+    server.status = 'Running'
+    server.save
+
+    @logger.info "finished rebooting server #{server.name}"
+  end
+
   def terminate_server(server)
     @logger.info "start terminating server #{server.name}"
 
-    virsh_shutdown_server(server)
+    virt_shutdown_server(server)
     iscsi_logout(server.physical_server, server.storage_iqn)
 
     el = Equallogic.new(@logger)
@@ -56,15 +83,27 @@ class PhysicalServer
     @logger.info "destroyed server record"
   end
 
+  def restart_server(server)
+    virt_restart_server(server)
+
+    virtual_server = Centos.new(@logger)
+    virtual_server.wait_for_started(server)
+
+    server.status = 'Running'
+    server.save
+
+    @logger.info "finished rebooting server #{server.name}"
+  end
+
   def migrate_server(server, new_physical_server)
     @logger.info "start migrating server #{server.name} to #{new_physical_server}"
 
     iscsi_login(new_physical_server, server.storage_iqn)
 
     begin
-      virsh_migrate_server(server, new_physical_server)
+      virt_migrate_server(server, new_physical_server)
     rescue Libvirt::Error
-      virsh_rollback_migrate_server(server, new_physical_server)
+      virt_rollback_migrate_server(server, new_physical_server)
       iscsi_logout(new_physical_server, server.storage>iqn)
       raise
     end
@@ -123,7 +162,6 @@ class PhysicalServer
   #   virt
   #------------------------------
 
-
   def virt_create_server(server, domain_xml)
     conn = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
     begin
@@ -137,7 +175,22 @@ class PhysicalServer
     @logger.debug "virt created server #{server.name}"
   end
 
-  def virsh_shutdown_server(server)
+  def virt_suspend_server(server)
+    conn = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
+    domain = conn.lookup_domain_by_name(server.name)
+    domain.suspend
+  end
+
+  def virt_resume_server(server)
+    conn = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
+    domain = conn.lookup_domain_by_name(server.name)
+    domain.resume
+  end
+
+  def virt_reboot_server(server)
+  end
+
+  def virt_shutdown_server(server)
     conn = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
     domain = conn.lookup_domain_by_name(server.name)
     domain.shutdown
@@ -153,7 +206,13 @@ class PhysicalServer
     @logger.debug "shutdown server #{server.name}"
   end
 
-  def virsh_migrate_server(server, new_physical_server)
+  def virt_restart_server(server)
+    conn = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
+    domain = conn.lookup_domain_by_name(server.name)
+    domain.create
+  end
+
+  def virt_migrate_server(server, new_physical_server)
     conn_src = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
     domain = conn_src.lookup_domain_by_name(server.name)
     conn_dst = Libvirt::open("qemu+ssh://root@#{new_physical_server}/system")
@@ -165,7 +224,7 @@ class PhysicalServer
     @logger.debug "migrated server #{server.name} to #{new_physical_server}"
   end
 
-  def virsh_rollback_migrate_server(server, new_physical_server)
+  def virt_rollback_migrate_server(server, new_physical_server)
     conn_dst = Libvirt::open("qemu+ssh://root@#{new_physical_server}/system")
     begin
       domain_dst = conn_dst.lookup_domain_by_name(server.name)

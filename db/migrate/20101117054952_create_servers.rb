@@ -21,6 +21,9 @@ class CreateServers < ActiveRecord::Migration
 
       t.text :comment
 
+      t.boolean :auto_restart
+      t.boolean :user_terminate
+
       t.timestamps
     end
   end

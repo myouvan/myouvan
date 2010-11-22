@@ -14,7 +14,7 @@ class Server < ActiveRecord::Base
   validates :cpus, :inclusion => { :in => 1..Settings.max_cpus }
   validates :memory, :inclusion => { :in => Settings.min_memory..Settings.max_memory }
 
-  before_validation :set_uuid
+  before_validation :set_uuid, :set_auto_restart, :set_user_terminate
 
   def set_uuid
     if self.uuid.blank?
@@ -23,6 +23,17 @@ class Server < ActiveRecord::Base
         self.uuid = generator.generate
       end until Server.where(:uuid => self.uuid).count == 0
     end
+    true
+  end
+
+  def set_auto_restart
+    self.auto_restart = false if self.auto_restart.nil?
+    true
+  end
+
+  def set_user_terminate
+    self.user_terminate = false if self.user_terminate.nil?
+    true
   end
 
   def errors_for_ext

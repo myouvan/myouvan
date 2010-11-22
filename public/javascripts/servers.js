@@ -88,17 +88,81 @@ var showServers = function() {
 	chartPanel.store = store;
     };
 
+    var changeStatus = function(record, status) {
+	record.set('status', status);
+	record.commit();
+
+	var showStatus = Ext.getCmp('show_status');
+	if (showStatus)
+	    showStatus.update(status);
+    };
+
+    var suspendServer = function() {
+	var record = indexGrid.selectedRecord();
+	Ext.Ajax.request({
+	    url: record.get('paths').suspend,
+	    method: 'POST',
+	    success: function(res, opts) {
+		changeStatus(record, 'Suspending');
+	    },
+	    failure: function(res, opts) {
+		Ext.MessageBox.alert('Error', 'Failed to suspend server');
+	    }
+	});
+    };
+
+    var resumeServer = function() {
+	var record = indexGrid.selectedRecord();
+	Ext.Ajax.request({
+	    url: record.get('paths').resume,
+	    method: 'POST',
+	    success: function(res, opts) {
+		changeStatus(record, 'Resuming');
+	    },
+	    failure: function(res, opts) {
+		Ext.MessageBox.alert('Error', 'Failed to resume server');
+	    }
+	});
+    };
+
+    var rebootServer = function() {
+	var record = indexGrid.selectedRecord();
+	Ext.Ajax.request({
+	    url: record.get('paths').reboot,
+	    method: 'POST',
+	    success: function(res, opts) {
+		changeStatus(record, 'Rebooting');
+	    },
+	    failure: function(res, opts) {
+		Ext.MessageBox.alert('Error', 'Failed to reboot server');
+	    }
+	});
+    };
+
     var terminateServer = function() {
 	var record = indexGrid.selectedRecord();
 	Ext.Ajax.request({
 	    url: record.get('paths').terminate,
 	    method: 'POST',
 	    success: function(res, opts) {
-		record.set('status', 'Terminating');
-		record.commit();
+		changeStatus(record, 'Terminating');
 	    },
 	    failure: function(res, opts) {
 		Ext.MessageBox.alert('Error', 'Failed to terminate server');
+	    }
+	});
+    };
+
+    var restartServer = function() {
+	var record = indexGrid.selectedRecord();
+	Ext.Ajax.request({
+	    url: record.get('paths').restart,
+	    method: 'POST',
+	    success: function(res, opts) {
+		changeStatus(record, 'Restarting');
+	    },
+	    failure: function(res, opts) {
+		Ext.MessageBox.alert('Error', 'Failed to restart server');
 	    }
 	});
     };
@@ -114,9 +178,7 @@ var showServers = function() {
             method: 'POST',
             waitMsg: 'Migrating...',
             success: function(f, action) {
-		record.set('status', 'Migrating');
-		record.commit();
-
+		changeStatus(record, 'Migrating');
 		migrateSelectServerWindow.hide();
             },
             failure: function(f, action) {
@@ -136,8 +198,15 @@ var showServers = function() {
 		indexGrid.getStore().each(function(record) {
                     var id = record.get('id');
                     if (items[id]) {
-			for (var field in items[id])
+			for (var field in items[id]) {
 			    record.set(field, items[id][field]);
+
+			    if (indexGrid.getSelectionModel().isSelected(record)) {
+				var showCmp = Ext.getCmp('show_' + field);
+				if (showCmp)
+				    showCmp.update(items[id][field]);
+			    }
+			}
 			record.commit();
                     } else {
 			deletedRecords.push(record);
@@ -175,8 +244,13 @@ var showServers = function() {
 	var imagePaths = {
 	    Starting: 'status_changing.gif',
 	    Running: 'status_running.gif',
+	    Suspending: 'status_changing.gif',
+	    Paused: 'status_terminated.gif',
+	    Resuming: 'status_changing.gif',
+	    Rebooting: 'status_changing.gif',
 	    Terminating: 'status_changing.gif',
 	    Terminated: 'status_terminated.gif',
+	    Restarting: 'status_changing.gif',
 	    Migrating: 'status_changing.gif',
 	    Error: 'status_error.gif',
 	};
@@ -264,11 +338,24 @@ var showServers = function() {
 	    },
 	    items: [
 		{
-		    text: 'Reboot'
+		    text: 'Suspend',
+		    handler: suspendServer
+		},
+		{
+		    text: 'Resume',
+		    handler: resumeServer
+		},
+		{
+		    text: 'Reboot',
+		    handler: rebootServer
 		},
 		{
 		    text: 'Terminate',
 		    handler: terminateServer
+		},
+		{
+		    text: 'Restart',
+		    handler: restartServer
 		},
 		{
 		    text: 'Migrate',
@@ -284,6 +371,7 @@ var showServers = function() {
 		rowclick: showServer,
 		rowcontextmenu: function(g, row, e) {
 		    grid.getSelectionModel().selectRow(row);
+		    showServer();
 		    e.stopEvent();
 		    contextMenu.showAt(e.getXY());
 		}
@@ -451,7 +539,6 @@ var showServers = function() {
 		id: 'form_physical_server',
 		fieldLabel: 'Physical Server',
 		width: 150,
-		disabled: true,
 		editable: false,
 		forceSelection: false,
 		triggerAction: 'all',
@@ -534,6 +621,14 @@ var showServers = function() {
 		height: 100
 	    },
 	    {
+		xtype: 'checkbox',
+		name: 'server[auto_restart]',
+		id: 'form_auto_restart',
+		fieldLabel: 'Auto Restart',
+		boxLabel: 'Restart automatically on unintentional shutdown',
+		inputValue: 'true'
+	    },
+	    {
 		xtype: 'hidden',
 		name: 'avatar[thumb]',
 		id: 'avatar_thumb'
@@ -547,6 +642,7 @@ var showServers = function() {
 
 	var form = new Ext.form.FormPanel({
 	    labelWidth: 100,
+	    labelAlign: 'right',
 	    bodyStyle: { padding: '5px 113px' },
 	    border: false,
 	    autoScroll: true,
@@ -698,7 +794,29 @@ var showServers = function() {
 
 	var formItems = [
 	    new Ext.form.ComboBox({
-		name: 'physical_server',
+		name: 'server[zone]',
+		id: 'migrate_form_zone',
+		fieldLabel: 'Zone',
+		width: 150,
+		editable: false,
+		forceSelection: false,
+		triggerAction: 'all',
+		store: comboItemsStore(paths.servers.zones),
+		displayField: 'value',
+		msgTarget: 'qtip',
+		listeners: {
+		    select: function(combo, record, index) {
+			var psCombo = Ext.getCmp('migrate_form_physical_server');
+			psCombo.getStore().baseParams['zone'] = record.get('value');
+			psCombo.getStore().load();
+			psCombo.reset();
+			psCombo.enable();
+		    }
+		}
+	    }),
+	    new Ext.form.ComboBox({
+		name: 'server[physical_server]',
+		id: 'migrate_form_physical_server',
 		fieldLabel: 'Physical Server',
 		width: 150,
 		editable: false,
@@ -707,11 +825,12 @@ var showServers = function() {
 		store: comboItemsStore(paths.servers.physical_servers),
 		displayField: 'value',
 		msgTarget: 'qtip'
-	    }),
+	    })
 	];
 
 	var form = new Ext.form.FormPanel({
-	    labelWidth: 100,
+	    labelWidth: 90,
+	    labelAlign: 'right',
 	    bodyStyle: { padding: '5px 10px' },
 	    border: false,
 	    autoScroll: true,
@@ -737,7 +856,7 @@ var showServers = function() {
 	    title: 'Migrate Server',
 	    modal: true,
 	    width: 291,
-	    height: 119,
+	    height: 145,
 	    layout: 'fit',
 	    plain: true,
 	    closable: false,
@@ -750,6 +869,7 @@ var showServers = function() {
 	    listeners: {
 		beforeshow: function() {
 		    form.getForm().reset();
+		    Ext.getCmp('migrate_form_physical_server').disable();
 		}
 	    }
 	});
@@ -772,58 +892,69 @@ var showServers = function() {
 	    border: false
 	},
 	layoutConfig: {
-	    columns: 4
+	    columns: 2
 	},
 	border: false
     });
 
-    var titleCell = function(str) {
-	return '<p style="font-weight: bold; width: 150px; text-align: right">' + str + '</p>';
-    };
-
-    var valueCell = function(str) {
-	return '<p style="width: 180px">' + str + '</p>';
+    var propPanel = function(id, label, value, colspan) {
+	return {
+	    items: new Ext.Panel({
+		layout: 'hbox',
+		width: colspan == 1 ? 340 : 687,
+		border: false,
+		items: [
+		    {
+			border: false,
+			width: 130,
+			bodyStyle: {
+			    fontWeight: 'bold',
+			    textAlign: 'right'
+			},
+			html: label + ':'
+		    },
+		    {
+			id: id,
+			border: false,
+			padding: '0 0 0 10px',
+			html: '' + value
+		    }
+		]
+	    }),
+	    colspan: colspan
+	};
     };
 
     var buildTableItems = function(server, interfaces) {
+	var auto_restart_str = server.auto_restart ? 'Yes' : 'No';
 	var tableItems = [
-	    { html: titleCell('Name:') },
-	    { html: server.name, colspan: 3 },
-	    { html: titleCell('UUID') },
-	    { html: server.uuid, colspan: 3 },
-	    { html: titleCell('Title:') },
-	    { html: server.title, colspan: 3 },
-	    { html: titleCell('Zone:') },
-	    { html: valueCell(server.zone) },
-	    { html: titleCell('Virtualization:') },
-	    { html: valueCell(server.virtualization) },
-	    { html: titleCell('Physical Server:') },
-	    { html: valueCell(server.physical_server) },
-	    { html: titleCell('Pool:') },
-	    { html: valueCell(server.pool) },
-	    { html: titleCell('Storage IQN:') },
-	    { html: server.storage_iqn, colspan: 3 },
-	    { html: titleCell('CPUs:') },
-	    { html: valueCell(server.cpus) },
-	    { html: titleCell('Memory(MB):') },
-	    { html: valueCell(server.memory) }
+	    propPanel('show_name', 'Name', server.name, 2),
+	    propPanel('show_uuid', 'UUID', server.uuid, 2),
+	    propPanel('show_title', 'Title', server.title, 2),
+	    propPanel('show_status', 'Status', server.status, 1),
+	    propPanel('show_auto_restart', 'Auto Restart', auto_restart_str, 1),
+	    propPanel('show_zone', 'Zone', server.zone, 1),
+	    propPanel('show_virtualization', 'Virtualization', server.virtualization, 1),
+	    propPanel('show_physical_server', 'Physical Server', server.physical_server, 1),
+	    propPanel('show_pool', 'Pool', server.pool, 1),
+	    propPanel('show_storage_iqn', 'Storage IQN', server.storage_iqn, 2),
+	    propPanel('show_cpus', 'CPUs', server.cpus, 1),
+	    propPanel('show_memory', 'Memory(MB)', server.memory, 1)
 	];
 
 	for (var i = 0; i < interfaces.length; ++i) {
+	    var iface = interfaces[i];
+	    var label_ip_address = 'IP Address(' + (i + 1) + ')';
+	    var label_mac_address = 'Mac Address(' + (i + 1) + ')';
 	    tableItems.push([
-		{ html: titleCell('IP Address(' + (i + 1) + '):') },
-		{ html: valueCell(interfaces[i].ip_address) },
-		{ html: titleCell('Mac Address(' + (i + 1) + '):') },
-		{ html: valueCell(interfaces[i].mac_address) },
+		propPanel('show_ip_address' + i, label_ip_address, iface.ip_address, 1),
+		propPanel('show_mac_address' + i, label_mac_address, iface.mac_address, 1)
 	    ]);
 	}
 
+	avatarImg = '<img src="' + server.paths.avatarThumb + '" width="150" height="150" />';
 	tableItems.push([
-	    { html: titleCell('Avatar:') },
-	    {
-		html: valueCell('<img src="' + server.paths.avatarThumb + '" width="150" height="150" />'),
-		colspan: 3
-	    }
+	    propPanel('show_avatar', 'Avatar', avatarImg, 2)
 	]);
 
 	return tableItems;

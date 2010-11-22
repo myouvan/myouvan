@@ -15,7 +15,19 @@ class ServersController < ApplicationController
   end
 
   def status
-    servers = Server.select([:id, :status, :physical_server]).all
+    servers = Server.all
+
+    servers.each do |server|
+      if %(Running Paused Terminated).include?(server.status)
+        memcache = MemCache.new(Settings.memcached.server)
+        state = memcache.get("#{Settings.memcached.key.state}:#{server.id}")
+        if state != server.status
+          server.status = state
+          server.save
+        end
+      end
+    end
+
     h = servers.collect {|server|
       [server.id, server.attributes]
     }
@@ -116,6 +128,54 @@ class ServersController < ApplicationController
     starling.set(Settings.starling.queue, item)
   end
 
+  def suspend
+    server = Server.find(params[:id])
+    server.status = 'Suspending'
+    server.save
+
+    render :json => { :success => true }
+
+    item = {
+      :command => 'suspend_server',
+      :server_id => server.id
+    }
+
+    starling = Starling.new(Settings.starling.server)
+    starling.set(Settings.starling.queue, item)
+  end
+
+  def resume
+    server = Server.find(params[:id])
+    server.status = 'Resuming'
+    server.save
+
+    render :json => { :success => true }
+
+    item = {
+      :command => 'resume_server',
+      :server_id => server.id
+    }
+
+    starling = Starling.new(Settings.starling.server)
+    starling.set(Settings.starling.queue, item)
+  end
+
+  def reboot
+    server = Server.find(params[:id])
+    server.status = 'Rebooting'
+    server.save
+
+    render :json => { :success => true }
+
+    item = {
+      :command => 'reboot_server',
+      :server_id => server.id
+    }
+
+    starling = Starling.new(Settings.starling.server)
+    starling.set(Settings.starling.queue, item)
+  end
+
   def terminate
     server = Server.find(params[:id])
     server.status = 'Terminating'
@@ -132,10 +192,32 @@ class ServersController < ApplicationController
     starling.set(Settings.starling.queue, item)
   end
 
+  def restart
+    server = Server.find(params[:id])
+    server.status = 'Restarting'
+    server.save
+
+    render :json => { :success => true }
+
+    item = {
+      :command => 'restart_server',
+      :server_id => server.id
+    }
+
+    starling = Starling.new(Settings.starling.server)
+    starling.set(Settings.starling.queue, item)
+  end
+
   def migrate
-    new_physical_server = params[:physical_server]
-    if new_physical_server.blank?
-      render :json => { :success => false, :errors => { :physical_server => "can't be blank" } }
+    errors = Hash.new
+    if params[:server][:zone].blank?
+      errors['server[zone]'] = "can't be blank"
+    end
+    if params[:server][:physical_server].blank?
+      errors['server[physical_server]'] = "can't be blank"
+    end
+    unless errors.empty?
+      render :json => { :success => false, :errors => errors }
       return
     end
 
@@ -148,7 +230,7 @@ class ServersController < ApplicationController
     item = {
       :command => 'migrate_server',
       :server_id => server.id,
-      :new_physical_server => new_physical_server
+      :new_physical_server => params[:server][:physical_server]
     }
 
     starling = Starling.new(Settings.starling.server)
@@ -161,6 +243,8 @@ class ServersController < ApplicationController
       :paths => {
         :server => url_for(server),
         :monitor => monitor_server_path(server),
+        :suspend => suspend_server_path(server),
+        :resume => resume_server_path(server),
         :reboot => reboot_server_path(server),
         :terminate => terminate_server_path(server),
         :migrate => migrate_server_path(server),

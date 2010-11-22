@@ -12,8 +12,11 @@ Provisioning::Application.routes.draw do
   resources :servers, :except => [:new, :edit, :update, :destroy] do
     member do
       get :monitor
+      post :suspend
+      post :resume
       post :reboot
       post :terminate
+      post :restart
       post :migrate
     end
 
