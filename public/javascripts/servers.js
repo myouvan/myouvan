@@ -1,11 +1,12 @@
 var showServers = function() {
 
     //------------------------------
-    //   windows
+    //   windows, panels
     //------------------------------
 
     var newServerWindow = new NewServerWindow();
     var selectServerWindow = new SelectServerWindow();
+    var subcontentTab = new SubcontentTab();
 
     //------------------------------
     //   handlers
@@ -40,12 +41,18 @@ var showServers = function() {
 	    method: 'GET',
 	    success: function(res, opts) {
 		result = Ext.decode(res.responseText);
-		tableItems = buildTableItems(result.server, result.interfaces);
 
-		description.removeAll();
-		description.add(tableItems);
+		server = result.server;
+		interfaces = result.interfaces;
 
-		tab.show();
+		var monitorStore = new itemsStore(record.get('paths').monitor, [
+		    'index',
+		    'cpu_use'
+		]);
+		monitorStore.load();
+
+		subcontentTab.showContent(server, interfaces, monitorStore);
+		subcontentTab.show();
 
 		Ext.getCmp('content-container').doLayout();
 	    },
@@ -53,52 +60,13 @@ var showServers = function() {
 		alert('Error');
 	    }
 	});
-
-	var store = new itemsStore(record.get('paths').monitor, [
-	    'index',
-	    'cpu_use'
-	]);
-	store.load();
-
-	var chart = new Ext.chart.LineChart({
-	    store: store,
-	    xField: 'index',
-	    series: [
-		{
-		    yField: "cpu_use",
-		    style: {
-			size: 0
-		    }
-		}
-	    ],
-	    extraStyle: {
-		animationEnabled: false,
-		xAxis: {
-		    showLabels:false
-		}
-	    },
-	    xAxis: new Ext.chart.NumericAxis({
-		maximum: 49,
-		minimum: 0
-	    }),
-	    yAxis: new Ext.chart.NumericAxis({
-		maximum: 100,
-		minimum: 0
-	    })
-	});
-
-	chartContainer.removeAll();
-	chartContainer.add(chart);
-	chartPanel.store = store;
     };
 
     var changeStatus = function(record, status) {
 	record.set('status', status);
 	record.commit();
 
-	var showStatus = Ext.getCmp('show_status');
-	if (showStatus)
-	    showStatus.update(status);
+	subcontentTab.updateStatus({ status: status });
     };
 
     var suspendServer = function() {
@@ -201,12 +169,6 @@ var showServers = function() {
                     if (items[id]) {
 			for (var field in items[id]) {
 			    record.set(field, items[id][field]);
-
-			    if (indexGrid.getSelectionModel().isSelected(record)) {
-				var showCmp = Ext.getCmp('show_' + field);
-				if (showCmp)
-				    showCmp.update(items[id][field]);
-			    }
 			}
 			record.commit();
                     } else {
@@ -216,6 +178,13 @@ var showServers = function() {
 		for (var i = 0; i < deletedRecords.length; ++i) {
                     store.remove(deletedRecords[i]);
 		}
+
+		if (indexGrid.getSelectionModel().hasSelection()) {
+		    var record = indexGrid.selectedRecord();
+		    var id = record.get('id');
+		    if (items[id])
+			subcontentTab.updateStatus(items[id]);
+		}
             },
             failure: function(res, opts) {
             }
@@ -223,8 +192,7 @@ var showServers = function() {
     };
 
     var updateMonitor = function() {
-	if (chartPanel.store)
-	    chartPanel.store.reload();
+	subcontentTab.updateMonitor();
     };
 
     //------------------------------
@@ -426,141 +394,13 @@ var showServers = function() {
     });
 
     //------------------------------
-    //   subconte-tab
-    //------------------------------
-
-    //--- description
-
-    var description = new Ext.Panel({
-	layout: 'table',
-	defaults: {
-	    padding: '3px',
-	    border: false
-	},
-	layoutConfig: {
-	    columns: 2
-	},
-	border: false
-    });
-
-    var propPanel = function(id, label, value, colspan) {
-	return {
-	    items: new Ext.Panel({
-		layout: 'hbox',
-		width: colspan == 1 ? 340 : 687,
-		border: false,
-		items: [
-		    {
-			border: false,
-			width: 130,
-			bodyStyle: {
-			    fontWeight: 'bold',
-			    textAlign: 'right'
-			},
-			html: label + ':'
-		    },
-		    {
-			id: id,
-			border: false,
-			padding: '0 0 0 10px',
-			html: '' + value
-		    }
-		]
-	    }),
-	    colspan: colspan
-	};
-    };
-
-    var buildTableItems = function(server, interfaces) {
-	var auto_restart_str = server.auto_restart ? 'Yes' : 'No';
-	var tableItems = [
-	    propPanel('show_name', 'Name', server.name, 2),
-	    propPanel('show_uuid', 'UUID', server.uuid, 2),
-	    propPanel('show_title', 'Title', server.title, 2),
-	    propPanel('show_status', 'Status', server.status, 1),
-	    propPanel('show_auto_restart', 'Auto Restart', auto_restart_str, 1),
-	    propPanel('show_zone', 'Zone', server.zone, 1),
-	    propPanel('show_virtualization', 'Virtualization', server.virtualization, 1),
-	    propPanel('show_physical_server', 'Physical Server', server.physical_server, 1),
-	    propPanel('show_pool', 'Pool', server.pool, 1),
-	    propPanel('show_storage_iqn', 'Storage IQN', server.storage_iqn, 2),
-	    propPanel('show_cpus', 'CPUs', server.cpus, 1),
-	    propPanel('show_memory', 'Memory(MB)', server.memory, 1)
-	];
-
-	for (var i = 0; i < interfaces.length; ++i) {
-	    var iface = interfaces[i];
-	    var label_ip_address = 'IP Address(' + (i + 1) + ')';
-	    var label_mac_address = 'Mac Address(' + (i + 1) + ')';
-	    tableItems.push([
-		propPanel('show_ip_address' + i, label_ip_address, iface.ip_address, 1),
-		propPanel('show_mac_address' + i, label_mac_address, iface.mac_address, 1)
-	    ]);
-	}
-
-	avatarImg = '<img src="' + server.paths.avatarThumb + '" width="150" height="150" />';
-	tableItems.push([
-	    propPanel('show_avatar', 'Avatar', avatarImg, 2)
-	]);
-
-	return tableItems;
-    };
-
-    //--- chart panel
-
-    var chartContainer = new Ext.Panel({
-	layout: "fit",
-	border: false,
-	width: 400,
-	height: 250
-    });
-
-    var chartPanel = new Ext.Panel({
-	border: false,
-	items: [
-	    {
-		html: 'CPU use',
-		bodyStyle: {
-		    padding: '3px'
-		},
-		border: false
-	    },
-	    chartContainer
-	]
-    });
-
-    //--- tab
-
-    var tab = new Ext.TabPanel({
-	activeTab: 0,
-	layoutOnTabChange: true,
-	border: false,
-	items: [
-	    {
-		title: 'Description',
-		autoScroll: true,
-		items: description,
-		border: false,
-		bodyStyle: 'padding: 10px'
-            },
-	    {
-		title: 'Monitoring',
-		autoScroll: true,
-		items: chartPanel,
-		border: false,
-		bodyStyle: 'padding: 10px'
-	    }
-	]
-    });
-
-    //------------------------------
     //   layout
     //------------------------------
 
     Ext.getCmp('subcontent').show();
     Ext.getCmp('subcontent').removeAll();
-    Ext.getCmp('subcontent').add(tab);
-    tab.hide();
+    Ext.getCmp('subcontent').add(subcontentTab);
+    subcontentTab.hide();
 
     Ext.getCmp('content').removeAll();
     Ext.getCmp('content').add(indexPanel);
