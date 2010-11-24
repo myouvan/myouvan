@@ -14,6 +14,11 @@ class ImagesController < ApplicationController
     end
   end
 
+  def show
+    image = Image.find(params[:id])
+    render :json => { :success => true, :image => image.attributes }
+  end
+
   def oss
     oss = ['CentOS']
     render :json => { :success => true }.merge(combo_items(oss))
@@ -32,11 +37,6 @@ class ImagesController < ApplicationController
     else
       render :json => { :success => false, :errors => image.errors_for_ext }
     end
-  end
-
-  def edit
-    image = Image.find(params[:id])
-    render :json => { :success => true, :values => image.attributes }
   end
 
   def update
@@ -58,8 +58,7 @@ class ImagesController < ApplicationController
   def attributes_with_paths(image)
     image.attributes.merge({
       :paths => {
-        :image => url_for(image),
-        :edit => edit_image_path(image)
+        :image => url_for(image)
       }
     })
   end

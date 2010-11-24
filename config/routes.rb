@@ -2,7 +2,7 @@ Provisioning::Application.routes.draw do
 
   root :to => 'servers#index'
 
-  resources :images, :except => [:new] do
+  resources :images, :except => [:new, :edit] do
     collection do
       get :oss
       get :iqns

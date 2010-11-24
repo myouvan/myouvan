@@ -1,20 +1,17 @@
 var showImages = function() {
 
     //------------------------------
+    //   windows, panels
+    //------------------------------
+
+    var newImageWindow = new NewImageWindow();
+
+    //------------------------------
     //   handlers
     //------------------------------
 
     var newImage = function() {
-	newImageWindow.form.getForm().reset();
-	newImageWindow.setTitle('Create Image');
-	newImageWindow.submitButton.setText('Create');
-	newImageWindow.submitButton.setHandler(createImage);
-
-	newImageWindow.show();
-    };
-
-    var createImage = function() {
-	newImageWindow.form.getForm().submit({
+	newImageWindow.setForCreate({
             url: paths.images.index,
             method: 'POST',
             waitMsg: 'Creating...',
@@ -32,38 +29,12 @@ var showImages = function() {
 		Ext.MessageBox.alert('Error', 'Failed to create image');
             }
 	});
+	newImageWindow.show();
     };
 
     var editImage = function() {
-	newImageWindow.form.getForm().reset();
-	newImageWindow.setTitle('Update Image');
-	newImageWindow.submitButton.setText('Update');
-	newImageWindow.submitButton.setHandler(updateImage);
-
 	var record = indexGrid.selectedRecord();
-	Ext.Ajax.request({
-	    url: record.get('paths').edit,
-	    method: 'GET',
-	    success: function(res, opts) {
-		result = Ext.decode(res.responseText);
-
-		for (var field in result.values) {
-		    var cmp = Ext.getCmp('form_' + field);
-		    if (cmp)
-			cmp.setValue(result.values[field]);
-		}
-
-		newImageWindow.show();
-	    },
-	    failure: function(res, opts) {
-		alert('Error');
-	    }
-	});
-    };
-
-    var updateImage = function() {
-	var record = indexGrid.selectedRecord();
-	newImageWindow.form.getForm().submit({
+	newImageWindow.setForUpdate({
             url: record.get('paths').image,
             method: 'PUT',
             waitMsg: 'Updating...',
@@ -78,6 +49,19 @@ var showImages = function() {
             failure: function(form, action) {
 		alert('Failed to update image');
             }
+	});
+
+	Ext.Ajax.request({
+	    url: record.get('paths').image,
+	    method: 'GET',
+	    success: function(res, opts) {
+		result = Ext.decode(res.responseText);
+		newImageWindow.setValues(result.image);
+		newImageWindow.show();
+	    },
+	    failure: function(res, opts) {
+		alert('Error');
+	    }
 	});
     };
 
@@ -217,96 +201,6 @@ var showImages = function() {
 	    }
 	}
     });
-
-    //------------------------------
-    //   form window
-    //------------------------------
-
-    var newImageWindow = (function() {
-
-	//--- form
-
-	var formItems = [
-	    {
-		xtype: 'textfield',
-		name: 'image[title]',
-		id: 'form_title',
-		fieldLabel: 'Title',
-		width: 200,
-		msgTarget: 'qtip'
-	    },
-	    new Ext.form.ComboBox({
-		name: 'image[os]',
-		id: 'form_os',
-		fieldLabel: 'OS',
-		width: 200,
-		editable: false,
-		forceSelection: false,
-		triggerAction: 'all',
-		store: comboItemsStore(paths.images.oss),
-		displayField: 'value',
-		msgTarget: 'qtip'
-	    }),
-	    new Ext.form.ComboBox({
-		name: 'image[iqn]',
-		id: 'form_iqn',
-		fieldLabel: 'IQN',
-		width: 500,
-		editable: false,
-		forceSelection: false,
-		triggerAction: 'all',
-		store: comboItemsStore(paths.images.iqns),
-		displayField: 'value',
-		msgTarget: 'qtip'
-	    }),
-	    {
-		xtype: 'textarea',
-		name: 'image[comment]',
-		id: 'form_comment',
-		fieldLabel: 'Comment',
-		width: 300,
-		height: 100
-	    }
-	];
-
-	var form = new Ext.form.FormPanel({
-	    labelWidth: 70,
-	    bodyStyle: { padding: '5px' },
-	    items: formItems
-	});
-
-	//--- buttons
-
-	var submitButton = new Ext.Button();
-	var closeButton = new Ext.Button({
-	    text: 'Close',
-	    handler: function() {
-		wdw.hide();
-	    }
-	});
-
-	//--- window
-
-	var wdw = new Ext.Window({
-	    modal: true,
-	    width: 625,
-	    height: 260,
-	    layout: 'fit',
-	    plain: true,
-	    closable: false,
-	    items: form,
-	    buttonAlign: 'center',
-	    buttons: [
-		submitButton,
-		closeButton
-	    ]
-	});
-
-	wdw.form = form;
-	wdw.submitButton = submitButton;
-
-	return wdw;
-    })();
 
     //------------------------------
     //   layout

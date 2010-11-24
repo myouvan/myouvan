@@ -23,39 +23,26 @@ var NewServerWindow = function() {
 	    formPanel,
 	    tagsPanel,
 	    flashPanel
-	],
-	listeners: {
-	    beforeshow: function() {
-		activeItem = 0;
-		card.layout.setActiveItem(activeItem);
-
-		prevButton.disable();
-		nextButton.enable();
-		nextButton.setText('Next');
-	    }
-	}
+	]
     });
 
     var prevCard = function() {
 	if (activeItem > 0) {
-	    activeItem--;
-	    card.layout.setActiveItem(activeItem);
-
-	    if (activeItem == 0) {
+	    if (activeItem == 1) {
 		prevButton.disable();
-	    } else if (activeItem == 2) {
+	    } else if (activeItem == 3) {
 		nextButton.setText('Next');
 		nextButton.enable();
 	    }
+
+	    activeItem--;
+	    card.layout.setActiveItem(activeItem);
 	}
     };
 
     var nextCard = function() {
 	if (activeItem < 3) {
-	    activeItem++;
-	    card.layout.setActiveItem(activeItem);
-	    
-	    if (activeItem == 1) {
+	    if (activeItem == 0) {
 		if (!selectImagePanel.isSelected()) {
 		    Ext.MessageBox.alert('Error', 'Select an image');
 		    return;
@@ -64,12 +51,15 @@ var NewServerWindow = function() {
 		formPanel.setImageId(id);
 
 		prevButton.enable();
-	    } else if (activeItem == 3) {
+	    } else if (activeItem == 2) {
 		formPanel.setTags(tagsPanel.tags);
 
 		nextButton.setText('Create');
 		nextButton.disable();
 	    }
+
+	    activeItem++;
+	    card.layout.setActiveItem(activeItem);
 	} else if (activeItem == 3) {
 	    prevCard();
 	    prevCard();
@@ -115,6 +105,13 @@ var NewServerWindow = function() {
 	],
 	listeners: {
 	    beforeshow: function() {
+		activeItem = 0;
+		card.layout.setActiveItem(activeItem);
+
+		prevButton.disable();
+		nextButton.enable();
+		nextButton.setText('Next');
+
 		selectImagePanel.resetPanel();
 		formPanel.resetPanel();
 		tagsPanel.resetPanel();
