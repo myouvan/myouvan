@@ -392,19 +392,23 @@ var showServers = function() {
     //------------------------------
 
     var indexPanel = new Ext.Panel({
-	layout: 'border',
+	layout: 'vbox',
+	layoutConfig: {
+	    align: 'stretch'
+	},
+	border: false,
 	items: [
 	    {
-		region: 'north',
 		height: 30,
+		border: false,
 		items: createButton
 	    },
-	    new Ext.Panel({
-		region: 'center',
+	    {
+		flex: 1,
 		layout: 'fit',
 		border: false,
 		items: indexGrid
-	    })
+	    }
 	],
 	listeners: {
 	    added: function() {
@@ -476,11 +480,13 @@ var showServers = function() {
 	})();
 
 	var selectImage = new Ext.Panel({
-	    layout: 'border',
+	    layout: 'vbox',
+	    layoutConfig: {
+		align: 'stretch'
+	    },
 	    border: false,
 	    items: [
 		{
-		    region: 'north',
 		    height: 20,
 		    html: 'Select Image',
 		    bodyStyle: {
@@ -489,8 +495,9 @@ var showServers = function() {
 		    border: false
 		},
 		{
-		    region: 'center',
+		    flex: 1,
 		    layout: 'fit',
+		    border: false,
 		    items: imagesGrid
 		}
 	    ]
@@ -653,12 +660,25 @@ var showServers = function() {
 	];
 
 	var form = new Ext.form.FormPanel({
+	    width: 424,
 	    labelWidth: 100,
 	    labelAlign: 'right',
-	    bodyStyle: { padding: '5px 113px' },
+	    bodyStyle: {
+		padding: '5px 0',
+	    },
 	    border: false,
 	    autoScroll: true,
 	    items: formItems
+	});
+
+	var formPanel = new Ext.Panel({
+	    layout: 'hbox',
+	    layoutConfig: {
+		align: 'stretch',
+		pack: 'center',
+	    },
+	    border: false,
+	    items: form
 	});
 
 	//--- tags panel
@@ -712,7 +732,7 @@ var showServers = function() {
 	})();
 
 	var addTagCombo = new Ext.form.ComboBox({
-	    width: 250,
+	    flex: 1,
 	    editable: true,
 	    triggerAction: 'all',
 	    store: comboItemsStore(paths.tags.index),
@@ -738,42 +758,53 @@ var showServers = function() {
 	});
 
 	var tagsPanel = new Ext.Panel({
-	    layout: 'border',
-	    border: false,
-	    items: [
-		{
-		    region: 'north',
-		    height: 20,
-		    html: 'Add Tags',
-		    border: false,
-		    bodyStyle: {
-			padding: '3px'
-		    }
+	    layout: 'hbox',
+	    layoutConfig: {
+		align: 'stretch',
+		pack: 'center'
+	    },
+	    items: {
+		width: 300,
+		layout: 'vbox',
+		layoutConfig: {
+		    align: 'stretch'
 		},
-		new Ext.Panel({
-		    region: 'center',
-		    layout: 'fit',
-		    border: false,
-		    items: tagsGrid
-		}),
-		new Ext.Panel({
-		    region: 'south',
-		    layout: 'hbox',
-		    height: 30,
-		    border: false,
-		    bodyStyle: {
-			padding: '5px 0 0 0'
-		    },
-		    items: [
-			addTagCombo,
-			{
-			    border: false,
-			    padding: '0 0 0 5px',
-			    items: addTagButton
+		border: false,
+		items: [
+		    {
+			height: 20,
+			html: 'Add Tags',
+			border: false,
+			bodyStyle: {
+			    padding: '3px'
 			}
-		    ]
-		})
-	    ]
+		    },
+		    new Ext.Panel({
+			flex: 1,
+			layout: 'fit',
+			border: false,
+			items: tagsGrid
+		    }),
+		    new Ext.Panel({
+			layout: 'hbox',
+			height: 30,
+			border: false,
+			bodyStyle: {
+			    padding: '5px 0 0 0'
+			},
+			items: [
+			    addTagCombo,
+			    {
+				border: false,
+				bodyStyle: {
+				    padding: '0 0 0 5px'
+				},
+				items: addTagButton
+			    }
+			]
+		    })
+		]
+	    }
 	});
 
 	//--- flash panel
@@ -805,7 +836,7 @@ var showServers = function() {
 	    activeItem: 0,
 	    items: [
 		selectImage,
-		form,
+		formPanel,
 		tagsPanel,
 		flash
 	    ],

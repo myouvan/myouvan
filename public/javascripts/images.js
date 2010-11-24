@@ -194,18 +194,22 @@ var showImages = function() {
     //------------------------------
 
     var indexPanel = new Ext.Panel({
+	layout: 'vbox',
+	layoutConfig: {
+	    align: 'stretch'
+	},
 	items: [
 	    {
-		region: 'north',
 		height: 30,
+		border: false,
 		items: createButton
 	    },
-	    new Ext.Panel({
-		region: 'center',
+	    {
+		flex: 1,
 		layout: 'fit',
 		border: false,
 		items: indexGrid
-	    })
+	    }
 	],
 	listeners: {
 	    destroy: function() {
