@@ -1,6 +1,12 @@
 var showServers = function() {
 
     //------------------------------
+    //   windows
+    //------------------------------
+
+    var newServerWindow = new NewServerWindow();
+
+    //------------------------------
     //   handlers
     //------------------------------
 
@@ -8,26 +14,24 @@ var showServers = function() {
 	newServerWindow.show();
     };
 
-    var createServer = function() {
-	newServerWindow.form.getForm().submit({
-            url: paths.servers.index,
-            method: 'POST',
-            waitMsg: 'Creating...',
-            success: function(f, action) {
-		var server = action.result.server;
-		var store = indexGrid.getStore();
+    newServerWindow.setSubmitOpts({
+        url: paths.servers.index,
+        method: 'POST',
+        waitMsg: 'Creating...',
+        success: function(f, action) {
+	    var server = action.result.server;
+	    var store = indexGrid.getStore();
 
-		var RecordType = store.recordType;
-		var record = new RecordType(server);
-		store.add(record);
+	    var RecordType = store.recordType;
+	    var record = new RecordType(server);
+	    store.add(record);
 
-		newServerWindow.hide();
-            },
-            failure: function(f, action) {
-		Ext.MessageBox.alert('Error', 'Failed to create server');
-            }
-	});
-    };
+	    newServerWindow.hide();
+        },
+        failure: function(f, action) {
+	    Ext.MessageBox.alert('Error', 'Failed to create server');
+        }
+    });
 
     var showServer = function() {
 	var record = indexGrid.selectedRecord();
@@ -651,8 +655,6 @@ var showServers = function() {
     //   layout
     //------------------------------
 
-    var newServerWindow = new NewServerWindow();
-
     Ext.getCmp('subcontent').show();
     Ext.getCmp('subcontent').removeAll();
     Ext.getCmp('subcontent').add(tab);
@@ -662,6 +664,3 @@ var showServers = function() {
     Ext.getCmp('content').add(indexPanel);
     Ext.getCmp('content-container').doLayout();
 };
-
-// call from avatar flash
-var ovater_set;

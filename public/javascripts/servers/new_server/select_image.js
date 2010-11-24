@@ -1,4 +1,4 @@
-SelectImagePanel = function() {
+var SelectImagePanel = function() {
 
     var grid = (function() {
 	var colModel = new Ext.grid.ColumnModel([
@@ -79,7 +79,7 @@ SelectImagePanel = function() {
 	return grid.getSelectionModel().getSelected().get('id');	
     };
 
-    this.reset = function() {
+    this.resetPanel = function() {
 	grid.getStore().load();
 	grid.getSelectionModel().clearSelections();
     };
