@@ -6,76 +6,6 @@ var NewServerWindow = function() {
 
     //--- select image card
 
-    var imagesGrid = (function() {
-	var colModel = new Ext.grid.ColumnModel([
-	    {
-		header: 'ID',
-		dataIndex: 'id',
-		width: 30,
-		sortable: true
-	    },
-	    {
-		header: 'Title',
-		dataIndex: 'title',
-		width: 200,
-		sortable: true
-	    },
-	    {
-		header: 'OS',
-		dataIndex: 'os',
-		width: 150,
-		sortable: true
-	    },
-	    {
-		header: 'Comment',
-		dataIndex: 'comment',
-		width: 250
-	    }
-	]);
-
-	var store = itemsStore(paths.images.index, [
-	    'id',
-	    'title',
-	    'os',
-	    'comment'
-	]);
-
-	var grid = new Ext.grid.GridPanel({
-	    colModel: colModel,
-	    store: store,
-	    autoHeight: true
-	});
-
-	grid.selectedRecord = function() {
-	    return grid.getSelectionModel().getSelected();
-	};
-
-	return grid;
-    })();
-
-    var selectImage = new Ext.Panel({
-	layout: 'vbox',
-	layoutConfig: {
-	    align: 'stretch'
-	},
-	border: false,
-	items: [
-	    {
-		height: 20,
-		html: 'Select Image',
-		bodyStyle: {
-		    padding: '3px'
-		},
-		border: false
-	    },
-	    {
-		flex: 1,
-		layout: 'fit',
-		border: false,
-		items: imagesGrid
-	    }
-	]
-    });
 
     //--- form card
 
@@ -403,13 +333,15 @@ var NewServerWindow = function() {
 
     //--- card
 
+    var selectImagePanel = new SelectImagePanel();
+
     var activeItem = 0;
 
     var card = new Ext.Panel({
 	layout: 'card',
 	activeItem: 0,
 	items: [
-	    selectImage,
+	    selectImagePanel,
 	    formPanel,
 	    tagsPanel,
 	    flash
@@ -437,11 +369,11 @@ var NewServerWindow = function() {
 
     var nextCard = function() {
 	if (activeItem == 0) {
-	    if (!imagesGrid.getSelectionModel().hasSelection()) {
+	    if (!selectImagePanel.isSelected()) {
 		Ext.MessageBox.alert('Error', 'Select an image');
 		return;
 	    }
-	    var id = imagesGrid.getSelectionModel().getSelected().get('id');
+	    var id = selectImagePanel.selectedId();
 	    Ext.getCmp('image-id').setValue(id);
 
 	    prevButton.enable();
@@ -516,8 +448,7 @@ var NewServerWindow = function() {
 		nextButton.setText('Next');
 		nextButton.enable();
 
-		imagesGrid.getStore().load();
-		imagesGrid.getSelectionModel().clearSelections();
+		selectImagePanel.reset();
 
 		form.getForm().reset();
 		Ext.getCmp('form_physical_server').disable();
