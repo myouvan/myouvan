@@ -46,13 +46,7 @@ var SelectServerWindow = function() {
 	bodyStyle: { padding: '5px 10px' },
 	border: false,
 	autoScroll: true,
-	items: formItems,
-	listeners: {
-	    beforeshow: function() {
-		form.getForm().reset();
-		physicalServerCombo.disable();
-	    }
-	}
+	items: formItems
     });
 
     //--- buttons
@@ -86,7 +80,13 @@ var SelectServerWindow = function() {
 	buttons: [
 	    submitButton,
 	    closeButton
-	]
+	],
+	listeners: {
+	    beforeshow: function() {
+		form.getForm().reset();
+		physicalServerCombo.disable();
+	    }
+	}
     }]);
 
     var wdw = this;

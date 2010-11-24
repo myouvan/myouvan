@@ -23,7 +23,13 @@ var ChartPanel = function() {
 
     var panel = this;
 
-    this.showContent = function(store) {
+    this.showContent = function(monitorPath) {
+	var store = new itemsStore(monitorPath, [
+	    'index',
+	    'cpu_use'
+	]);
+	store.load();
+
 	var chart = new Ext.chart.LineChart({
 	    store: store,
 	    xField: 'index',
@@ -57,7 +63,8 @@ var ChartPanel = function() {
     };
 
     this.updateMonitor = function() {
-	panel.store.reload();
+	if (panel.store)
+	    panel.store.reload();
     };
 
 };

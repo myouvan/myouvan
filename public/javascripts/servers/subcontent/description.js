@@ -80,10 +80,10 @@ var DescriptionPanel = function() {
 	valuePanels['avatar'].update(avatarImg);
     };
 
-    this.updateStatus = function(item) {
+    this.updateValues = function(item) {
 	for (var field in item)
 	    if (valuePanels[field])
-		valuePanels[field].update(server[field]);
+		valuePanels[field].update(item[field]);
     };
 
 };

@@ -25,13 +25,13 @@ var SubcontentTab = function() {
 	]
     }]);
 
-    this.showContent = function(server, interfaces, monitorStore) {
+    this.showContent = function(server, interfaces, monitorPath) {
 	descriptionPanel.showContent(server, interfaces);
-	chartPanel.showContent(monitorStore);
+	chartPanel.showContent(monitorPath);
     };
 
-    this.updateStatus = function(item) {
-	descriptionPanel.updateStatus(item);
+    this.updateValues = function(item) {
+	descriptionPanel.updateValues(item);
     };
 
     this.updateMonitor = function() {
