@@ -5,33 +5,33 @@ var showServers = function() {
     //------------------------------
 
     var newServerWindow = new NewServerWindow();
+    var selectServerWindow = new SelectServerWindow();
 
     //------------------------------
     //   handlers
     //------------------------------
 
-    var newServer = function() {
+    var createServer = function() {
 	newServerWindow.show();
+	newServerWindow.setSubmitOpts({
+            url: paths.servers.index,
+            method: 'POST',
+            waitMsg: 'Creating...',
+            success: function(f, action) {
+		var server = action.result.server;
+		var store = indexGrid.getStore();
+
+		var RecordType = store.recordType;
+		var record = new RecordType(server);
+		store.add(record);
+
+		newServerWindow.hide();
+            },
+            failure: function(f, action) {
+		Ext.MessageBox.alert('Error', 'Failed to create server');
+            }
+	});
     };
-
-    newServerWindow.setSubmitOpts({
-        url: paths.servers.index,
-        method: 'POST',
-        waitMsg: 'Creating...',
-        success: function(f, action) {
-	    var server = action.result.server;
-	    var store = indexGrid.getStore();
-
-	    var RecordType = store.recordType;
-	    var record = new RecordType(server);
-	    store.add(record);
-
-	    newServerWindow.hide();
-        },
-        failure: function(f, action) {
-	    Ext.MessageBox.alert('Error', 'Failed to create server');
-        }
-    });
 
     var showServer = function() {
 	var record = indexGrid.selectedRecord();
@@ -171,19 +171,16 @@ var showServers = function() {
 	});
     };
 
-    var migrateSelectServer = function() {
-	migrateSelectServerWindow.show();
-    };
-
     var migrateServer = function() {
 	var record = indexGrid.selectedRecord();
-	migrateSelectServerWindow.form.getForm().submit({
+	selectServerWindow.show();
+	selectServerWindow.setSubmitOpts({
             url: record.get('paths').migrate,
             method: 'POST',
             waitMsg: 'Migrating...',
             success: function(f, action) {
 		changeStatus(record, 'Migrating');
-		migrateSelectServerWindow.hide();
+		selectServerWindow.hide();
             },
             failure: function(f, action) {
 		Ext.MessageBox.alert('Error', 'Failed to create server');
@@ -237,7 +234,7 @@ var showServers = function() {
     var createButton = new Ext.Button({
 	text: 'Create Server',
 	border: false,
-	handler: newServer
+	handler: createServer
     });
 
     //------------------------------
@@ -363,7 +360,7 @@ var showServers = function() {
 		},
 		{
 		    text: 'Migrate',
-		    handler: migrateSelectServer
+		    handler: migrateServer
 		}
 	    ]
 	});
@@ -423,105 +420,10 @@ var showServers = function() {
 		clearInterval(this.updateStatusTimer);
 		clearInterval(this.updateMonitorTimer);
 		newServerWindow.destroy();
-		migrateSelectServerWindow.destroy();
+		selectServerWindow.destroy();
 	    }
 	}
     });
-
-    //------------------------------
-    //   migrate select server form
-    //------------------------------
-
-    var migrateSelectServerWindow = (function() {
-	
-	//----- form
-
-	var formItems = [
-	    new Ext.form.ComboBox({
-		name: 'server[zone]',
-		id: 'migrate_form_zone',
-		fieldLabel: 'Zone',
-		width: 150,
-		editable: false,
-		forceSelection: false,
-		triggerAction: 'all',
-		store: comboItemsStore(paths.servers.zones),
-		displayField: 'value',
-		msgTarget: 'qtip',
-		listeners: {
-		    select: function(combo, record, index) {
-			var psCombo = Ext.getCmp('migrate_form_physical_server');
-			psCombo.getStore().baseParams['zone'] = record.get('value');
-			psCombo.getStore().load();
-			psCombo.reset();
-			psCombo.enable();
-		    }
-		}
-	    }),
-	    new Ext.form.ComboBox({
-		name: 'server[physical_server]',
-		id: 'migrate_form_physical_server',
-		fieldLabel: 'Physical Server',
-		width: 150,
-		editable: false,
-		forceSelection: false,
-		triggerAction: 'all',
-		store: comboItemsStore(paths.servers.physical_servers),
-		displayField: 'value',
-		msgTarget: 'qtip'
-	    })
-	];
-
-	var form = new Ext.form.FormPanel({
-	    labelWidth: 90,
-	    labelAlign: 'right',
-	    bodyStyle: { padding: '5px 10px' },
-	    border: false,
-	    autoScroll: true,
-	    items: formItems
-	});
-
-	//--- buttons
-
-	var submitButton = new Ext.Button({
-	    text: 'Migrate',
-	    handler: migrateServer
-	});
-	var closeButton = new Ext.Button({
-	    text: 'Close',
-	    handler: function() {
-		wdw.hide();
-	    }
-	});
-
-	//----- window
-
-	var wdw = new Ext.Window({
-	    title: 'Migrate Server',
-	    modal: true,
-	    width: 291,
-	    height: 145,
-	    layout: 'fit',
-	    plain: true,
-	    closable: false,
-	    items: form,
-	    buttonAlign: 'center',
-	    buttons: [
-		submitButton,
-		closeButton
-	    ],
-	    listeners: {
-		beforeshow: function() {
-		    form.getForm().reset();
-		    Ext.getCmp('migrate_form_physical_server').disable();
-		}
-	    }
-	});
-
-	wdw.form = form;
-
-	return wdw;
-    })();
 
     //------------------------------
     //   subconte-tab

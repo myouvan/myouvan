@@ -89,8 +89,6 @@ var NewServerWindow = function() {
 	handler: nextCard
     });
 
-    var wdw = this;
-
     var closeButton = new Ext.Button({
 	text: 'Close',
 	handler: function() {
@@ -124,7 +122,13 @@ var NewServerWindow = function() {
 	}
     }]);
 
-    this.setSubmitOpts = function(opts) { formPanel.setSubmitOpts(opts); }
+    var wdw = this;
+
+    //--- submit
+
+    this.setSubmitOpts = function(opts) {
+	formPanel.setSubmitOpts(opts);
+    }
 
 };
 
