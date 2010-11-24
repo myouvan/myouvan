@@ -1,4 +1,4 @@
-var ChartPanel = function() {
+Servers.SubcontentTab.ChartPanel = function() {
 
     var container = new Ext.Panel({
 	layout: "fit",
@@ -7,7 +7,7 @@ var ChartPanel = function() {
 	height: 250
     });
 
-    ChartPanel.baseConstructor.apply(this, [{
+    Servers.SubcontentTab.ChartPanel.baseConstructor.apply(this, [{
 	border: false,
 	items: [
 	    {
@@ -69,4 +69,4 @@ var ChartPanel = function() {
 
 };
 
-ChartPanel.inherit(Ext.Panel);
+Servers.SubcontentTab.ChartPanel.inherit(Ext.Panel);

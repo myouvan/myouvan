@@ -16,7 +16,7 @@ class ImagesController < ApplicationController
 
   def show
     image = Image.find(params[:id])
-    render :json => { :success => true, :image => image.attributes }
+    render :json => { :success => true, :item => image.attributes }
   end
 
   def oss
@@ -33,7 +33,7 @@ class ImagesController < ApplicationController
   def create
     image = Image.new(params[:image])
     if image.save
-      render :json => { :success => true, :image => attributes_with_paths(image) }
+      render :json => { :success => true, :item => attributes_with_paths(image) }
     else
       render :json => { :success => false, :errors => image.errors_for_ext }
     end
@@ -43,7 +43,7 @@ class ImagesController < ApplicationController
     image = Image.find(params[:id])
     image.attributes = params[:image]
     if image.save
-      render :json => { :success => true, :image => image.attributes }
+      render :json => { :success => true, :item => image.attributes }
     else
       render :json => { :success => false, :errors => image.errors_for_ext }
     end

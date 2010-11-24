@@ -1,28 +1,27 @@
-var showImages = function() {
+var Images = function() {
+};
+
+Images.prototype.show = function() {
 
     //------------------------------
     //   windows, panels
     //------------------------------
 
-    var newImageWindow = new NewImageWindow();
+    var indexGrid = new Images.IndexGrid();
+    var newImageWindow = new Images.NewImageWindow();
 
     //------------------------------
     //   handlers
     //------------------------------
 
-    var newImage = function() {
+    var createImage = function() {
 	newImageWindow.setForCreate({
             url: paths.images.index,
             method: 'POST',
             waitMsg: 'Creating...',
             success: function(f, action) {
-		var image = action.result.image;
-		var store = indexGrid.getStore();
-
-		var RecordType = store.recordType;
-		var record = new RecordType(image);
-		store.add(record);
-
+		var image = action.result.item;
+		indexGrid.addRecord(item);
 		newImageWindow.hide();
             },
             failure: function(f, action) {
@@ -32,18 +31,14 @@ var showImages = function() {
 	newImageWindow.show();
     };
 
-    var editImage = function() {
-	var record = indexGrid.selectedRecord();
+    indexGrid.updateImage = function() {
 	newImageWindow.setForUpdate({
-            url: record.get('paths').image,
+            url: indexGrid.selectedPaths().image,
             method: 'PUT',
             waitMsg: 'Updating...',
             success: function(f, action) {
-		var image = action.result.image;
-		for (var field in image)
-                    record.set(field, image[field]);
-		record.commit();
-
+		var item = action.result.item;
+		indexGrid.updateSelectedValues(item);
 		newImageWindow.hide();
             },
             failure: function(form, action) {
@@ -52,11 +47,11 @@ var showImages = function() {
 	});
 
 	Ext.Ajax.request({
-	    url: record.get('paths').image,
+	    url: indexGrid.selectedPaths().image,
 	    method: 'GET',
 	    success: function(res, opts) {
 		result = Ext.decode(res.responseText);
-		newImageWindow.setValues(result.image);
+		newImageWindow.setValues(result.item);
 		newImageWindow.show();
 	    },
 	    failure: function(res, opts) {
@@ -65,13 +60,12 @@ var showImages = function() {
 	});
     };
 
-    var destroyImage = function() {
-	var record = indexGrid.selectedRecord();
+    indexGrid.destroyImage = function() {
 	Ext.Ajax.request({
-	    url: record.get('paths').image,
+	    url: indexGrid.selectedPaths().image,
 	    method: 'DELETE',
 	    success: function(res, opts) {
-		indexGrid.getStore().remove(record);
+		indexGrid.removeSelected();
 	    },
 	    failure: function(res, opts) {
 		alert('Error');
@@ -86,92 +80,8 @@ var showImages = function() {
     var createButton = new Ext.Button({
 	text: 'Create Image',
 	border: false,
-	handler: newImage
+	handler: createImage
     });
-
-    //------------------------------
-    //   index grid
-    //------------------------------
-
-    var indexGrid = (function() {
-	var colModel = new Ext.grid.ColumnModel([
-	    {
-		header: 'ID',
-		dataIndex: 'id',
-		width: 30,
-		sortable: true
-	    },
-	    {
-		header: 'Title',
-		dataIndex: 'title',
-		width: 200,
-		sortable: true
-	    },
-	    {
-		header: 'OS',
-		dataIndex: 'os',
-		width: 150,
-		sortable: true
-	    },
-	    {
-		header: 'IQN',
-		dataIndex: 'iqn',
-		width: 450,
-		sortable: true
-	    },
-	    {
-		header: 'Comment',
-		dataIndex: 'comment',
-		width: 250
-	    }
-	]);
-
-	var store = itemsStore(paths.images.index, [
-	    'id',
-	    'title',
-	    'os',
-	    'iqn',
-	    'comment',
-	    'paths'
-	]);
-
-	var contextMenu = new Ext.menu.Menu({
-	    style: {
-		overflow: 'visible'
-	    },
-	    items: [
-		{
-		    text: 'Edit',
-		    handler: editImage
-		},
-		{
-		    text: 'Destroy',
-		    handler: destroyImage
-		}
-	    ]
-	});
-
-	var grid = new Ext.grid.GridPanel({
-	    colModel: colModel,
-	    store: store,
-	    autoHeight: true,
-	    listeners: {
-		rowcontextmenu: function(g, row, e) {
-		    grid.getSelectionModel().selectRow(row);
-		    e.stopEvent();
-		    contextMenu.showAt(e.getXY());
-		}
-	    }
-	});
-
-	store.load();
-
-	grid.selectedRecord = function() {
-	    return grid.getSelectionModel().getSelected();
-	};
-
-	return grid;
-    })();
 
     //------------------------------
     //   index panel

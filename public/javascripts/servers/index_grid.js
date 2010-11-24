@@ -1,4 +1,4 @@
-var IndexGrid = function() {
+Servers.IndexGrid = function() {
 
     var imagePaths = {
 	Starting: 'status_changing.gif',
@@ -135,7 +135,7 @@ var IndexGrid = function() {
 	]
     });
 
-    IndexGrid.baseConstructor.apply(this, [{
+    Servers.IndexGrid.baseConstructor.apply(this, [{
 	colModel: colModel,
 	store: store,
 	listeners: {
@@ -167,9 +167,9 @@ var IndexGrid = function() {
 	return grid.getSelectionModel().getSelected().get('paths');
     };
 
-    this.addRecord = function(server) {
+    this.addRecord = function(item) {
 	var RecordType = store.recordType;
-	var record = new RecordType(server);
+	var record = new RecordType(item);
 	store.add(record);
     };
 
@@ -200,4 +200,4 @@ var IndexGrid = function() {
     };
 };
 
-IndexGrid.inherit(Ext.grid.GridPanel);
+Servers.IndexGrid.inherit(Ext.grid.GridPanel);

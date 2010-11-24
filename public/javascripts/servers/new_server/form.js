@@ -1,4 +1,4 @@
-var FormPanel = function() {
+Servers.NewServerWindow.FormPanel = function() {
 
     var zoneCombo = new Ext.form.ComboBox({
 	name: 'server[zone]',
@@ -156,7 +156,7 @@ var FormPanel = function() {
 	items: formItems
     });
 
-    FormPanel.baseConstructor.apply(this, [{
+    Servers.NewServerWindow.FormPanel.baseConstructor.apply(this, [{
 	layout: 'hbox',
 	layoutConfig: {
 	    align: 'stretch',
@@ -194,4 +194,4 @@ var FormPanel = function() {
 
 };
 
-FormPanel.inherit(Ext.Panel);
+Servers.NewServerWindow.FormPanel.inherit(Ext.Panel);

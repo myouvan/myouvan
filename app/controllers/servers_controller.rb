@@ -70,9 +70,10 @@ class ServersController < ApplicationController
   def show
     server = Server.includes(:interfaces).find(params[:id])
     render :json => {
-      :success => true,
-      :server => attributes_with_paths(server),
-      :interfaces => server.interfaces.collect {|interface| interface.attributes }
+      :success => true, :items => {
+        :server => attributes_with_paths(server),
+        :interfaces => server.interfaces.collect {|interface| interface.attributes }
+      }
     }
   end
 
@@ -112,7 +113,7 @@ class ServersController < ApplicationController
     end
 
     if server.save
-      render :json => { :success => true, :server => attributes_with_paths(server) }
+      render :json => { :success => true, :item => attributes_with_paths(server) }
     else
       render :json => { :success => false, :errors => server.errors_for_ext }
       return

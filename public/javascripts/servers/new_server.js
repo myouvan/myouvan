@@ -1,11 +1,11 @@
-var NewServerWindow = function() {
+Servers.NewServerWindow = function() {
 
     //--- card
 
-    var selectImagePanel = new SelectImagePanel();
-    var formPanel = new FormPanel();
-    var tagsPanel = new TagsPanel();
-    var flashPanel = new FlashPanel();
+    var selectImagePanel = new Servers.NewServerWindow.SelectImagePanel();
+    var formPanel = new Servers.NewServerWindow.FormPanel();
+    var tagsPanel = new Servers.NewServerWindow.TagsPanel();
+    var flashPanel = new Servers.NewServerWindow.FlashPanel();
 
     flashPanel.onSet(function(thumb, icon) {
 	formPanel.setAvatar(thumb, icon);
@@ -88,7 +88,7 @@ var NewServerWindow = function() {
 
     //--- window
 
-    NewServerWindow.baseConstructor.apply(this, [{
+    Servers.NewServerWindow.baseConstructor.apply(this, [{
 	title: 'Create Server',
 	modal: true,
 	width: 650,
@@ -129,4 +129,4 @@ var NewServerWindow = function() {
 
 };
 
-NewServerWindow.inherit(Ext.Window);
+Servers.NewServerWindow.inherit(Ext.Window);

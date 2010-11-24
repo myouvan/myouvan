@@ -1,3 +1,6 @@
+var images = new Images();
+var servers = new Servers();
+
 var showViewport = function() {
     var items = [
 	{
@@ -56,12 +59,12 @@ var showViewport = function() {
     });
 
     Ext.get('nav-images').on('click', function(ev) {
-	showImages();
+	images.show();
 	ev.stopEvent();
     });
 
     Ext.get('nav-servers').on('click', function(ev) {
-	showServers();
+	servers.show();
 	ev.stopEvent();
     });
 };

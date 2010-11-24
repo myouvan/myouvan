@@ -1,4 +1,4 @@
-var TagsPanel = function() {
+Servers.NewServerWindow.TagsPanel = function() {
 
     var grid = (function() {
 	var colModel = new Ext.grid.ColumnModel([
@@ -71,7 +71,7 @@ var TagsPanel = function() {
 	}
     });
 
-    TagsPanel.baseConstructor.apply(this, [{
+    Servers.NewServerWindow.TagsPanel.baseConstructor.apply(this, [{
 	layout: 'hbox',
 	layoutConfig: {
 	    align: 'stretch',
@@ -134,4 +134,4 @@ var TagsPanel = function() {
     };
 };
 
-TagsPanel.inherit(Ext.Panel);
+Servers.NewServerWindow.TagsPanel.inherit(Ext.Panel);

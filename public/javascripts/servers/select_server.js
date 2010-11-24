@@ -1,4 +1,4 @@
-var SelectServerWindow = function() {
+Servers.SelectServerWindow = function() {
 
     //--- form
 
@@ -67,7 +67,7 @@ var SelectServerWindow = function() {
 
     //----- window
 
-    SelectServerWindow.baseConstructor.apply(this, [{
+    Servers.SelectServerWindow.baseConstructor.apply(this, [{
 	title: 'Migrate Server',
 	modal: true,
 	width: 291,
@@ -99,4 +99,4 @@ var SelectServerWindow = function() {
 
 };
 
-SelectServerWindow.inherit(Ext.Window);
+Servers.SelectServerWindow.inherit(Ext.Window);

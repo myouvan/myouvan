@@ -1,4 +1,4 @@
-var NewImageWindow = function() {
+Images.NewImageWindow = function() {
 
     //--- form
 
@@ -72,7 +72,7 @@ var NewImageWindow = function() {
 
     //--- window
 
-    NewImageWindow.baseConstructor.apply(this, [{
+    Images.NewImageWindow.baseConstructor.apply(this, [{
 	modal: true,
 	width: 625,
 	height: 260,
@@ -111,4 +111,4 @@ var NewImageWindow = function() {
 
 };
 
-NewImageWindow.inherit(Ext.Window);
+Images.NewImageWindow.inherit(Ext.Window);

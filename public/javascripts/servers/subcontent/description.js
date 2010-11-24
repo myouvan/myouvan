@@ -1,4 +1,4 @@
-var DescriptionPanel = function() {
+Servers.SubcontentTab.DescriptionPanel = function() {
 
     var propPanels = new Array();
     var valuePanels = new Array();
@@ -53,7 +53,7 @@ var DescriptionPanel = function() {
 
     addPropPanel('avatar', 'Avatar', 2)
     
-    DescriptionPanel.baseConstructor.apply(this, [{
+    Servers.SubcontentTab.DescriptionPanel.baseConstructor.apply(this, [{
 	layout: 'table',
 	defaults: {
 	    padding: '3px',
@@ -88,4 +88,4 @@ var DescriptionPanel = function() {
 
 };
 
-DescriptionPanel.inherit(Ext.Panel);
+Servers.SubcontentTab.DescriptionPanel.inherit(Ext.Panel);

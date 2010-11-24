@@ -1,10 +1,10 @@
-var FlashPanel = function() {
+Servers.NewServerWindow.FlashPanel = function() {
 
     this.onSet = function(callback) {
 	ovater_set = callback;
     };
 
-    FlashPanel.baseConstructor.apply(this, [{
+    Servers.NewServerWindow.FlashPanel.baseConstructor.apply(this, [{
 	layout: 'fit',
 	border: false,
 	html: '<div id="avatar-flash" />',
@@ -17,7 +17,7 @@ var FlashPanel = function() {
 
 };
 
-FlashPanel.inherit(Ext.Panel);
+Servers.NewServerWindow.FlashPanel.inherit(Ext.Panel);
 
 // call from avatar flash
 var ovater_set;

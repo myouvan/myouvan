@@ -1,13 +1,16 @@
-var showServers = function() {
+var Servers = function() {
+};
+
+Servers.prototype.show = function() {
 
     //------------------------------
     //   windows, panels
     //------------------------------
 
-    var indexGrid = new IndexGrid();
-    var subcontentTab = new SubcontentTab();
-    var newServerWindow = new NewServerWindow();
-    var selectServerWindow = new SelectServerWindow();
+    var indexGrid = new Servers.IndexGrid();
+    var subcontentTab = new Servers.SubcontentTab();
+    var newServerWindow = new Servers.NewServerWindow();
+    var selectServerWindow = new Servers.SelectServerWindow();
 
     //------------------------------
     //   handlers
@@ -19,8 +22,8 @@ var showServers = function() {
             method: 'POST',
             waitMsg: 'Creating...',
             success: function(f, action) {
-		var server = action.result.server;
-		indexGrid.addRecord(server);
+		var item = action.result.item;
+		indexGrid.addRecord(item);
 		newServerWindow.hide();
             },
             failure: function(f, action) {
@@ -37,8 +40,8 @@ var showServers = function() {
 	    success: function(res, opts) {
 		var result = Ext.decode(res.responseText);
 
-		var server = result.server;
-		var interfaces = result.interfaces;
+		var server = result.items.server;
+		var interfaces = result.items.interfaces;
 		var monitorPath = indexGrid.selectedPaths().monitor;
 
 		subcontentTab.showContent(server, interfaces, monitorPath);
@@ -188,4 +191,5 @@ var showServers = function() {
     Ext.getCmp('content').removeAll();
     Ext.getCmp('content').add(indexPanel);
     Ext.getCmp('content-container').doLayout();
+
 };

@@ -1,9 +1,9 @@
-var SubcontentTab = function() {
+Servers.SubcontentTab = function() {
 
-    var descriptionPanel = new DescriptionPanel();
-    var chartPanel = new ChartPanel();
+    var descriptionPanel = new Servers.SubcontentTab.DescriptionPanel();
+    var chartPanel = new  Servers.SubcontentTab.ChartPanel();
 
-    SubcontentTab.baseConstructor.apply(this, [{
+    Servers.SubcontentTab.baseConstructor.apply(this, [{
 	activeTab: 0,
 	layoutOnTabChange: true,
 	border: false,
@@ -40,4 +40,4 @@ var SubcontentTab = function() {
 
 };
 
-SubcontentTab.inherit(Ext.TabPanel);
+Servers.SubcontentTab.inherit(Ext.TabPanel);

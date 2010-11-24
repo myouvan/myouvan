@@ -1,4 +1,4 @@
-var SelectImagePanel = function() {
+Servers.NewServerWindow.SelectImagePanel = function() {
 
     var grid = (function() {
 	var colModel = new Ext.grid.ColumnModel([
@@ -47,7 +47,7 @@ var SelectImagePanel = function() {
 	return grid;
     })();
 
-    SelectImagePanel.baseConstructor.apply(this, [{
+    Servers.NewServerWindow.SelectImagePanel.baseConstructor.apply(this, [{
 	layout: 'vbox',
 	layoutConfig: {
 	    align: 'stretch'
@@ -85,4 +85,4 @@ var SelectImagePanel = function() {
     };
 };
 
-SelectImagePanel.inherit(Ext.Panel);
+Servers.NewServerWindow.SelectImagePanel.inherit(Ext.Panel);
