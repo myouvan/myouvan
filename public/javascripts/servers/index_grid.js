@@ -113,8 +113,9 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     makeStore: function() {
-	this.store = Ext.ux.ItemsStore({
+	this.store = new Ext.ux.ItemsStore({
 	    url: paths.servers.index,
+	    autoLoad: true,
 	    fields: [
 		'id',
 		'image_id',

@@ -1,137 +1,92 @@
-Servers.NewServerWindow.TagsPanel = function() {
+Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 
-    var grid = (function() {
-	var colModel = new Ext.grid.ColumnModel([
-	    {
-		header: 'Value',
-		dataIndex: 'value',
-		width: 250,
-		sortable: true
-	    }
-	]);
-
-	var store = new Ext.data.ArrayStore({
-	    fields: ['value']
-	});
-
-	var contextMenu = new Ext.menu.Menu({
-	    style: {
-		overflow: 'visible'
-	    },
-	    items: [
-		{
-		    text: 'Delete',
-		    handler: function() {
-			var store = grid.getStore();
-			var record = grid.getSelectionModel().getSelected();
-			store.remove(record);
-		    }
-		}
-	    ]
-	});
-
-	var grid = new Ext.grid.GridPanel({
-	    colModel: colModel,
-	    store: store,
-	    listeners: {
-		rowcontextmenu: function(g, row, e) {
-		    grid.getSelectionModel().selectRow(row);
-		    e.stopEvent();
-		    contextMenu.showAt(e.getXY());
-		}
-	    }
-	});
-
-	return grid;
-    })();
-
-    var addCombo = new Ext.form.ComboBox({
-	flex: 1,
-	editable: true,
-	triggerAction: 'all',
-	store: comboItemsStore(paths.tags.index),
-	displayField: 'value'
-    });
-
-    var addButton = new Ext.Button({
-	text: 'Add Tag',
-	width: 70,
-	handler: function() {
-	    var value = addCombo.getValue();
-	    if (value == '')
-		return;
-
-	    var store = grid.getStore();
-	    var RecordType = store.recordType;
-	    var record = new RecordType({
-		value: value
-	    });
-	    store.add(record);
-	    addCombo.reset();
-	}
-    });
-
-    Servers.NewServerWindow.TagsPanel.baseConstructor.apply(this, [{
-	layout: 'hbox',
-	layoutConfig: {
-	    align: 'stretch',
-	    pack: 'center'
-	},
-	items: {
-	    width: 300,
-	    layout: 'vbox',
+    constructor: function() {
+	this.makeComponents();
+	Servers.NewServerWindow.TagsPanel.superclass.constructor.call(this, {
+	    layout: 'hbox',
 	    layoutConfig: {
-		align: 'stretch'
+		align: 'stretch',
+		pack: 'center'
 	    },
-	    border: false,
-	    items: [
-		{
-		    height: 20,
-		    html: 'Add Tags',
-		    border: false,
-		    bodyStyle: {
-			padding: '3px'
-		    }
+	    items: {
+		width: 300,
+		layout: 'vbox',
+		layoutConfig: {
+		    align: 'stretch'
 		},
-		new Ext.Panel({
-		    flex: 1,
-		    layout: 'fit',
-		    border: false,
-		    items: grid
-		}),
-		new Ext.Panel({
-		    layout: 'hbox',
-		    height: 30,
-		    border: false,
-		    bodyStyle: {
-			padding: '5px 0 0 0'
-		    },
-		    items: [
-			addCombo,
-			{
-			    border: false,
-			    bodyStyle: {
-				padding: '0 0 0 5px'
-			    },
-			    items: addButton
+		border: false,
+		items: [
+		    {
+			height: 20,
+			html: 'Add Tags',
+			border: false,
+			bodyStyle: {
+			    padding: '3px'
 			}
-		    ]
-		})
-	    ]
-	}
-    }]);
-
-    this.resetPanel = function() {
-	grid.getStore().removeAll();
-	addCombo.reset();
-    };
-
-    this.tags = function() {
-	var tags = new Array();
-	grid.getStore().each(function(record) {
-	    tags.push({ value: record.get('value') });
+		    },
+		    new Ext.Panel({
+			flex: 1,
+			layout: 'fit',
+			border: false,
+			items: this.grid
+		    }),
+		    new Ext.Panel({
+			layout: 'hbox',
+			height: 30,
+			border: false,
+			bodyStyle: {
+			    padding: '5px 0 0 0'
+			},
+			items: [
+			    this.addCombo,
+			    {
+				border: false,
+				bodyStyle: {
+				    padding: '0 0 0 5px'
+				},
+				items: this.addButton
+			    }
+			]
+		    })
+		]
+	    }
 	});
-    };
-};
+    },
 
-Servers.NewServerWindow.TagsPanel.inherit(Ext.Panel);
+    makeComponents: function() {
+	this.grid = new Servers.NewServerWindow.TagsGrid();
+	this.makeAddComponents();
+    },
+
+    makeAddComponents: function() {
+	this.addCombo = new Ext.ux.EditableStoreComboBox({
+	    flex: 1,
+	    storeConfig: {
+		url: paths.tags.index
+	    }
+	});
+
+	var panel = this;
+
+	this.addButton = new Ext.Button({
+	    text: 'Add Tag',
+	    width: 70,
+	    handler: function() {
+		var value = panel.addCombo.getValue();
+		if (value == '')
+		    return;
+		panel.grid.addTag(value);
+		panel.addCombo.reset();
+	    }
+	});
+    },
+
+    resetPanel: function() {
+	this.grid.resetGrid();
+	this.addCombo.reset();
+    },
+
+    tags: function() {
+	return this.grid.tags();
+    }
+});

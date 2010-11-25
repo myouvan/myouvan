@@ -1,132 +1,138 @@
-Servers.NewServerWindow = function() {
+Servers.NewServerWindow = Ext.extend(Ext.Window, {
 
-    //--- card
+    constructor: function() {
+	this.makeComponents();
+	Servers.NewServerWindow.superclass.constructor.call(this, {
+	    title: 'Create Server',
+	    modal: true,
+	    width: 650,
+	    height: 468,
+	    layout: 'fit',
+	    plain: true,
+	    closable: false,
+	    items: this.card,
+	    buttonAlign: 'center',
+	    buttons: [
+		this.prevButton,
+		this.nextButton,
+		this.closeButton
+	    ],
+	    listeners: {
+		beforeshow: function() {
+		    this.activeItem = 0;
+		    this.card.layout.setActiveItem(this.activeItem);
 
-    var selectImagePanel = new Servers.NewServerWindow.SelectImagePanel();
-    var formPanel = new Servers.NewServerWindow.FormPanel();
-    var tagsPanel = new Servers.NewServerWindow.TagsPanel();
-    var flashPanel = new Servers.NewServerWindow.FlashPanel();
+		    this.prevButton.disable();
+		    this.nextButton.enable();
+		    this.nextButton.setText('Next');
 
-    flashPanel.onSet(function(thumb, icon) {
-	formPanel.setAvatar(thumb, icon);
-	nextButton.enable();
-    });
+		    this.selectImagePanel.resetPanel();
+		    this.formPanel.resetPanel();
+		    this.tagsPanel.resetPanel();
+		}
+	    }
+	});
+    },
 
-    var activeItem = 0;
+    makeComponents: function() {
+	this.selectImagePanel = new Servers.NewServerWindow.SelectImagePanel();
+	this.formPanel = new Servers.NewServerWindow.FormPanel();
+	this.tagsPanel = new Servers.NewServerWindow.TagsPanel();
+	this.flashPanel = new Servers.NewServerWindow.FlashPanel();
 
-    var card = new Ext.Panel({
-	layout: 'card',
-	activeItem: 0,
-	width: 400,
-	items: [
-	    selectImagePanel,
-	    formPanel,
-	    tagsPanel,
-	    flashPanel
-	]
-    });
+	var wdw = this;
+	this.flashPanel.onSet(function(thumb, icon) {
+	    wdw.formPanel.setAvatar(thumb, icon);
+	    wdw.nextButton.enable();
+	});
 
-    var prevCard = function() {
-	if (activeItem > 0) {
-	    if (activeItem == 1) {
-		prevButton.disable();
-	    } else if (activeItem == 3) {
-		nextButton.setText('Next');
-		nextButton.enable();
+	this.makeCard();
+	this.makeButtons();
+    },
+
+    makeCard: function() {
+	this.activeItem = 0;
+	this.card = new Ext.Panel({
+	    layout: 'card',
+	    activeItem: 0,
+	    width: 400,
+	    items: [
+		this.selectImagePanel,
+		this.formPanel,
+		this.tagsPanel,
+		this.flashPanel
+	    ]
+	});
+    },
+
+    makeButtons: function() {
+	var wdw = this;
+
+	this.prevButton = new Ext.Button({
+	    text: 'Prev',
+	    handler: function() {
+		wdw.prevCard();
+	    }
+	});
+
+	this.nextButton = new Ext.Button({
+	    text: 'Next',
+	    handler: function() {
+		wdw.nextCard();
+	    }
+	});
+
+	this.closeButton = new Ext.Button({
+	    text: 'Close',
+	    handler: function() {
+		wdw.hide();
+	    }
+	});
+    },
+
+    prevCard: function() {
+	if (this.activeItem > 0) {
+	    if (this.activeItem == 1) {
+		this.prevButton.disable();
+	    } else if (this.activeItem == 3) {
+		this.nextButton.setText('Next');
+		this.nextButton.enable();
 	    }
 
-	    activeItem--;
-	    card.layout.setActiveItem(activeItem);
+	    this.activeItem--;
+	    this.card.layout.setActiveItem(this.activeItem);
 	}
-    };
+    },
 
-    var nextCard = function() {
-	if (activeItem < 3) {
-	    if (activeItem == 0) {
-		if (!selectImagePanel.isSelected()) {
+    nextCard: function() {
+	if (this.activeItem < 3) {
+	    if (this.activeItem == 0) {
+		if (!this.selectImagePanel.isSelected()) {
 		    Ext.MessageBox.alert('Error', 'Select an image');
 		    return;
 		}
-		var id = selectImagePanel.selectedId();
-		formPanel.setImageId(id);
+		var id = this.selectImagePanel.selectedId();
+		this.formPanel.setImageId(id);
 
-		prevButton.enable();
-	    } else if (activeItem == 2) {
-		formPanel.setTags(tagsPanel.tags);
+		this.prevButton.enable();
+	    } else if (this.activeItem == 2) {
+		this.formPanel.setTags(this.tagsPanel.tags);
 
-		nextButton.setText('Create');
-		nextButton.disable();
+		this.nextButton.setText('Create');
+		this.nextButton.disable();
 	    }
 
-	    activeItem++;
-	    card.layout.setActiveItem(activeItem);
-	} else if (activeItem == 3) {
-	    prevCard();
-	    prevCard();
-	    formPanel.submit();
+	    this.activeItem++;
+	    this.card.layout.setActiveItem(this.activeItem);
+	} else if (this.activeItem == 3) {
+	    this.prevCard();
+	    this.prevCard();
+	    this.formPanel.submit();
 	}
-    };
+    },
 
-    //--- buttons
-
-    var prevButton = new Ext.Button({
-	text: 'Prev',
-	handler: prevCard
-    });
-
-    var nextButton = new Ext.Button({
-	text: 'Next',
-	handler: nextCard
-    });
-
-    var closeButton = new Ext.Button({
-	text: 'Close',
-	handler: function() {
-	    wdw.hide();
-	}
-    });
-
-    //--- window
-
-    Servers.NewServerWindow.baseConstructor.apply(this, [{
-	title: 'Create Server',
-	modal: true,
-	width: 650,
-	height: 468,
-	layout: 'fit',
-	plain: true,
-	closable: false,
-	items: card,
-	buttonAlign: 'center',
-	buttons: [
-	    prevButton,
-	    nextButton,
-	    closeButton
-	],
-	listeners: {
-	    beforeshow: function() {
-		activeItem = 0;
-		card.layout.setActiveItem(activeItem);
-
-		prevButton.disable();
-		nextButton.enable();
-		nextButton.setText('Next');
-
-		selectImagePanel.resetPanel();
-		formPanel.resetPanel();
-		tagsPanel.resetPanel();
-	    }
-	}
-    }]);
-
-    var wdw = this;
-
-    //--- submit
-
-    this.setSubmitOpts = function(opts) {
-	formPanel.setSubmitOpts(opts);
+    setSubmitOpts: function(opts) {
+	this.formPanel.setSubmitOpts(opts);
     }
 
-};
-
-Servers.NewServerWindow.inherit(Ext.Window);
+});

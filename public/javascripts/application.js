@@ -63,7 +63,7 @@ Ext.ux.StoreComboBox = Ext.extend(Ext.form.ComboBox, {
 
 	Ext.applyIf(config, {
 	    editable: false,
-	    forceSelection: false,
+	    forceSelection: true,
 	    triggerAction: 'all',
 	    displayField: 'value',
 	    msgTarget: 'qtip',
@@ -73,7 +73,7 @@ Ext.ux.StoreComboBox = Ext.extend(Ext.form.ComboBox, {
     }
 });
 
-Ext.ux.EdittableStoreComboBox = Ext.extend(Ext.form.ComboBox, {
+Ext.ux.EditableStoreComboBox = Ext.extend(Ext.form.ComboBox, {
     constructor: function(config) {
 	if (config.storeConfig) {
 	    config.store = new Ext.ux.ItemsStore(config.storeConfig);
@@ -82,7 +82,7 @@ Ext.ux.EdittableStoreComboBox = Ext.extend(Ext.form.ComboBox, {
 
 	Ext.applyIf(config, {
 	    editable: true,
-	    forceSelection: true,
+	    forceSelection: false,
 	    triggerAction: 'all',
 	    displayField: 'value',
 	    msgTarget: 'qtip',

@@ -1,88 +1,46 @@
-Servers.NewServerWindow.SelectImagePanel = function() {
+Servers.NewServerWindow.SelectImagePanel = Ext.extend(Ext.Panel, {
 
-    var grid = (function() {
-	var colModel = new Ext.grid.ColumnModel([
-	    {
-		header: 'ID',
-		dataIndex: 'id',
-		width: 30,
-		sortable: true
+    constructor: function() {
+	this.makeComponents();
+	Servers.NewServerWindow.SelectImagePanel.superclass.constructor.call(this, {
+	    layout: 'vbox',
+	    layoutConfig: {
+		align: 'stretch'
 	    },
-	    {
-		header: 'Title',
-		dataIndex: 'title',
-		width: 200,
-		sortable: true
-	    },
-	    {
-		header: 'OS',
-		dataIndex: 'os',
-		width: 150,
-		sortable: true
-	    },
-	    {
-		header: 'Comment',
-		dataIndex: 'comment',
-		width: 250
-	    }
-	]);
-
-	var store = itemsStore(paths.images.index, [
-	    'id',
-	    'title',
-	    'os',
-	    'comment'
-	]);
-
-	var grid = new Ext.grid.GridPanel({
-	    colModel: colModel,
-	    store: store,
-	    autoHeight: true
-	});
-
-	grid.selectedRecord = function() {
-	    return grid.getSelectionModel().getSelected();
-	};
-
-	return grid;
-    })();
-
-    Servers.NewServerWindow.SelectImagePanel.baseConstructor.apply(this, [{
-	layout: 'vbox',
-	layoutConfig: {
-	    align: 'stretch'
-	},
-	border: false,
-	items: [
-	    {
-		height: 20,
-		html: 'Select Image',
-		bodyStyle: {
-		    padding: '3px'
+	    border: false,
+	    items: [
+		{
+		    height: 20,
+		    html: 'Select Image',
+		    bodyStyle: {
+			padding: '3px'
+		    },
+		    border: false
 		},
-		border: false
-	    },
-	    {
-		flex: 1,
-		layout: 'fit',
-		border: false,
-		items: grid
-	    }
-	]
-    }]);
+		{
+		    flex: 1,
+		    layout: 'fit',
+		    border: false,
+		    items: this.grid
+		}
+	    ]
+	});
+    },
 
-    this.isSelected = function() {
-	return grid.getSelectionModel().hasSelection();
-    };
+    makeComponents: function() {
+	this.grid = new Servers.NewServerWindow.SelectImageGrid();
+    },
 
-    this.selectedId = function() {
-	return grid.getSelectionModel().getSelected().get('id');	
-    };
+    isSelected: function() {
+	return this.grid.isSelected();
+    },
 
-    this.resetPanel = function() {
-	grid.getStore().load();
-	grid.getSelectionModel().clearSelections();
-    };
-};
+    selectedId: function() {
+	return this.grid.selectedId();
+    },
 
-Servers.NewServerWindow.SelectImagePanel.inherit(Ext.Panel);
+    resetPanel: function() {
+	this.grid.resetGrid();
+    }
+
+});
