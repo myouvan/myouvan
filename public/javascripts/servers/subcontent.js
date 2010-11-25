@@ -1,43 +1,46 @@
-Servers.SubcontentTab = function() {
+Servers.SubcontentTab = Ext.extend(Ext.TabPanel, {
 
-    var descriptionPanel = new Servers.SubcontentTab.DescriptionPanel();
-    var chartPanel = new  Servers.SubcontentTab.ChartPanel();
+    constructor: function() {
+	this.makeComponents();
+	Servers.SubcontentTab.superclass.constructor.call(this, {
+	    activeTab: 0,
+	    layoutOnTabChange: true,
+	    border: false,
+	    items: [
+		{
+		    title: 'Description',
+		    autoScroll: true,
+		    items: this.descriptionPanel,
+		    border: false,
+		    bodyStyle: 'padding: 10px'
+		},
+		{
+		    title: 'Monitoring',
+		    autoScroll: true,
+		    items: this.chartPanel,
+		    border: false,
+		    bodyStyle: 'padding: 10px'
+		}
+	    ]
+	});
+    },
 
-    Servers.SubcontentTab.baseConstructor.apply(this, [{
-	activeTab: 0,
-	layoutOnTabChange: true,
-	border: false,
-	items: [
-	    {
-		title: 'Description',
-		autoScroll: true,
-		items: descriptionPanel,
-		border: false,
-		bodyStyle: 'padding: 10px'
-            },
-	    {
-		title: 'Monitoring',
-		autoScroll: true,
-		items: chartPanel,
-		border: false,
-		bodyStyle: 'padding: 10px'
-	    }
-	]
-    }]);
+    makeComponents: function() {
+	this.descriptionPanel = new Servers.SubcontentTab.DescriptionPanel();
+	this.chartPanel = new  Servers.SubcontentTab.ChartPanel();
+    },
 
-    this.showContent = function(server, interfaces, monitorPath) {
-	descriptionPanel.showContent(server, interfaces);
-	chartPanel.showContent(monitorPath);
-    };
+    showContent: function(server, interfaces, monitorPath) {
+	this.descriptionPanel.showContent(server, interfaces);
+	this.chartPanel.showContent(monitorPath);
+    },
 
-    this.updateValues = function(item) {
-	descriptionPanel.updateValues(item);
-    };
+    updateValues: function(item) {
+	this.descriptionPanel.updateValues(item);
+    },
 
-    this.updateMonitor = function() {
-	chartPanel.updateMonitor();
-    };
+    updateMonitor: function() {
+	this.chartPanel.updateMonitor();
+    }
 
-};
-
-Servers.SubcontentTab.inherit(Ext.TabPanel);
+});

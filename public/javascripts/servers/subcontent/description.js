@@ -1,19 +1,146 @@
-Servers.SubcontentTab.DescriptionPanel = function() {
+Servers.SubcontentTab.DescriptionPanel = Ext.extend(Ext.Panel, {
 
-    var propPanels = new Array();
-    var valuePanels = new Array();
-
-    var addPropPanel = function(field, label, colspan) {
-	var valuePanel = new Ext.Panel({
+    constructor: function() {
+	this.makeComponents();
+	Servers.SubcontentTab.DescriptionPanel.superclass.constructor.call(this, {
+	    layout: 'table',
+	    defaults: {
+		padding: '3px',
+		border: false
+	    },
+	    layoutConfig: {
+		columns: 2
+	    },
 	    border: false,
-	    padding: '0 0 0 10px',
+	    items: [
+		this.propPanels['name'],
+		this.propPanels['uuid'],
+		this.propPanels['title'],
+		this.propPanels['status'],
+		this.propPanels['auto_restart'],
+		this.propPanels['zone'],
+		this.propPanels['virtualization'],
+		this.propPanels['physical_server'],
+		this.propPanels['pool'],
+		this.propPanels['storage_iqn'],
+		this.propPanels['cpus'],
+		this.propPanels['memory'],
+		this.propPanels['ip_address0'],
+		this.propPanels['mac_address0'],
+		this.propPanels['ip_address1'],
+		this.propPanels['mac_address1'],
+		this.propPanels['avatar']
+	    ]
 	});
-	valuePanels[field] = valuePanel;
+    },
 
-	var propPanel =  new Ext.Panel({
+    makeComponents: function() {
+	this.makePropPanels();
+    },
+
+    makePropPanels: function() {
+	this.propPanels = {
+	    name: new Servers.SubcontentTab.PropPanel({
+		label: 'Name',
+		colspan: 2
+	    }),
+	    uuid: new Servers.SubcontentTab.PropPanel({
+		label: 'UUID',
+		colspan: 2
+	    }),
+	    title: new Servers.SubcontentTab.PropPanel({
+		label: 'Title',
+		colspan: 2
+	    }),
+	    status: new Servers.SubcontentTab.PropPanel({
+		label: 'Status',
+		colspan: 1
+	    }),
+	    auto_restart: new Servers.SubcontentTab.PropPanel({
+		label: 'Auto Restart',
+		colspan: 1
+	    }),
+	    zone: new Servers.SubcontentTab.PropPanel({
+		label: 'Zone',
+		colspan: 1
+	    }),
+	    virtualization: new Servers.SubcontentTab.PropPanel({
+		label: 'Virtualization',
+		colspan: 1
+	    }),
+	    physical_server: new Servers.SubcontentTab.PropPanel({
+		label: 'Physical Server',
+		colspan: 1
+	    }),
+	    pool: new Servers.SubcontentTab.PropPanel({
+		label: 'Pool',
+		colspan: 1
+	    }),
+	    storage_iqn: new Servers.SubcontentTab.PropPanel({
+		label: 'Storage IQN',
+		colspan: 2
+	    }),
+	    cpus: new Servers.SubcontentTab.PropPanel({
+		label: 'CPUs',
+		colspan: 1
+	    }),
+	    memory: new Servers.SubcontentTab.PropPanel({
+		label: 'Memory(MB)',
+		colspan: 1
+	    }),
+	    ip_address0: new Servers.SubcontentTab.PropPanel({
+		label: 'IP Address(1)',
+		colspan: 1
+	    }),
+	    mac_address0: new Servers.SubcontentTab.PropPanel({
+		label: 'Mac Address(1)',
+		colspan: 1
+	    }),
+	    ip_address1: new Servers.SubcontentTab.PropPanel({
+		label: 'IP Address(2)',
+		colspan: 1
+	    }),
+	    mac_address1: new Servers.SubcontentTab.PropPanel({
+		label: 'Mac Address(2)',
+		colspan: 1
+	    }),
+	    avatar: new Servers.SubcontentTab.PropPanel({
+		label: 'Avatar',
+		colspan: 2
+	    })
+	};
+    },
+
+    showContent: function(server, interfaces) {
+	for (var field in server)
+	    if (this.propPanels[field])
+		this.propPanels[field].setValue(server[field]);
+
+	for (var i = 0; i < interfaces.length; ++i)
+	    for (var field in interfaces[i])
+		if (this.propPanels[field + i])
+		    this.propPanels[field + i].setValue(interfaces[i][field]);
+
+	avatarImg = '<img src="' + server.paths.avatarThumb + '" width="150" height="150" />';
+	this.propPanels['avatar'].setValue(avatarImg);
+    },
+
+    updateValues: function(item) {
+	for (var field in item)
+	    if (this.propPanels[field])
+		this.propPanels[field].setValue(item[field]);
+    }
+
+});
+
+Servers.SubcontentTab.PropPanel = Ext.extend(Ext.Panel, {
+
+    constructor: function(config) {
+	this.makeValuePanel();
+	Servers.SubcontentTab.PropPanel.superclass.constructor.call(this, {
 	    items: new Ext.Panel({
 		layout: 'hbox',
-		width: colspan == 1 ? 340 : 687,
+		width: config.colspan == 1 ? 340 : 687,
 		border: false,
 		items: [
 		    {
@@ -23,69 +150,24 @@ Servers.SubcontentTab.DescriptionPanel = function() {
 			    fontWeight: 'bold',
 			    textAlign: 'right'
 			},
-			html: label + ':'
+			html: config.label + ':'
 		    },
-		    valuePanel
+		    this.valuePanel
 		]
 	    }),
-	    colspan: colspan
+	    colspan: config.colspan
 	});
-	propPanels.push(propPanel);
-    };
+    },
 
-    addPropPanel('name', 'Name', 2),
-    addPropPanel('uuid', 'UUID', 2),
-    addPropPanel('title', 'Title', 2),
-    addPropPanel('status', 'Status', 1),
-    addPropPanel('auto_restart', 'Auto Restart', 1),
-    addPropPanel('zone', 'Zone', 1),
-    addPropPanel('virtualization', 'Virtualization', 1),
-    addPropPanel('physical_server', 'Physical Server', 1),
-    addPropPanel('pool', 'Pool', 1),
-    addPropPanel('storage_iqn', 'Storage IQN', 2),
-    addPropPanel('cpus', 'CPUs', 1),
-    addPropPanel('memory', 'Memory(MB)', 1)
+    makeValuePanel: function() {
+	this.valuePanel = new Ext.Panel({
+	    border: false,
+	    padding: '0 0 0 10px',
+	});
+    },
 
-    for (var i = 0; i < 2; ++i) {
-	addPropPanel('ip_address' + i, 'IP Address(' + (i + 1) + ')', 1),
-	addPropPanel('mac_address' + i, 'Mac Address(' + (i + 1) + ')', 1)
+    setValue: function(value) {
+	this.valuePanel.update(value);
     }
 
-    addPropPanel('avatar', 'Avatar', 2)
-    
-    Servers.SubcontentTab.DescriptionPanel.baseConstructor.apply(this, [{
-	layout: 'table',
-	defaults: {
-	    padding: '3px',
-	    border: false
-	},
-	layoutConfig: {
-	    columns: 2
-	},
-	border: false,
-	items: propPanels
-    }]);
-
-    this.showContent = function(server, interfaces) {
-	for (var field in server)
-	    if (valuePanels[field])
-		valuePanels[field].update(server[field]);
-
-	for (var i = 0; i < interfaces.length; ++i)
-	    for (var field in interfaces[i])
-		if (valuePanels[field + i])
-		    valuePanels[field + i].update(interfaces[i][field]);
-
-	avatarImg = '<img src="' + server.paths.avatarThumb + '" width="150" height="150" />';
-	valuePanels['avatar'].update(avatarImg);
-    };
-
-    this.updateValues = function(item) {
-	for (var field in item)
-	    if (valuePanels[field])
-		valuePanels[field].update(item[field]);
-    };
-
-};
-
-Servers.SubcontentTab.DescriptionPanel.inherit(Ext.Panel);
+});

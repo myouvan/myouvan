@@ -1,102 +1,101 @@
-Servers.SelectServerWindow = function() {
+Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 
-    //--- form
-
-    var zoneCombo = new Ext.form.ComboBox({
-	name: 'server[zone]',
-	fieldLabel: 'Zone',
-	width: 150,
-	editable: false,
-	forceSelection: false,
-	triggerAction: 'all',
-	store: comboItemsStore(paths.servers.zones),
-	displayField: 'value',
-	msgTarget: 'qtip',
-	listeners: {
-	    select: function(combo, record, index) {
-		physicalServerCombo.getStore().baseParams['zone'] = record.get('value');
-		physicalServerCombo.getStore().load();
-		physicalServerCombo.reset();
-		physicalServerCombo.enable();
+    constructor: function() {
+	this.makeComponents();
+	Servers.SelectServerWindow.superclass.constructor.call(this, {
+	    title: 'Migrate Server',
+	    modal: true,
+	    width: 291,
+	    height: 145,
+	    layout: 'fit',
+	    plain: true,
+	    closable: false,
+	    items: this.form,
+	    buttonAlign: 'center',
+	    buttons: [
+		this.submitButton,
+		this.closeButton
+	    ],
+	    listeners: {
+		beforeshow: function() {
+		    this.form.getForm().reset();
+		    this.formItems['physical_server'].disable();
+		}
 	    }
-	}
-    });
+	});
+    },
 
-    var physicalServerCombo = new Ext.form.ComboBox({
-	name: 'server[physical_server]',
-	fieldLabel: 'Physical Server',
-	width: 150,
-	editable: false,
-	forceSelection: false,
-	triggerAction: 'all',
-	store: comboItemsStore(paths.servers.physical_servers),
-	displayField: 'value',
-	msgTarget: 'qtip'
-    });
+    makeComponents: function() {
+	this.makeFormItems();
+	this.makeForm();
+	this.makeButtons();
+    },
 
+    makeFormItems: function() {
+	var wdw = this;
+	this.formItems = {
+	    zone: new Ext.ux.StoreComboBox({
+		name: 'server[zone]',
+		fieldLabel: 'Zone',
+		width: 150,
+		storeConfig: {
+		    url:paths.servers.zones
+		},
+		listeners: {
+		    select: function(combo, record, index) {
+			var psCombo = wdw.formItems['physical_server'];
+			psCombo.getStore().baseParams['zone'] = record.get('value');
+			psCombo.getStore().load();
+			psCombo.reset();
+			psCombo.enable();
+		    }
+		}
+	    }),
+	    physical_server: new Ext.ux.StoreComboBox({
+		name: 'server[physical_server]',
+		fieldLabel: 'Physical Server',
+		width: 150,
+		storeConfig: {
+		    url: paths.servers.physical_servers
+		}
+	    })
+	};
+    },
 
-    var formItems = [
-	zoneCombo,
-	physicalServerCombo
-    ];
+    makeForm: function() {
+	this.form = new Ext.form.FormPanel({
+	    labelWidth: 90,
+	    labelAlign: 'right',
+	    bodyStyle: { padding: '5px 10px' },
+	    border: false,
+	    autoScroll: true,
+	    items: [
+		this.formItems['zone'],
+		this.formItems['physical_server']
+	    ]
+	});
+    },
 
-    var form = new Ext.form.FormPanel({
-	labelWidth: 90,
-	labelAlign: 'right',
-	bodyStyle: { padding: '5px 10px' },
-	border: false,
-	autoScroll: true,
-	items: formItems
-    });
+    makeButtons: function() {
+	var wdw = this;
 
-    //--- buttons
-
-    var submitButton = new Ext.Button({
-	text: 'Migrate',
-	handler: function() {
-	    form.getForm().submit(wdw.submitOpts);
-	}
-    });
-
-    var closeButton = new Ext.Button({
-	text: 'Close',
-	handler: function() {
-	    wdw.hide();
-	}
-    });
-
-    //----- window
-
-    Servers.SelectServerWindow.baseConstructor.apply(this, [{
-	title: 'Migrate Server',
-	modal: true,
-	width: 291,
-	height: 145,
-	layout: 'fit',
-	plain: true,
-	closable: false,
-	items: form,
-	buttonAlign: 'center',
-	buttons: [
-	    submitButton,
-	    closeButton
-	],
-	listeners: {
-	    beforeshow: function() {
-		form.getForm().reset();
-		physicalServerCombo.disable();
+	this.submitButton = new Ext.Button({
+	    text: 'Migrate',
+	    handler: function() {
+		wdw.form.getForm().submit(wdw.submitOpts);
 	    }
-	}
-    }]);
+	});
 
-    var wdw = this;
+	this.closeButton = new Ext.Button({
+	    text: 'Close',
+	    handler: function() {
+		wdw.hide();
+	    }
+	});
+    },
 
-    //--- submit
-
-    this.setSubmitOpts = function(opts) {
+    setSubmitOpts: function(opts) {
 	this.submitOpts = opts;
-    };
+    }
 
-};
-
-Servers.SelectServerWindow.inherit(Ext.Window);
+});

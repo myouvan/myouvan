@@ -1,37 +1,47 @@
-Servers.SubcontentTab.ChartPanel = function() {
+Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
 
-    var container = new Ext.Panel({
-	layout: "fit",
-	border: false,
-	width: 400,
-	height: 250
-    });
-
-    Servers.SubcontentTab.ChartPanel.baseConstructor.apply(this, [{
-	border: false,
-	items: [
-	    {
-		html: 'CPU use',
-		bodyStyle: {
-		    padding: '3px'
+    constructor: function() {
+	this.makeComponents();
+	Servers.SubcontentTab.ChartPanel.superclass.constructor.call(this, {
+	    border: false,
+	    items: [
+		{
+		    html: 'CPU use',
+		    bodyStyle: {
+			padding: '3px'
+		    },
+		    border: false
 		},
-		border: false
-	    },
-	    container
-	]
-    }]);
+		this.container
+	    ]
+	});
+    },
 
-    var panel = this;
+    makeComponents: function() {
+	this.makeContainer();
+    },
 
-    this.showContent = function(monitorPath) {
-	var store = new itemsStore(monitorPath, [
-	    'index',
-	    'cpu_use'
-	]);
-	store.load();
+    makeContainer: function() {
+	this.container = new Ext.Panel({
+	    layout: "fit",
+	    border: false,
+	    width: 400,
+	    height: 250
+	});
+    },
+
+    showContent: function(monitorPath) {
+	this.store = new Ext.ux.ItemsStore({
+	    url: monitorPath,
+	    autoLoad: true,
+	    fields: [
+		'index',
+		'cpu_use'
+	    ]
+	});
 
 	var chart = new Ext.chart.LineChart({
-	    store: store,
+	    store: this.store,
 	    xField: 'index',
 	    series: [
 		{
@@ -57,16 +67,13 @@ Servers.SubcontentTab.ChartPanel = function() {
 	    })
 	});
 
-	container.removeAll();
-	container.add(chart);
-	panel.store = store;
-    };
+	this.container.removeAll();
+	this.container.add(chart);
+    },
 
-    this.updateMonitor = function() {
-	if (panel.store)
-	    panel.store.reload();
-    };
+    updateMonitor: function() {
+	if (this.store)
+	    this.store.reload();
+    }
 
-};
-
-Servers.SubcontentTab.ChartPanel.inherit(Ext.Panel);
+});

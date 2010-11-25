@@ -26,7 +26,7 @@ class ImagesController < ApplicationController
 
   def iqns
     lines = `sudo /sbin/iscsiadm -m discovery -t sendtargets -p #{Settings.storage.server}`
-    iqns = lines.split(/\r\n/).collect {|line| line.split(/\s+/)[1] }
+    iqns = lines.split(/\r?\n/).collect {|line| line.split(/\s+/)[1] }
     render :json => { :success => true }.merge(combo_items(iqns))
   end
 
