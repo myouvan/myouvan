@@ -3,27 +3,13 @@ Servers.NewServerWindow.SelectImagePanel = Ext.extend(Ext.Panel, {
     constructor: function() {
 	this.makeComponents();
 	Servers.NewServerWindow.SelectImagePanel.superclass.constructor.call(this, {
-	    layout: 'vbox',
+	    title: 'Select Image',
+	    layout: 'fit',
 	    layoutConfig: {
 		align: 'stretch'
 	    },
 	    border: false,
-	    items: [
-		{
-		    height: 20,
-		    html: 'Select Image',
-		    bodyStyle: {
-			padding: '3px'
-		    },
-		    border: false
-		},
-		{
-		    flex: 1,
-		    layout: 'fit',
-		    border: false,
-		    items: this.grid
-		}
-	    ]
+	    items: this.grid
 	});
     },
 

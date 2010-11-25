@@ -3,6 +3,7 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
     constructor: function() {
 	this.makeComponents();
 	Servers.NewServerWindow.FormPanel.superclass.constructor.call(this, {
+	    title: 'Input Specifications',
 	    layout: 'hbox',
 	    layoutConfig: {
 		align: 'stretch',

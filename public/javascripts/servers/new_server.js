@@ -6,7 +6,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    title: 'Create Server',
 	    modal: true,
 	    width: 650,
-	    height: 468,
+	    height: 492,
 	    layout: 'fit',
 	    plain: true,
 	    closable: false,

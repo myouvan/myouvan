@@ -9,9 +9,19 @@ Images.IndexPanel = Ext.extend(Ext.Panel, {
 	    },
 	    items: [
 		{
-		    height: 30,
+		    layout: 'hbox',
+		    height: 32,
 		    border: false,
-		    items: this.createButton
+                    layoutConfig: {
+                        padding: 3,
+                        align: 'middle'
+		    },
+		    defaults: {
+			margins: '0 5 0 0'
+		    },
+		    items: [
+			this.createButton
+		    ]
 		},
 		{
 		    flex: 1,

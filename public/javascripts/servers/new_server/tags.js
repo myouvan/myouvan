@@ -3,10 +3,11 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
     constructor: function() {
 	this.makeComponents();
 	Servers.NewServerWindow.TagsPanel.superclass.constructor.call(this, {
+	    title: 'Add Tags',
 	    layout: 'hbox',
 	    layoutConfig: {
 		align: 'stretch',
-		pack: 'center'
+		pack: 'center',
 	    },
 	    items: {
 		width: 300,
@@ -14,16 +15,11 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 		layoutConfig: {
 		    align: 'stretch'
 		},
+		defaults: {
+		    margins: '5 0 2 0'
+		},
 		border: false,
 		items: [
-		    {
-			height: 20,
-			html: 'Add Tags',
-			border: false,
-			bodyStyle: {
-			    padding: '3px'
-			}
-		    },
 		    new Ext.Panel({
 			flex: 1,
 			layout: 'fit',
@@ -34,18 +30,15 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 			layout: 'hbox',
 			height: 30,
 			border: false,
-			bodyStyle: {
-			    padding: '5px 0 0 0'
+			layoutConfig: {
+			    align: 'middle'
+			},
+			defaults: {
+			    margins: '0 2 0 2'
 			},
 			items: [
 			    this.addCombo,
-			    {
-				border: false,
-				bodyStyle: {
-				    padding: '0 0 0 5px'
-				},
-				items: this.addButton
-			    }
+			    this.addButton
 			]
 		    })
 		]

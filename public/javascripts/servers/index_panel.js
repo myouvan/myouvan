@@ -10,9 +10,30 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 	    border: false,
 	    items: [
 		{
-		    height: 30,
+		    layout: 'hbox',
+		    height: 32,
 		    border: false,
-		    items: this.createButton
+                    layoutConfig: {
+                        padding: 3,
+                        align: 'middle'
+		    },
+		    defaults: {
+			margins: '0 5 0 0'
+		    },
+		    items: [
+			this.createButton,
+			this.importButton,
+			{
+			    xtype: 'spacer',
+			    flex: 1
+			},
+			{
+			    html: 'Tag Filter:',
+			    border: false
+			},
+			this.tagFilterCombo,
+			this.clearTagFilterButton
+		    ]
 		},
 		{
 		    flex: 1,
@@ -39,12 +60,35 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 
     makeButtons: function() {
 	var panel = this;
+
 	this.createButton = new Ext.Button({
 	    text: 'Create Server',
+	    width: 80,
 	    border: false,
 	    handler: function() {
 		panel.createServer();
 	    }
+	});
+
+	this.importButton = new Ext.Button({
+	    text: 'Import Server',
+	    width: 80,
+	    border: false,
+	    handlers: function() {
+		panel.importServer();
+	    }
+	});
+
+	this.tagFilterCombo = new Ext.ux.StoreComboBox({
+	    storeConfig: {
+		url: paths.tags.index
+	    }
+	});
+
+	this.clearTagFilterButton = new Ext.Button({
+	    text: 'Clear',
+	    width: 40,
+	    border: false
 	});
     }
 });
