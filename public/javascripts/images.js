@@ -7,14 +7,20 @@ Images.prototype.show = function() {
     //   windows, panels
     //------------------------------
 
-    var indexGrid = new Images.IndexGrid();
+    var indexPanel = new Images.IndexPanel();
+    var indexGrid = indexPanel.indexGrid;
+
     var newImageWindow = new Images.NewImageWindow();
 
     //------------------------------
     //   handlers
     //------------------------------
 
-    var createImage = function() {
+    indexPanel.onDestroy = function() {
+	newImageWindow.destroy();
+    };
+
+    indexPanel.createImage = function() {
 	newImageWindow.setForCreate({
             url: paths.images.index,
             method: 'POST',
@@ -72,45 +78,6 @@ Images.prototype.show = function() {
 	    }
 	});
     };
-
-    //------------------------------
-    //   create button
-    //------------------------------
-
-    var createButton = new Ext.Button({
-	text: 'Create Image',
-	border: false,
-	handler: createImage
-    });
-
-    //------------------------------
-    //   index panel
-    //------------------------------
-
-    var indexPanel = new Ext.Panel({
-	layout: 'vbox',
-	layoutConfig: {
-	    align: 'stretch'
-	},
-	items: [
-	    {
-		height: 30,
-		border: false,
-		items: createButton
-	    },
-	    {
-		flex: 1,
-		layout: 'fit',
-		border: false,
-		items: indexGrid
-	    }
-	],
-	listeners: {
-	    destroy: function() {
-		newImageWindow.destroy();
-	    }
-	}
-    });
 
     //------------------------------
     //   layout

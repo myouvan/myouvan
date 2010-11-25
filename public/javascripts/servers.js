@@ -7,8 +7,11 @@ Servers.prototype.show = function() {
     //   windows, panels
     //------------------------------
 
-    var indexGrid = new Servers.IndexGrid();
+    var indexPanel = new Servers.IndexPanel();
+    var indexGrid = indexPanel.indexGrid;
+
     var subcontentTab = new Servers.SubcontentTab();
+
     var newServerWindow = new Servers.NewServerWindow();
     var selectServerWindow = new Servers.SelectServerWindow();
 
@@ -16,7 +19,19 @@ Servers.prototype.show = function() {
     //   handlers
     //------------------------------
 
-    var createServer = function() {
+    indexPanel.onAdded = function() {
+	this.updateValuesTimer = setInterval(updateValues, 10000);
+	this.updateMonitorTimer = setInterval(updateMonitor, 5000);
+    };
+
+    indexPanel.onDestroy = function() {
+	clearInterval(this.updateValuesTimer);
+	clearInterval(this.updateMonitorTimer);
+	newServerWindow.destroy();
+	selectServerWindow.destroy();
+    };
+
+    indexPanel.createServer = function() {
 	newServerWindow.setSubmitOpts({
             url: paths.servers.index,
             method: 'POST',
@@ -131,53 +146,6 @@ Servers.prototype.show = function() {
     var updateMonitor = function() {
 	subcontentTab.updateMonitor();
     };
-
-    //------------------------------
-    //   create button
-    //------------------------------
-
-    var createButton = new Ext.Button({
-	text: 'Create Server',
-	border: false,
-	handler: createServer
-    });
-
-    //------------------------------
-    //   index panel
-    //------------------------------
-
-    var indexPanel = new Ext.Panel({
-	layout: 'vbox',
-	layoutConfig: {
-	    align: 'stretch'
-	},
-	border: false,
-	items: [
-	    {
-		height: 30,
-		border: false,
-		items: createButton
-	    },
-	    {
-		flex: 1,
-		layout: 'fit',
-		border: false,
-		items: indexGrid
-	    }
-	],
-	listeners: {
-	    added: function() {
-		this.updateValuesTimer = setInterval(updateValues, 10000);
-		this.updateMonitorTimer = setInterval(updateMonitor, 5000);
-	    },
-	    destroy: function() {
-		clearInterval(this.updateValuesTimer);
-		clearInterval(this.updateMonitorTimer);
-		newServerWindow.destroy();
-		selectServerWindow.destroy();
-	    }
-	}
-    });
 
     //------------------------------
     //   layout
