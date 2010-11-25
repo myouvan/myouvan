@@ -1,10 +1,10 @@
 Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
     constructor: function() {
-	this.contextMenu = this.makeContextMenu();
+	this.makeComponents();
 	Images.IndexGrid.superclass.constructor.call(this, {
-	    colModel: this.makeColModel(),
-	    store: this.makeStore(),
+	    colModel: this.colModel,
+	    store: this.store,
 	    autoHeight: true,
 	    listeners: {
 		rowcontextmenu: function(grid, row, e) {
@@ -14,11 +14,17 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		}
 	    }
 	});
-	this.getStore().load();
+	this.store.load();
+    },
+
+    makeComponents: function() {
+	this.makeColModel();
+	this.makeStore();
+	this.makeContextMenu();
     },
 
     makeColModel: function() {
-	return new Ext.grid.ColumnModel([
+	this.colModel = new Ext.grid.ColumnModel([
 	    {
 		header: 'ID',
 		dataIndex: 'id',
@@ -52,7 +58,7 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     makeStore: function() {
-	return itemsStore(paths.images.index, [
+	this.store = itemsStore(paths.images.index, [
 	    'id',
 	    'title',
 	    'os',
@@ -64,7 +70,7 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
     makeContextMenu: function() {
 	var grid = this;
-	return new Ext.menu.Menu({
+	this.contextMenu = new Ext.menu.Menu({
 	    style: {
 		overflow: 'visible'
 	    },
@@ -94,10 +100,9 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     addRecord: function(item) {
-	var store = this.getStore();
-	var RecordType = store.recordType;
+	var RecordType = this.store.recordType;
 	var record = new RecordType(item);
-	store.add(record);
+	this.store.add(record);
     },
 
     updateSelectedValues: function(item) {
@@ -110,7 +115,7 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
     removeSelected: function() {
 	var record = grid.getSelectionModel().getSelected();
-	this.getStore().remove(record);
+	this.store.remove(record);
     }
 
 });
