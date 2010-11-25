@@ -38,6 +38,6 @@ starling:
   :delay_before_kill: 0.2
   # Override the daemon startup order. Starling consumer daemons should have
   # their start_order set to 2, so starling is running when they start.
-  :start_order: 1
+  :start_order: 2
   # daemonz will ignore this daemon configuration when this flag is true
   :disabled: false
