@@ -1,203 +1,222 @@
-Servers.IndexGrid = function() {
+Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
-    var imagePaths = {
-	Starting: 'status_changing.gif',
-	Running: 'status_running.gif',
-	Suspending: 'status_changing.gif',
-	Paused: 'status_terminated.gif',
-	Resuming: 'status_changing.gif',
-	Rebooting: 'status_changing.gif',
-	Terminating: 'status_changing.gif',
-	Terminated: 'status_terminated.gif',
-	Restarting: 'status_changing.gif',
-	Migrating: 'status_changing.gif',
-	Error: 'status_error.gif',
-    };
-
-    var colModel = new Ext.grid.ColumnModel([
-	{
-	    header: 'ID',
-	    dataIndex: 'id',
-	    width: 30,
-	    sortable: true
-	},
-	{
-	    header: 'Image ID',
-	    dataIndex: 'image_id',
-	    width: 60,
-	    sortable: true
-	},
-	{
-	    header: 'Name',
-	    dataIndex: 'name',
-	    width: 120,
-	    sortable: true,
-	    renderer: function(value, metadata, record) {
-		url = record.get('paths').avatarIcon;
-		return '<img src="' + url + '" width="32" height="32" style="vertical-align: top" /> ' + value;
-	    }
-	},
-	{
-	    header: 'Title',
-	    dataIndex: 'title',
-	    width: 200,
-	    sortable: true
-	},
-	{
-	    header: 'Status',
-	    dataIndex: 'status',
-	    width: 100,
-	    sortable: true,
-	    renderer: function(value, metadata, record) {
-		var url = '/images/' + imagePaths[value];
-		return '<img src="' + url + '" width="16" height="16" style="vertical-align: top" /> ' + value;
-	    }
-	},
-	{
-	    header: 'Physical Server',
-	    dataIndex: 'physical_server',
-	    width: 150,
-	    sortable: true
-	},
-	{
-	    header: 'CPUs',
-	    dataIndex: 'cpus',
-	    width: 50,
-	    sortable: true
-	},
-	{
-	    header: 'Memory(MB)',
-	    dataIndex: 'memory',
-	    width: 80,
-	    sortable: true
-	},
-	{
-	    header: 'Comment',
-	    dataIndex: 'comment',
-	    width: 250
-	}
-    ]);
-
-    var store = itemsStore(paths.servers.index, [
-	'id',
-	'image_id',
-	'name',
-	'title',
-	'status',
-	'physical_server',
-	'cpus',
-	'memory',
-	'comment',
-	'paths'
-    ]);
-
-    var contextMenu = new Ext.menu.Menu({
-	style: {
-	    overflow: 'visible'
-	},
-	items: [
-	    {
-		text: 'Suspend',
-		handler: function() {
-		    grid.suspendServer();
-		}
-	    },
-	    {
-		text: 'Resume',
-		handler: function() {
-		    grid.resumeServer();
-		}
-	    },
-	    {
-		text: 'Reboot',
-		handler: function() {
-		    grid.rebootServer();
-		}
-	    },
-	    {
-		text: 'Terminate',
-		handler: function() {
-		    grid.terminateServer();
-		}
-	    },
-	    {
-		text: 'Restart',
-		handler: function() {
-		    grid.restartServer();
-		}
-	    },
-	    {
-		text: 'Migrate',
-		handler: function() {
-		    grid.migrateServer();
+    constructor: function() {
+	this.makeComponents();
+	Servers.IndexGrid.superclass.constructor.call(this, {
+	    colModel: this.colModel,
+	    store: this.store,
+	    listeners: {
+		rowclick: function(grid, row, e) {
+		    this.showServer();
+		},
+		rowcontextmenu: function(grid, row, e) {
+		    this.getSelectionModel().selectRow(row);
+		    this.showServer();
+		    e.stopEvent();
+		    this.contextMenu.showAt(e.getXY());
 		}
 	    }
-	]
-    });
+	});
+	this.store.load();
+    },
 
-    Servers.IndexGrid.baseConstructor.apply(this, [{
-	colModel: colModel,
-	store: store,
-	listeners: {
-	    rowclick: function() {
-		grid.showServer()
+    makeComponents: function() {
+	this.makeColModel();
+	this.makeStore();
+	this.makeContextMenu();
+    },
+
+    makeColModel: function() {
+	var imagePaths = {
+	    Starting: 'status_changing.gif',
+	    Running: 'status_running.gif',
+	    Suspending: 'status_changing.gif',
+	    Paused: 'status_terminated.gif',
+	    Resuming: 'status_changing.gif',
+	    Rebooting: 'status_changing.gif',
+	    Terminating: 'status_changing.gif',
+	    Terminated: 'status_terminated.gif',
+	    Restarting: 'status_changing.gif',
+	    Migrating: 'status_changing.gif',
+	    Error: 'status_error.gif',
+	};
+
+	var img = function(src, w, h) {
+	    return '<img src="' + src + '"' +
+		   ' width="' + w + '" height="' + h + '"' +
+		   ' style="vertical-align: top" />';
+	};
+
+	this.colModel = new Ext.grid.ColumnModel([
+	    {
+		header: 'ID',
+		dataIndex: 'id',
+		width: 30,
+		sortable: true
 	    },
-	    rowcontextmenu: function(g, row, e) {
-		grid.getSelectionModel().selectRow(row);
-		grid.showServer();
-		e.stopEvent();
-		contextMenu.showAt(e.getXY());
+	    {
+		header: 'Image ID',
+		dataIndex: 'image_id',
+		width: 60,
+		sortable: true
+	    },
+	    {
+		header: 'Name',
+		dataIndex: 'name',
+		width: 120,
+		sortable: true,
+		renderer: function(value, metadata, record) {
+		    var url = record.get('paths').avatarIcon;
+		    return img(url, 32, 32) + value;
+		}
+	    },
+	    {
+		header: 'Title',
+		dataIndex: 'title',
+		width: 200,
+		sortable: true
+	    },
+	    {
+		header: 'Status',
+		dataIndex: 'status',
+		width: 100,
+		sortable: true,
+		renderer: function(value, metadata, record) {
+		    var url = '/images/' + imagePaths[value];
+		    return img(url, 16, 16) + value;
+		}
+	    },
+	    {
+		header: 'Physical Server',
+		dataIndex: 'physical_server',
+		width: 150,
+		sortable: true
+	    },
+	    {
+		header: 'CPUs',
+		dataIndex: 'cpus',
+		width: 50,
+		sortable: true
+	    },
+	    {
+		header: 'Memory(MB)',
+		dataIndex: 'memory',
+		width: 80,
+		sortable: true
+	    },
+	    {
+		header: 'Comment',
+		dataIndex: 'comment',
+		width: 250
 	    }
-	}
-    }]);
+	]);
+    },
 
-    var grid = this;
+    makeStore: function() {
+	this.store = Ext.ux.ItemsStore({
+	    url: paths.servers.index,
+	    fields: [
+		'id',
+		'image_id',
+		'name',
+		'title',
+		'status',
+		'physical_server',
+		'cpus',
+		'memory',
+		'comment',
+		'paths'
+	    ]
+	});
+    },
 
-    store.load();
+    makeContextMenu: function() {
+	var grid = this;
+	this.contextMenu = new Ext.menu.Menu({
+	    style: {
+		overflow: 'visible'
+	    },
+	    items: [
+		{
+		    text: 'Suspend',
+		    handler: function() {
+			grid.suspendServer();
+		    }
+		},
+		{
+		    text: 'Resume',
+		    handler: function() {
+			grid.resumeServer();
+		    }
+		},
+		{
+		    text: 'Reboot',
+		    handler: function() {
+			grid.rebootServer();
+		    }
+		},
+		{
+		    text: 'Terminate',
+		    handler: function() {
+			grid.terminateServer();
+		    }
+		},
+		{
+		    text: 'Restart',
+		    handler: function() {
+			grid.restartServer();
+		    }
+		},
+		{
+		    text: 'Migrate',
+		    handler: function() {
+			grid.migrateServer();
+		    }
+		}
+	    ]
+	});
+    },
 
-    this.isSelected = function() {
-	return grid.getSelectionModel().hasSelection();
-    };
+    isSelected: function() {
+	return this.getSelectionModel().hasSelection();
+    },
 
-    this.selectedId = function() {
-	return grid.getSelectionModel().getSelected().get('id');
-    };
+    selectedId: function() {
+	return this.getSelectionModel().getSelected().get('id');
+    },
 
-    this.selectedPaths = function() {
-	return grid.getSelectionModel().getSelected().get('paths');
-    };
+    selectedPaths: function() {
+	return this.getSelectionModel().getSelected().get('paths');
+    },
 
-    this.addRecord = function(item) {
-	var RecordType = store.recordType;
+    addRecord: function(item) {
+	var RecordType = this.store.recordType;
 	var record = new RecordType(item);
-	store.add(record);
-    };
+	this.store.add(record);
+    },
 
-    this.updateSelectedValues = function(item) {
-	var record = grid.getSelectionModel().getSelected();
+    updateSelectedValues: function(item) {
+	var record = this.getSelectionModel().getSelected();
 	for (var field in item) {
 	    record.set(field, item[field]);
 	    record.commit();
 	}
-    };
+    },
 
-    this.updateValues = function(items) {
+    updateValues: function(items) {
 	var deletedRecords = new Array();
-	store.each(function(record) {
-            var id = record.get('id');
-            if (items[id]) {
-		for (var field in items[id]) {
+	this.store.each(function(record) {
+	    var id = record.get('id');
+	    if (items[id]) {
+		for (var field in items[id])
 		    record.set(field, items[id][field]);
-		}
 		record.commit();
-            } else {
+	    } else {
 		deletedRecords.push(record);
-            }
+	    }
 	});
-	for (var i = 0; i < deletedRecords.length; ++i) {
-            store.remove(deletedRecords[i]);
-	}
-    };
-};
+	for (var i = 0; i < deletedRecords.length; ++i)
+	    this.store.remove(deletedRecords[i]);
+    }
 
-Servers.IndexGrid.inherit(Ext.grid.GridPanel);
+});

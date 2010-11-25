@@ -14,7 +14,6 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		}
 	    }
 	});
-	this.store.load();
     },
 
     makeComponents: function() {
@@ -58,14 +57,18 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     makeStore: function() {
-	this.store = itemsStore(paths.images.index, [
-	    'id',
-	    'title',
-	    'os',
-	    'iqn',
-	    'comment',
-	    'paths'
-	]);
+	this.store = new Ext.ux.ItemsStore({
+	    url: paths.images.index,
+	    autoLoad: true,
+	    fields: [
+		'id',
+		'title',
+		'os',
+		'iqn',
+		'comment',
+		'paths'
+	    ]
+	});
     },
 
     makeContextMenu: function() {

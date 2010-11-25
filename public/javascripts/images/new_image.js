@@ -32,27 +32,21 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
 		width: 200,
 		msgTarget: 'qtip'
 	    }),
-	    os: new Ext.form.ComboBox({
+	    os: new Ext.ux.StoreComboBox({
 		name: 'image[os]',
 		fieldLabel: 'OS',
 		width: 200,
-		editable: false,
-		forceSelection: false,
-		triggerAction: 'all',
-		store: comboItemsStore(paths.images.oss),
-		displayField: 'value',
-		msgTarget: 'qtip'
+		storeConfig: {
+		    url: paths.images.oss
+		}
 	    }),
-	    iqn: new Ext.form.ComboBox({
+	    iqn: new Ext.ux.StoreComboBox({
 		name: 'image[iqn]',
 		fieldLabel: 'IQN',
 		width: 500,
-		editable: false,
-		forceSelection: false,
-		triggerAction: 'all',
-		store: comboItemsStore(paths.images.iqns),
-		displayField: 'value',
-		msgTarget: 'qtip'
+		storeConfig: {
+		    url: paths.images.iqns
+		}
 	    }),
 	    comment: new Ext.form.TextArea({
 		name: 'image[comment]',
