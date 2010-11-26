@@ -2,6 +2,16 @@ Servers.SubcontentTab = Ext.extend(Ext.TabPanel, {
 
     constructor: function() {
 	this.makeComponents();
+
+	this.addEvents('addTag');
+	this.addEvents('destroyTag');
+    },
+
+    makeComponents: function() {
+	this.descriptionPanel = new Servers.SubcontentTab.DescriptionPanel();
+	this.chartPanel = new  Servers.SubcontentTab.ChartPanel();
+	this.tagsPanel = new Servers.SubcontentTab.TagsPanel();
+
 	Servers.SubcontentTab.superclass.constructor.call(this, {
 	    activeTab: 0,
 	    layoutOnTabChange: true,
@@ -36,38 +46,6 @@ Servers.SubcontentTab = Ext.extend(Ext.TabPanel, {
 		}
 	    ]
 	});
-    },
-
-    makeComponents: function() {
-	this.descriptionPanel = new Servers.SubcontentTab.DescriptionPanel();
-	this.chartPanel = new  Servers.SubcontentTab.ChartPanel();
-	this.tagsPanel = new Servers.SubcontentTab.TagsPanel();
-
-	var tab = this;
-	this.tagsPanel.addTag = function(tag) {
-	    tab.addTag(tag);
-	};
-	this.tagsPanel.destroyTag = function(config) {
-	    tab.destroyTag(config)
-	};
-    },
-
-    showContent: function(item) {
-	this.descriptionPanel.showContent(item);
-	this.chartPanel.showContent(item);
-	this.tagsPanel.showContent(item);
-    },
-
-    updateValues: function(item) {
-	this.descriptionPanel.updateValues(item);
-    },
-
-    updateMonitor: function() {
-	this.chartPanel.updateMonitor();
-    },
-
-    updateTags: function() {
-	this.tagsPanel.updateTags();
     }
 
 });

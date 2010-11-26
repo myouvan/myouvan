@@ -2,28 +2,45 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
     constructor: function() {
 	this.makeComponents();
-	Servers.IndexGrid.superclass.constructor.call(this, {
-	    colModel: this.colModel,
-	    store: this.store,
-	    listeners: {
-		rowclick: function(grid, row, e) {
-		    this.showServer();
-		},
-		rowcontextmenu: function(grid, row, e) {
-		    this.getSelectionModel().selectRow(row);
-		    this.showServer();
-		    e.stopEvent();
-		    this.contextMenu.showAt(e.getXY());
-		}
-	    }
-	});
-	this.store.load();
+
+	this.addEvent('showServer');
+	this.enableBubble('showServer');
+	this.addEvent('suspendServer');
+	this.enableBubble('suspendServer');
+	this.addEvent('resumeServer');
+	this.enableBubble('resumeServer');
+	this.addEvent('rebootServer');
+	this.enableBubble('rebootServer');
+	this.addEvent('terminateServer');
+	this.enableBubble('terminateServer');
+	this.addEvent('restartServer');
+	this.enableBubble('restartServer');
+	this.addEvent('migrateServer');
+	this.enableBubble('migrateServer');
     },
 
     makeComponents: function() {
 	this.makeColModel();
 	this.makeStore();
 	this.makeContextMenu();
+
+	Servers.IndexGrid.superclass.constructor.call(this, {
+	    colModel: this.colModel,
+	    store: this.store,
+	    listeners: {
+		rowclick: function(grid, row, e) {
+		    this.operateServer('showServer');
+		},
+		rowcontextmenu: function(grid, row, e) {
+		    this.getSelectionModel().selectRow(row);
+		    this.showServer();
+		    e.stopEvent();
+		    this.contextMenu.showAt(e.getXY());
+		},
+		added: this.addEventHandlers,
+		destroy: this.removeEventHandlers
+	    }
+	});
     },
 
     makeColModel: function() {
@@ -132,62 +149,69 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     makeContextMenu: function() {
-	var grid = this;
 	this.contextMenu = new Ext.menu.Menu({
 	    style: {
 		overflow: 'visible'
+	    },
+	    defaults: {
+		scope: this
 	    },
 	    items: [
 		{
 		    text: 'Suspend',
 		    handler: function() {
-			grid.suspendServer();
+			this.operateServer('suspendServer')
 		    }
 		},
 		{
 		    text: 'Resume',
 		    handler: function() {
-			grid.resumeServer();
+			this.operateServer('resumeServer')
 		    }
 		},
 		{
 		    text: 'Reboot',
 		    handler: function() {
-			grid.rebootServer();
+			this.operateServer('rebootServer')
 		    }
 		},
 		{
 		    text: 'Terminate',
 		    handler: function() {
-			grid.terminateServer();
+			this.operateServer('terminateServer')
 		    }
 		},
 		{
 		    text: 'Restart',
 		    handler: function() {
-			grid.restartServer();
+			this.operateServer('restartServer')
 		    }
 		},
 		{
 		    text: 'Migrate',
 		    handler: function() {
-			grid.migrateServer();
+			this.operateServer('migrateServer')
 		    }
 		}
 	    ]
 	});
     },
 
-    isSelected: function() {
-	return this.getSelectionModel().hasSelection();
+    operateServer: function(operation) {
+	var record = this.getSelectionModel().getSelected();
+	this.fireEvent(operation, record.data);
     },
 
-    selectedId: function() {
-	return this.getSelectionModel().getSelected().get('id');
+    addEventHandler: function() {
+	servers.on('createdServer', this.addRecord.createDelegate(this));
+	servers.on('updatedServer', this.updateRecord.createDelegate(this));
+	servers.on('updatedServers', this.updateRecords.createDelegate(this));
     },
 
-    selectedPaths: function() {
-	return this.getSelectionModel().getSelected().get('paths');
+    removeEventHandler: function() {
+	servers.un('createdServer', this.addRecord.createDelegate(this));
+	servers.un('updatedServer', this.updateRecord.createDelegate(this));
+	servers.un('updatedServers', this.updateRecords.createDelegate(this));
     },
 
     addRecord: function(item) {
@@ -196,26 +220,40 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.store.add(record);
     },
 
-    updateSelectedValues: function(item) {
-	var record = this.getSelectionModel().getSelected();
-	for (var field in item) {
-	    record.set(field, item[field]);
+    updateRecord: function(item) {
+	var ri = this.store.findExact('id', item.id);
+	if (ri != -1) {
+	    var record = this.store.getAt(ri);
+	    for (var field in item)
+		record.set(field, item[field]);
 	    record.commit();
 	}
     },
 
-    updateValues: function(items) {
+    updateRecords: function(items) {
+	var walkedRecords = new Object();
+	for (var i = 0; i < items.length; ++i) {
+	    var ri = this.store.findExact('id', items[i].id);
+	    if (ri != -1) {
+		var RecordType = this.store.recordType;
+		var record = new RecordType(item);
+		this.store.add(record);
+		walkedRecords[record.get('id')] = true;
+	    } else {
+		var record = this.store.getAt(ri);
+		for (var field in item)
+		    record.set(field, item[field]);
+		record.commit();
+		walkedRecords[record.get('id')] = true;
+	    }
+	}
+
 	var deletedRecords = new Array();
 	this.store.each(function(record) {
-	    var id = record.get('id');
-	    if (items[id]) {
-		for (var field in items[id])
-		    record.set(field, items[id][field]);
-		record.commit();
-	    } else {
+	    if (!walkedRecords[record.id])
 		deletedRecords.push(record);
-	    }
 	});
+
 	for (var i = 0; i < deletedRecords.length; ++i)
 	    this.store.remove(deletedRecords[i]);
     }

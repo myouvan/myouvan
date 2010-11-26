@@ -2,6 +2,11 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
+    },
+
+    makeComponents: function() {
+	this.makeChartContainer();
+
 	Servers.SubcontentTab.ChartPanel.superclass.constructor.call(this, {
 	    border: false,
 	    items: [
@@ -13,12 +18,12 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
 		    border: false
 		},
 		this.chartContainer
-	    ]
+	    ],
+	    listeners: {
+		added: this.addEventHandlers,
+		destroy: this.removeEventHandlers
+	    }
 	});
-    },
-
-    makeComponents: function() {
-	this.makeChartContainer();
     },
 
     makeChartContainer: function() {
@@ -30,7 +35,17 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
 	});
     },
 
-    showContent: function(item) {
+    addEventHandlers: function() {
+	servers.on('gotServer', this.showChart.createDelegate(this));
+	servers.on('monitorServer', this.updateChart.createDelegate(this));
+    },
+
+    removeEventHandlers: function() {
+	servers.un('gotServer', this.showValues.createDelegate(this));
+	servers.un('monitorServer', this.updateChart.createDelegate(this));
+    },
+
+    showChart: function(item) {
 	this.chart = new Servers.SubcontentTab.Chart({
 	    url: item.server.paths.monitor
 	});
@@ -39,9 +54,8 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
 	this.chartContainer.add(this.chart);
     },
 
-    updateMonitor: function() {
-	if (this.chart)
-	    this.chart.store.load();
+    updateChart: function() {
+	this.chart.store.load();
     }
 
 });
@@ -50,6 +64,11 @@ Servers.SubcontentTab.Chart = Ext.extend(Ext.chart.LineChart, {
 
     constructor: function(config) {
 	this.makeComponents(config);
+    },
+
+    makeComponents: function(config) {
+	this.makeStore(config);
+
 	Servers.SubcontentTab.Chart.superclass.constructor.call(this, {
 	    store: this.store,
 	    xField: 'index',
@@ -76,10 +95,6 @@ Servers.SubcontentTab.Chart = Ext.extend(Ext.chart.LineChart, {
 		minimum: 0
 	    })
 	});
-    },
-
-    makeComponents: function(config) {
-	this.makeStore(config);
     },
 
     makeStore: function(config) {

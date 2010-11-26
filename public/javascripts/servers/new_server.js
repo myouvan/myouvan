@@ -2,6 +2,17 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 
     constructor: function() {
 	this.makeComponents();
+    },
+
+    makeComponents: function() {
+	this.selectImagePanel = new Servers.NewServerWindow.SelectImagePanel();
+	this.formPanel = new Servers.NewServerWindow.FormPanel();
+	this.tagsPanel = new Servers.NewServerWindow.TagsPanel();
+	this.flashPanel = new Servers.NewServerWindow.FlashPanel();
+
+	this.makeCard();
+	this.makeButtons();
+
 	Servers.NewServerWindow.superclass.constructor.call(this, {
 	    title: 'Create Server',
 	    modal: true,
@@ -29,25 +40,11 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 		    this.selectImagePanel.resetPanel();
 		    this.formPanel.resetPanel();
 		    this.tagsPanel.resetPanel();
-		}
+		},
+		added: this.addEventHandlers,
+		destroy: this.removeEventHandlers
 	    }
 	});
-    },
-
-    makeComponents: function() {
-	this.selectImagePanel = new Servers.NewServerWindow.SelectImagePanel();
-	this.formPanel = new Servers.NewServerWindow.FormPanel();
-	this.tagsPanel = new Servers.NewServerWindow.TagsPanel();
-	this.flashPanel = new Servers.NewServerWindow.FlashPanel();
-
-	var wdw = this;
-	this.flashPanel.onSet(function(thumb, icon) {
-	    wdw.formPanel.setAvatar(thumb, icon);
-	    wdw.nextButton.enable();
-	});
-
-	this.makeCard();
-	this.makeButtons();
     },
 
     makeCard: function() {
@@ -66,27 +63,24 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
     },
 
     makeButtons: function() {
-	var wdw = this;
-
 	this.prevButton = new Ext.Button({
 	    text: 'Prev',
-	    handler: function() {
-		wdw.prevCard();
-	    }
+	    handler: this.prevCard.createDelegate(this),
+	    scopt: this
 	});
 
 	this.nextButton = new Ext.Button({
 	    text: 'Next',
-	    handler: function() {
-		wdw.nextCard();
-	    }
+	    handler: this.nextCard.createDelegate(this),
+	    scopt: this
 	});
 
 	this.closeButton = new Ext.Button({
 	    text: 'Close',
 	    handler: function() {
-		wdw.hide();
-	    }
+		this.hide();
+	    },
+	    scope: this
 	});
     },
 
@@ -133,6 +127,19 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 
     setSubmitOpts: function(opts) {
 	this.formPanel.setSubmitOpts(opts);
+    },
+
+    addEventHandlers: function() {
+	this.flashPanel.on('setAvatar', this.setAvatar.createDelegate(this));
+    },
+
+    removeEventHandlers: function() {
+	this.flashPanel.un('setAvatar', this.setAvatar.createDelegate(this));
+    },
+
+    setAvatar: function(thumb, icon) {
+	this.formPanel.setAvatar(thumb, icon);
+	this.nextButton.enable();
     }
 
 });

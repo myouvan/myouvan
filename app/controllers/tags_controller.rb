@@ -19,8 +19,9 @@ class TagsController < ApplicationController
 
   def destroy
     tag = Tag.find(params[:id])
+    id = tag.id
     tag.destroy
-    render :json => { :success => true }
+    render :json => { :success => true, :item => { :id => id } }
   end
 
   def attributes_with_paths(image)

@@ -1,6 +1,11 @@
 Servers.NewServerWindow.FlashPanel = Ext.extend(Ext.Panel, {
 
     constructor: function() {
+	this.addEvents('setAvatar');
+	ovater_set = this.setAvatar;
+    },
+
+    makeComponents: function() {
 	Servers.NewServerWindow.FlashPanel.superclass.constructor.call(this, {
 	    title: 'Create Avatar',
 	    layout: 'fit',
@@ -14,8 +19,8 @@ Servers.NewServerWindow.FlashPanel = Ext.extend(Ext.Panel, {
 	});
     },
 
-    onSet: function(callback) {
-	ovater_set = callback;
+    setAvatar: function(thumb, icon) {
+	this.fireEvent('setAvatar', thumb, icon);
     }
 
 });

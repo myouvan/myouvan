@@ -2,6 +2,11 @@ Servers.NewServerWindow.SelectImagePanel = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
+    },
+
+    makeComponents: function() {
+	this.grid = new Servers.NewServerWindow.SelectImageGrid();
+
 	Servers.NewServerWindow.SelectImagePanel.superclass.constructor.call(this, {
 	    title: 'Select Image',
 	    layout: 'fit',
@@ -11,10 +16,6 @@ Servers.NewServerWindow.SelectImagePanel = Ext.extend(Ext.Panel, {
 	    border: false,
 	    items: this.grid
 	});
-    },
-
-    makeComponents: function() {
-	this.grid = new Servers.NewServerWindow.SelectImageGrid();
     },
 
     isSelected: function() {

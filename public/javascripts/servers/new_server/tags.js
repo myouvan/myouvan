@@ -2,6 +2,12 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
+    },
+
+    makeComponents: function() {
+	this.tagsGrid = new Servers.NewServerWindow.TagsGrid();
+	this.makeAddComponents();
+
 	Servers.NewServerWindow.TagsPanel.superclass.constructor.call(this, {
 	    title: 'Add Tags',
 	    layout: 'hbox',
@@ -47,11 +53,6 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 	});
     },
 
-    makeComponents: function() {
-	this.tagsGrid = new Servers.NewServerWindow.TagsGrid();
-	this.makeAddComponents();
-    },
-
     makeAddComponents: function() {
 	this.addCombo = new Ext.ux.EditableStoreComboBox({
 	    flex: 1,
@@ -60,8 +61,6 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 	    }
 	});
 
-	var panel = this;
-
 	this.addButton = new Ext.Button({
 	    text: 'Add Tag',
 	    width: 70,
@@ -69,8 +68,8 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 		var value = panel.addCombo.getValue();
 		if (value == '')
 		    return;
-		panel.tagsGrid.addTag(value);
-		panel.addCombo.reset();
+		this.tagsGrid.addTag(value);
+		this.addCombo.reset();
 	    }
 	});
     },
@@ -89,6 +88,13 @@ Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 
     constructor: function() {
 	this.makeComponents();
+    },
+
+    makeComponents: function() {
+	this.makeColModel();
+	this.makeStore();
+	this.makeContextMenu();
+
 	Servers.NewServerWindow.TagsGrid.superclass.constructor.call(this, {
 	    colModel: this.colModel,
 	    store: this.store,
@@ -100,12 +106,6 @@ Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 		}
 	    }
 	});
-    },
-
-    makeComponents: function() {
-	this.makeColModel();
-	this.makeStore();
-	this.makeContextMenu();
     },
 
     makeColModel: function() {
@@ -126,7 +126,6 @@ Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     makeContextMenu: function() {
-	var grid = this;
 	this.contextMenu = new Ext.menu.Menu({
 	    style: {
 		overflow: 'visible'
@@ -139,7 +138,8 @@ Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 			this.store.remove(record);
 		    }
 		}
-	    ]
+	    ],
+	    scope: this
 	});
     },
 

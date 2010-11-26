@@ -2,6 +2,22 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
+
+	this.addEvents('createServer');
+	this.addEvents('importServer');
+	this.addEvents('showServer');
+	this.addEvents('suspendServer');
+	this.addEvents('resumeServer');
+	this.addEvents('rebootServer');
+	this.addEvents('terminateServer');
+	this.addEvents('restartServer');
+	this.addEvents('migrateServer');
+    },
+
+    makeComponents: function() {
+	this.indexGrid = new Servers.IndexGrid();
+	this.makeButtons();
+
 	Servers.IndexPanel.superclass.constructor.call(this, {
 	    layout: 'vbox',
 	    layoutConfig: {
@@ -43,31 +59,21 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 		}
 	    ],
 	    listeners: {
-		added: function() {
-		    this.onAdded();
-		},
-		destroy: function() {
-		    this.onDestroy();
-		}
+		added: this.addEventHandlers,
+		destroy: this.removeEventHandlers
 	    }
 	});
     },
 
-    makeComponents: function() {
-	this.indexGrid = new Servers.IndexGrid();
-	this.makeButtons();
-    },
-
     makeButtons: function() {
-	var panel = this;
-
 	this.createButton = new Ext.Button({
 	    text: 'Create Server',
 	    width: 80,
 	    border: false,
 	    handler: function() {
-		panel.createServer();
-	    }
+		this.fireEvent('createServer');
+	    },
+	    scope: this
 	});
 
 	this.importButton = new Ext.Button({
@@ -75,8 +81,9 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 	    width: 80,
 	    border: false,
 	    handlers: function() {
-		panel.importServer();
-	    }
+		this.fireEvent('importServer');
+	    },
+	    scope: this
 	});
 
 	this.tagFilterCombo = new Ext.ux.StoreComboBox({
@@ -90,6 +97,16 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 	    width: 40,
 	    border: false
 	});
+    },
+
+    addEventHandlers: function() {
+	server.on('addedTag', this.updateTags.createDelegate(this));
+	server.on('destroyedTag', this.updateTags.createDelegate(this));
+    },
+
+    removeEventHandlers: function() {
+	server.un('addedTag', this.updateTags.createDelegate(this));
+	server.un('destroyedTag', this.updateTags.createDelegate(this));
     },
 
     updateTags: function() {

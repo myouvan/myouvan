@@ -2,6 +2,16 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
+
+	this.addEvents('addTag');
+	this.enableBubble('addTag');
+	this.addEvents('destroyTag');
+    },
+
+    makeComponents: function() {
+	this.makeTagsGridContainer();
+	this.makeAddComponents();
+
 	Servers.SubcontentTab.TagsPanel.superclass.constructor.call(this, {
 	    layout: 'fit',
 	    width: 300,
@@ -31,13 +41,12 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 			]
 		    })
 		]
+	    },
+	    listeners: {
+		added: this.addEventHandlers,
+		destroy: this.removeEventHandlers,
 	    }
 	});
-    },
-
-    makeComponents: function() {
-	this.makeTagsGridContainer();
-	this.makeAddComponents();
     },
 
     makeTagsGridContainer: function() {
@@ -62,18 +71,31 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 	    text: 'Add Tag',
 	    width: 70,
 	    handler: function() {
-		var value = panel.addCombo.getValue();
+		var value = this.addCombo.getValue();
 		if (value == '')
 		    return;
-
-		panel.addTag(value);
-	    }
+		this.fireEvent('addTag', {
+		    'tag[server_id]': this.currentItem.server.id,
+		    'tag[value]': value
+		});
+	    },
+	    scope: this
 	});
     },
 
-    showContent: function(item) {
-	this.currentItem = item;
+    addEventHandlers: function() {
+	servers.on('gotServer', this.showTags.createDelegate(this));
+	servers.on('addedTag', this.updateTags.createDelegate(this));
+	servers.on('destroyedTag', this.updateTags.createDelegate(this));
+    },
 
+    removeEventHandlers: function() {
+	servers.un('gotServer', this.showTags.createDelegate(this));
+	servers.un('addedTag', this.updateTags.createDelegate(this));
+	servers.un('destroyedTag', this.updateTags.createDelegate(this));
+    },
+
+    showTags: function(item) {
 	this.tagsGrid = new Servers.SubcontentTab.TagsGrid({
 	    url: item.server.paths.tags
 	});
@@ -81,45 +103,11 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 	this.tagsGridContainer.removeAll();
 	this.tagsGridContainer.add(this.tagsGrid);
 
-	var panel = this;
-	this.tagsGrid.destroyTag = function(config) {
-	    panel.destroyTag(config);
-	}
+	this.currentItem = item;
     },
 
-    addTag: function(value) {
-	var panel = this;
-	Ext.Ajax.request({
-	    url: paths.tags.index,
-	    method: 'POST',
-	    params: {
-		'tag[server_id]': this.currentItem.server.id,
-		'tag[value]': value
-	    },
-	    success: function(res, opts) {
-		var result = Ext.decode(res.responseText);
-		panel.tagsGrid.addTag(result.item);
-		panel.addCombo.reset();
-		subcontentTab.updateTags();
-	    },
-	    failure: function(res, opts) {
-		Ext.MessageBox.alert('Error', 'Failed to add tag');
-	    }
-	});
-    },
-
-    destroyTag: function(url) {
-	Ext.Ajax.request({
-	    url: url,
-	    method: 'DELETE',
-	    success: function(res, opts) {
-		indexPanel.updateTags();
-		subcontentTab.updateTags();
-	    },
-	    failure: function(res, opts) {
-		Ext.MessageBox.alert('Error', 'Failed to add tag');
-	    }
-	});
+    updateTags: function() {
+	this.addCombo.getStore().load();
     }
 
 });
@@ -128,6 +116,16 @@ Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 
     constructor: function(config) {
 	this.makeComponents(config);
+
+	this.addEvents('destroyTag');
+	this.enableBubble('destroyTag');
+    },
+
+    makeComponents: function(config) {
+	this.makeColModel();
+	this.makeStore(config);
+	this.makeContextMenu();
+
 	Servers.SubcontentTab.TagsGrid.superclass.constructor.call(this, {
 	    colModel: this.colModel,
 	    store: this.store,
@@ -139,12 +137,6 @@ Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 		}
 	    }
 	});
-    },
-
-    makeComponents: function(config) {
-	this.makeColModel();
-	this.makeStore(config);
-	this.makeContextMenu();
     },
 
     makeColModel: function() {
@@ -167,7 +159,6 @@ Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     makeContextMenu: function() {
-	var grid = this;
 	this.contextMenu = new Ext.menu.Menu({
 	    style: {
 		overflow: 'visible'
@@ -177,53 +168,34 @@ Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 		    text: 'Delete',
 		    handler: function() {
 			var record = grid.getSelectionModel().getSelected();
-			grid.destroyTag({
-			    url: record.get('paths').tag
-			});
-			grid.store.remove(record);
+			this.fireEvent('destroyTag', record.data);
 		    }
 		}
-	    ]
+	    ],
+	    scope: this
 	});
     },
 
-    addTag: function(item) {
-	Ext.Ajax.request({
-	    url: paths.tags.index,
-	    method: 'POST',
-	    params: {
-		'tag[server_id]': this.currentItem.server.id,
-		'tag[value]': value
-	    },
-	    success: function(res, opts) {
-		var result = Ext.decode(res.responseText);
-		panel.tagsGrid.addTag(result.item);
-		panel.addCombo.reset();
-		subcontentTab.updateTags();
-	    },
-	    failure: function(res, opts) {
-		Ext.MessageBox.alert('Error', 'Failed to add tag');
-	    }
-	});
+    addEventHandlers: function() {
+	servers.on('addedTag', this.addRecord.createDelegate(this));
+	servers.on('destroyedTag', this.destroyRecord.createDelegate(this));
+    },
 
+    removeEventHandlers: function() {
+	servers.on('addedTag', this.addRecord.createDelegate(this));
+	servers.on('destroyedTag', this.destroyRecord.createDelegate(this));
+    },
+
+    addRecord: function(item) {
 	var RecordType = this.store.recordType;
 	var record = new RecordType(item);
 	this.store.add(record);
     },
 
-    destroyTag: function() {
-	var record = grid.getSelectionModel().getSelected();
-	Ext.Ajax.request({
-	    url: record.get('paths').tag,
-	    method: 'DELETE',
-	    success: function(res, opts) {
-		grid.store.remove(record);
-		grid.updateTags();
-	    },
-	    failure: function(res, opts) {
-		Ext.MessageBox.alert('Error', 'Failed to add tag');
-	    }
-	});
+    destroyRecord: function(item) {
+	var ri = this.store.findExact('id', item.id);
+	if (ri != -1)
+	    this.store.removeAt(ri);
     }
 
 });

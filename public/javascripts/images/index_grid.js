@@ -128,10 +128,9 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	var ri = this.store.findExact('id', item.id);
 	if (ri != -1) {
 	    var record = this.store.getAt(ri);
-	    for (var field in item) {
+	    for (var field in item)
 		record.set(field, item[field]);
-		record.commit();
-	    }
+	    record.commit();
 	}
     },
 

@@ -6,10 +6,12 @@ class ServersController < ApplicationController
     respond_to do |format|
       format.html
       format.json {
-        servers = Server.all.collect {|server|
-          attributes_with_paths(server)
+        render :json => {
+          :success => true,
+          :items => Server.all.collect {|server|
+            attributes_with_paths(server)
+          }
         }
-        render :json => { :success => true, :items => servers }
       }
     end
   end
@@ -28,10 +30,12 @@ class ServersController < ApplicationController
       end
     end
 
-    h = servers.collect {|server|
-      [server.id, server.attributes]
+    render :json => {
+      :success => true,
+      :items => servers.collect {|server|
+        attributes_with_paths(server)
+      }
     }
-    render :json => { :success => true, :items => Hash[h] }
   end
 
   def monitor
@@ -83,7 +87,8 @@ class ServersController < ApplicationController
       :success => true,
       :item => {
         :server => attributes_with_paths(server),
-        :interfaces => server.interfaces.collect {|interface| interface.attributes }
+        :interfaces => server.interfaces.collect {|interface| interface.attributes },
+        :tags => server.tags.collect {|tag| tag.value }
       }
     }
   end
@@ -149,7 +154,10 @@ class ServersController < ApplicationController
     server.status = 'Suspending'
     server.save
 
-    render :json => { :success => true }
+    render :json => {
+      :success => true,
+      :item => { :id => server.id, :status => server.status }
+    }
 
     item = {
       :command => 'suspend_server',
@@ -165,7 +173,10 @@ class ServersController < ApplicationController
     server.status = 'Resuming'
     server.save
 
-    render :json => { :success => true }
+    render :json => {
+      :success => true,
+      :item => { :id => server.id, :status => server.status }
+    }
 
     item = {
       :command => 'resume_server',
@@ -181,7 +192,10 @@ class ServersController < ApplicationController
     server.status = 'Rebooting'
     server.save
 
-    render :json => { :success => true }
+    render :json => {
+      :success => true,
+      :item => { :id => server.id, :status => server.status }
+    }
 
     item = {
       :command => 'reboot_server',
@@ -198,7 +212,10 @@ class ServersController < ApplicationController
     server.user_terminate = true
     server.save
 
-    render :json => { :success => true }
+    render :json => {
+      :success => true,
+      :item => { :id => server.id, :status => server.status }
+    }
 
     item = {
       :command => 'terminate_server',
@@ -214,7 +231,10 @@ class ServersController < ApplicationController
     server.status = 'Restarting'
     server.save
 
-    render :json => { :success => true }
+    render :json => {
+      :success => true,
+      :item => { :id => server.id, :status => server.status }
+    }
 
     item = {
       :command => 'restart_server',
@@ -242,7 +262,10 @@ class ServersController < ApplicationController
     server.status = 'Migrating'
     server.save
 
-    render :json => { :success => true }
+    render :json => {
+      :success => true,
+      :item => { :id => server.id, :status => server.status }
+    }
 
     item = {
       :command => 'migrate_server',

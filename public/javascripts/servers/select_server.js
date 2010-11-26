@@ -2,6 +2,13 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 
     constructor: function() {
 	this.makeComponents();
+    },
+
+    makeComponents: function() {
+	this.makeFormItems();
+	this.makeForm();
+	this.makeButtons();
+
 	Servers.SelectServerWindow.superclass.constructor.call(this, {
 	    title: 'Migrate Server',
 	    modal: true,
@@ -25,14 +32,7 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 	});
     },
 
-    makeComponents: function() {
-	this.makeFormItems();
-	this.makeForm();
-	this.makeButtons();
-    },
-
     makeFormItems: function() {
-	var wdw = this;
 	this.formItems = {
 	    zone: new Ext.ux.StoreComboBox({
 		name: 'server[zone]',
@@ -43,7 +43,7 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 		},
 		listeners: {
 		    select: function(combo, record, index) {
-			var psCombo = wdw.formItems['physical_server'];
+			var psCombo = this.formItems['physical_server'];
 			psCombo.getStore().baseParams['zone'] = record.get('value');
 			psCombo.getStore().load();
 			psCombo.reset();
@@ -77,20 +77,20 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
     },
 
     makeButtons: function() {
-	var wdw = this;
-
 	this.submitButton = new Ext.Button({
 	    text: 'Migrate',
 	    handler: function() {
-		wdw.form.getForm().submit(wdw.submitOpts);
-	    }
+		this.form.getForm().submit(wdw.submitOpts);
+	    },
+	    scope: this
 	});
 
 	this.closeButton = new Ext.Button({
 	    text: 'Close',
 	    handler: function() {
-		wdw.hide();
-	    }
+		this.hide();
+	    },
+	    scope: this
 	});
     },
 

@@ -1,173 +1,183 @@
-var Servers = function() {
-};
+var Servers = Ext.extend(Ext.util.Observable, {
 
 Servers.prototype.show = function() {
 
-    //------------------------------
-    //   windows, panels
-    //------------------------------
+    constructor: function() {
+	this.addEvents('createdServer');
+	this.addEvents('updatedServer');
+	this.addEvents('updatedServers');
+	this.addEvents('gotServer');
+	this.addEvents('monitorServer');
+	this.addEvents('addedTag');
+	this.addEvents('destroyedTag');
+    },
 
-    var indexPanel = new Servers.IndexPanel();
-    var indexGrid = indexPanel.indexGrid;
-
-    var subcontentTab = new Servers.SubcontentTab();
-
-    var newServerWindow = new Servers.NewServerWindow();
-    var selectServerWindow = new Servers.SelectServerWindow();
-
-    //------------------------------
-    //   handlers
-    //------------------------------
-
-    indexPanel.onAdded = function() {
-	this.updateValuesTimer = setInterval(updateValues, 10000);
-	this.updateMonitorTimer = setInterval(updateMonitor, 5000);
-    };
-
-    indexPanel.onDestroy = function() {
-	clearInterval(this.updateValuesTimer);
-	clearInterval(this.updateMonitorTimer);
-	newServerWindow.destroy();
-	selectServerWindow.destroy();
-    };
-
-    indexPanel.createServer = function() {
-	newServerWindow.setSubmitOpts({
+    createServer: function() {
+	this.newServerWindow.setSubmitOpts({
             url: paths.servers.index,
             method: 'POST',
             waitMsg: 'Creating...',
             success: function(f, action) {
 		var item = action.result.item;
-		indexGrid.addRecord(item);
-		newServerWindow.hide();
+		this.fireEvent('createdServer', item);
+		this.newServerWindow.hide();
             },
             failure: function(f, action) {
 		Ext.MessageBox.alert('Error', 'Failed to create server');
             }
+	    scope: this
 	});
-	newServerWindow.show();
+	this.newServerWindow.show();
     };
 
-    indexGrid.showServer = function() {
+    showServer: function(item) {
 	Ext.Ajax.request({
-	    url: indexGrid.selectedPaths().server,
+	    url: item.paths.server,
 	    method: 'GET',
 	    success: function(res, opts) {
-		var result = Ext.decode(res.responseText);
-
-		subcontentTab.showContent(result.item);
+		var item = Ext.decode(res.responseText).item;
+		this.fireEvent('gotServers', item);
 		subcontentTab.show();
-
 		Ext.getCmp('content-container').doLayout();
 	    },
 	    failure: function(res, opts) {
-		alert('Error');
-	    }
+		Ext.MessageBox.alert('Error', 'Failed to get server');
+	    },
+	    scope: this
 	});
     };
 
-    var changeStatus = function(status) {
-	indexGrid.updateSelectedValues({ status: status });
-	subcontentTab.updateValues({ status: status });
-    };
-
-    var operateServer = function(operation, status) {
+    operateServer: function(item, operation) {
 	Ext.Ajax.request({
-	    url: indexGrid.selectedPaths()[operation],
+	    url: item.paths[operation],
 	    method: 'POST',
 	    success: function(res, opts) {
-		changeStatus(status);
+		var item = Ext.decode(res.responseText).item;
+		this.fireEvent('updatedServer', item);
 	    },
 	    failure: function(res, opts) {
 		Ext.MessageBox.alert('Error', 'Failed to ' + operation + ' server');
-	    }
+	    },
+	    scope: this
 	});
     };
 
-    indexGrid.suspendServer = function() {
-	operateServer('suspend', 'Suspending');
+    suspendServer: function(item) {
+	this.operateServer(item, 'suspend');
     };
 
-    indexGrid.resumeServer = function() {
-	operateServer('resume', 'Resuming');
+    resumeServer: function(item) {
+	this.operateServer(item, 'resume');
     };
 
-    indexGrid.rebootServer = function() {
-	operateServer('reboot', 'Rebooting');
+    rebootServer: function() {
+	this.operateServer(item, 'reboot');
     };
 
-    indexGrid.terminateServer = function() {
-	operateServer('terminate', 'Terminating');
+    terminateServer: function() {
+	this.operateServer(item, 'terminate');
     };
 
-    indexGrid.restartServer = function() {
-	operateServer('restart', 'Restarting');
+    restartServer: function() {
+	this.operateServer(item, 'restart');
     };
 
-    indexGrid.migrateServer = function() {
-	selectServerWindow.setSubmitOpts({
-            url: indexGrid.selectedPaths().migrate,
+    migrateServer: function(item) {
+	this.selectServerWindow.setSubmitOpts({
+            url: item.paths.migrate,
             method: 'POST',
             waitMsg: 'Migrating...',
             success: function(f, action) {
-		changeStatus('Migrating');
-		selectServerWindow.hide();
+		this.fireEvent('updatedServer', { status: 'Migrating' });
+		this.selectServerWindow.hide();
             },
             failure: function(f, action) {
 		Ext.MessageBox.alert('Error', 'Failed to create server');
-            }
+            },
+	    scope: this
 	});
 	selectServerWindow.show();
     };
 
-    subcontentTab.destroyTag = function(config) {
+    addTag: function(tag) {
 	Ext.Ajax.request({
-	    url: config.url,
-	    method: 'DELETE',
+	    url: paths.tags.index,
+	    method: 'POST',
+	    params: tag,
 	    success: function(res, opts) {
-		indexPanel.updateTags();
-		subcontentTab.updateTags();
+		var item = Ext.decode(res.responseText).item;
+		this.fireEvent('addedTag', item);
 	    },
 	    failure: function(res, opts) {
 		Ext.MessageBox.alert('Error', 'Failed to add tag');
-	    }
+	    },
+	    scopt: this
 	});
-    };
+    },
 
-    var updateValues = function() {
+    destroyTag: function(item) {
+	Ext.Ajax.request({
+	    url: item.tag,
+	    method: 'DELETE',
+	    success: function(res, opts) {
+		var item = Ext.decode(res.responseText).item;
+		this.fireEvent('destroyedTag', item);
+	    },
+	    failure: function(res, opts) {
+		Ext.MessageBox.alert('Error', 'Failed to destroy tag');
+	    },
+	    scope: this
+	});
+    },
+
+    updateServer: function() {
 	Ext.Ajax.request({
             url: paths.servers.status,
             method: 'GET',
             success: function(res, opts) {
 		var items = Ext.decode(res.responseText).items;
-		indexGrid.updateValues(items);
-
-		if (indexGrid.isSelected()) {
-		    var id = indexGrid.selectedId();
-		    if (items[id])
-			subcontentTab.updateValues(items[id]);
-		}
+		this.fireEvent('updatedServers', items);
             },
             failure: function(res, opts) {
-            }
+            },
+	    scope: this
 	});
+    },
+
+    monitorServer: function() {
+	this.fireEvent('monitorServer');
     };
 
-    var updateMonitor = function() {
-	subcontentTab.updateMonitor();
-    };
+    show: function() {
+	var indexPanel = new Servers.IndexPanel();
+	var subcontentTab = new Servers.SubcontentTab();
+	var newServerWindow = new Servers.NewServerWindow();
+	var selectServerWindow = new Servers.SelectServerWindow();
 
-    //------------------------------
-    //   layout
-    //------------------------------
+	this.initEventHandlers();
 
-    Ext.getCmp('subcontent').show();
-    Ext.getCmp('subcontent').removeAll();
-    Ext.getCmp('subcontent').add(subcontentTab);
-    subcontentTab.hide();
+	Ext.getCmp('subcontent').show();
+	Ext.getCmp('subcontent').removeAll();
+	Ext.getCmp('subcontent').add(subcontentTab);
+	subcontentTab.hide();
 
-    Ext.getCmp('content').removeAll();
-    Ext.getCmp('content').add(indexPanel);
-    Ext.getCmp('content-container').doLayout();
+	Ext.getCmp('content').removeAll();
+	Ext.getCmp('content').add(indexPanel);
+	Ext.getCmp('content-container').doLayout();
+    },
+
+    initEventHandlers: function() {
+	this.indexPanel.on('added', function() {
+	    this.updateValuesTimer = setInterval(updateValues, 10000);
+	    this.updateMonitorTimer = setInterval(updateMonitor, 5000);
+	});
+
+	this.indexPanel.on('destroy', function() {
+	    clearInterval(this.updateValuesTimer);
+	    clearInterval(this.updateMonitorTimer);
+	    this.newServerWindow.destroy();
+	    this.selectServerWindow.destroy();
+	});
+    }
 
 };

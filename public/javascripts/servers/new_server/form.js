@@ -2,6 +2,12 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
+    },
+
+    makeComponents: function() {
+	this.makeFormItems();
+	this.makeForm();
+
 	Servers.NewServerWindow.FormPanel.superclass.constructor.call(this, {
 	    title: 'Input Specifications',
 	    layout: 'hbox',
@@ -12,11 +18,6 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    border: false,
 	    items: this.form
 	});
-    },
-
-    makeComponents: function() {
-	this.makeFormItems();
-	this.makeForm();
     },
 
     makeFormItems: function() {

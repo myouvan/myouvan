@@ -39,12 +39,7 @@ Images.IndexPanel = Ext.extend(Ext.Panel, {
 		    border: false,
 		    items: this.indexGrid
 		}
-	    ],
-	    listeners: {
-		destroy: function() {
-		    this.onDestroy();
-		}
-	    }
+	    ]
 	});
     },
 
