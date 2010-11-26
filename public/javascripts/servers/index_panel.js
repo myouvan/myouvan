@@ -12,6 +12,8 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 	this.addEvents('terminateServer');
 	this.addEvents('restartServer');
 	this.addEvents('migrateServer');
+
+	this.updateTagsDelegate = this.updateTags.createDelegate(this);
     },
 
     makeComponents: function() {
@@ -60,7 +62,7 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 	    ],
 	    listeners: {
 		added: this.addEventHandlers,
-		destroy: this.removeEventHandlers
+		beforedestroy: this.removeEventHandlers
 	    }
 	});
     },
@@ -100,13 +102,13 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
     },
 
     addEventHandlers: function() {
-	servers.on('addedTag', this.updateTags.createDelegate(this));
-	servers.on('destroyedTag', this.updateTags.createDelegate(this));
+	servers.on('addedTag', this.updateTagsDelegate);
+	servers.on('destroyedTag', this.updateTagsDelegate);
     },
 
     removeEventHandlers: function() {
-	servers.un('addedTag', this.updateTags.createDelegate(this));
-	servers.un('destroyedTag', this.updateTags.createDelegate(this));
+	servers.un('addedTag', this.updateTagsDelegate);
+	servers.un('destroyedTag', this.updateTagsDelegate);
     },
 
     updateTags: function() {

@@ -24,8 +24,8 @@ class TagsController < ApplicationController
     render :json => { :success => true, :item => { :id => id } }
   end
 
-  def attributes_with_paths(image)
-    image.attributes.merge({
+  def attributes_with_paths(tag)
+    tag.attributes.merge({
       :paths => {
         :tag => url_for(tag)
       }

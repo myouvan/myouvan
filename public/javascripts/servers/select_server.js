@@ -48,7 +48,8 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 			psCombo.getStore().load();
 			psCombo.reset();
 			psCombo.enable();
-		    }
+		    },
+		    scope: this
 		}
 	    }),
 	    physical_server: new Ext.ux.StoreComboBox({
@@ -80,7 +81,7 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 	this.submitButton = new Ext.Button({
 	    text: 'Migrate',
 	    handler: function() {
-		this.form.getForm().submit(wdw.submitOpts);
+		this.form.getForm().submit(this.submitOpts);
 	    },
 	    scope: this
 	});
@@ -92,6 +93,11 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 	    },
 	    scope: this
 	});
+    },
+
+    setExcept: function(value) {
+	var psCombo = this.formItems['physical_server'];
+	psCombo.getStore().baseParams['except'] = value;
     },
 
     setSubmitOpts: function(opts) {

@@ -1,3 +1,7 @@
+//------------------------------
+//   extended JsonStore
+//------------------------------
+
 Ext.ux.ItemsStore = Ext.extend(Ext.data.JsonStore, {
     constructor: function(config) {
 	if (config.url) {
@@ -22,6 +26,10 @@ Ext.ux.ItemsStore = Ext.extend(Ext.data.JsonStore, {
 	Ext.ux.ItemsStore.superclass.constructor.call(this, config);
     }
 });
+
+//------------------------------
+//   extended ComboBox
+//------------------------------
 
 Ext.ux.StoreComboBox = Ext.extend(Ext.form.ComboBox, {
     constructor: function(config) {

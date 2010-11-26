@@ -6,6 +6,9 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 	this.addEvents('addTag');
 	this.enableBubble('addTag');
 	this.addEvents('destroyTag');
+
+	this.showTagsDelegate = this.showTags.createDelegate(this);
+	this.updateTagsDelegate = this.updateTags.createDelegate(this);
     },
 
     makeComponents: function() {
@@ -43,8 +46,8 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 		]
 	    },
 	    listeners: {
-		added: this.addEventHandlers,
-		destroy: this.removeEventHandlers,
+		added: this.addEventHandlers.createDelegate(this),
+		beforedestroy: this.removeEventHandlers.createDelegate(this)
 	    }
 	});
     },
@@ -78,21 +81,22 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 		    'tag[server_id]': this.currentItem.server.id,
 		    'tag[value]': value
 		});
+		this.addCombo.setValue('');
 	    },
 	    scope: this
 	});
     },
 
     addEventHandlers: function() {
-	servers.on('gotServer', this.showTags.createDelegate(this));
-	servers.on('addedTag', this.updateTags.createDelegate(this));
-	servers.on('destroyedTag', this.updateTags.createDelegate(this));
+	servers.on('gotServer', this.showTagsDelegate);
+	servers.on('addedTag', this.updateTagsDelegate);
+	servers.on('destroyedTag', this.updateTagsDelegate);
     },
 
     removeEventHandlers: function() {
-	servers.un('gotServer', this.showTags.createDelegate(this));
-	servers.un('addedTag', this.updateTags.createDelegate(this));
-	servers.un('destroyedTag', this.updateTags.createDelegate(this));
+	servers.un('gotServer', this.showTagsDelegate);
+	servers.un('addedTag', this.updateTagsDelegate);
+	servers.un('destroyedTag', this.updateTagsDelegate);
     },
 
     showTags: function(item) {
@@ -119,6 +123,9 @@ Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 
 	this.addEvents('destroyTag');
 	this.enableBubble('destroyTag');
+
+	this.addRecordDelegate =  this.addRecord.createDelegate(this);
+	this.destroyRecordDelegate =  this.destroyRecord.createDelegate(this);
     },
 
     makeComponents: function(config) {
@@ -134,7 +141,9 @@ Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 		    grid.getSelectionModel().selectRow(row);
 		    e.stopEvent();
 		    grid.contextMenu.showAt(e.getXY());
-		}
+		},
+		added: this.addEventHandlers.createDelegate(this),
+		beforedestroy: this.removeEventHandlers.createDelegate(this)
 	    }
 	});
     },
@@ -154,7 +163,11 @@ Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.store = new Ext.ux.ItemsStore({
 	    url: config.url,
 	    autoLoad: true,
-	    fields: ['value', 'paths']
+	    fields: [
+		'id',
+		'value',
+		'paths'
+	    ]
 	});
     },
 
@@ -167,23 +180,23 @@ Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 		{
 		    text: 'Delete',
 		    handler: function() {
-			var record = grid.getSelectionModel().getSelected();
+			var record = this.getSelectionModel().getSelected();
 			this.fireEvent('destroyTag', record.data);
-		    }
+		    },
+		    scope: this
 		}
-	    ],
-	    scope: this
+	    ]
 	});
     },
 
     addEventHandlers: function() {
-	servers.on('addedTag', this.addRecord.createDelegate(this));
-	servers.on('destroyedTag', this.destroyRecord.createDelegate(this));
+	servers.on('addedTag', this.addRecordDelegate);
+	servers.on('destroyedTag', this.destroyRecordDelegate);
     },
 
     removeEventHandlers: function() {
-	servers.on('addedTag', this.addRecord.createDelegate(this));
-	servers.on('destroyedTag', this.destroyRecord.createDelegate(this));
+	servers.on('addedTag', this.addRecordDelegate);
+	servers.on('destroyedTag', this.destroyRecordDelegate);
     },
 
     addRecord: function(item) {

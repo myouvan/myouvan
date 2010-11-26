@@ -101,6 +101,8 @@ class ServersController < ApplicationController
   def physical_servers
     ps = Settings.physical_server.find {|ps| ps['zone'] == params[:zone] }
     physical_servers = ps ? ps['physical_servers'] : Array.new
+    physical_servers = physical_servers.dup
+    physical_servers.delete(params[:except])
     render :json => { :success => true }.merge(combo_items(physical_servers))
   end
 

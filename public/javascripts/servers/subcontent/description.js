@@ -2,6 +2,10 @@ Servers.SubcontentTab.DescriptionPanel = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
+
+	this.showServerDelegate = this.showServer.createDelegate(this);
+	this.updateServerDelegate = this.updateServer.createDelegate(this);
+	this.updateServersDelegate = this.updateServers.createDelegate(this);
     },
 
     makeComponents: function() {
@@ -38,7 +42,7 @@ Servers.SubcontentTab.DescriptionPanel = Ext.extend(Ext.Panel, {
 	    ],
 	    listeners: {
 		added: this.addEventHandlers.createDelegate(this),
-		destroy: this.removeEventHandlers.createDelegate(this)
+		beforedestroy: this.removeEventHandlers.createDelegate(this)
 	    }
 	});
     },
@@ -117,15 +121,15 @@ Servers.SubcontentTab.DescriptionPanel = Ext.extend(Ext.Panel, {
     },
 
     addEventHandlers: function() {
-	servers.on('gotServer', this.showServer.createDelegate(this));
-	servers.on('updatedServer', this.updateServer.createDelegate(this));
-	servers.on('updatedServers', this.updateServers.createDelegate(this));
+	servers.on('gotServer', this.showServerDelegate);
+	servers.on('updatedServer', this.updateServerDelegate);
+	servers.on('updatedServers', this.updateServersDelegate);
     },
 
     removeEventHandlers: function() {
-	servers.un('gotServer', this.showServer.createDelegate(this));
-	servers.un('updatedServer', this.updateServer.createDelegate(this));
-	servers.un('updatedServers', this.updateServers.createDelegate(this));
+	servers.un('gotServer', this.showServerDelegate);
+	servers.un('updatedServer', this.updateServerDelegate);
+	servers.un('updatedServers', this.updateServersDelegate);
     },
 
     showServer: function(item) {
@@ -141,7 +145,7 @@ Servers.SubcontentTab.DescriptionPanel = Ext.extend(Ext.Panel, {
 	avatarImg = '<img src="' + item.server.paths.avatarThumb + '" width="150" height="150" />';
 	this.propPanels['avatar'].setValue(avatarImg);
 
-	this.currentItem = item;
+	this.currentItem = item.server;
     },
 
     updateServer: function(item) {

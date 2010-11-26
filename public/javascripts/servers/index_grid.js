@@ -17,6 +17,10 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.enableBubble('restartServer');
 	this.addEvents('migrateServer');
 	this.enableBubble('migrateServer');
+
+	this.addRecordDelegate = this.addRecord.createDelegate(this);
+	this.updateRecordDelegate = this.updateRecord.createDelegate(this);
+	this.updateRecordsDelegate = this.updateRecords.createDelegate(this);
     },
 
     makeComponents: function() {
@@ -38,7 +42,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		    this.contextMenu.showAt(e.getXY());
 		},
 		added: this.addEventHandlers.createDelegate(this),
-		destroy: this.removeEventHandlers.createDelegate(this),
+		beforedestroy: this.removeEventHandlers.createDelegate(this),
 	    }
 	});
     },
@@ -203,15 +207,15 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     addEventHandlers: function() {
-	servers.on('createdServer', this.addRecord.createDelegate(this));
-	servers.on('updatedServer', this.updateRecord.createDelegate(this));
-	servers.on('updatedServers', this.updateRecords.createDelegate(this));
+	servers.on('createdServer', this.addRecordDelegate);
+	servers.on('updatedServer', this.updateRecordDelegate);
+	servers.on('updatedServers', this.updateRecordsDelegate);
     },
 
     removeEventHandlers: function() {
-	servers.un('createdServer', this.addRecord.createDelegate(this));
-	servers.un('updatedServer', this.updateRecord.createDelegate(this));
-	servers.un('updatedServers', this.updateRecords.createDelegate(this));
+	servers.un('createdServer', this.addRecordDelegate);
+	servers.un('updatedServer', this.updateRecordDelegate);
+	servers.un('updatedServers', this.updateRecordsDelegate);
     },
 
     addRecord: function(item) {
@@ -234,7 +238,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	var walkedRecords = new Object();
 	for (var i = 0; i < items.length; ++i) {
 	    var ri = this.store.findExact('id', items[i].id);
-	    if (ri != -1) {
+	    if (ri == -1) {
 		var RecordType = this.store.recordType;
 		var record = new RecordType(items[i]);
 		this.store.add(record);

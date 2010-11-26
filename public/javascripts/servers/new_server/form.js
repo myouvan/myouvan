@@ -47,12 +47,13 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 		},
 		listeners: {
 		    select: function(combo, record, index) {
-			var psCombo = panel.formItems['physical_server'];
+			var psCombo = this.formItems['physical_server'];
 			psCombo.getStore().baseParams['zone'] = record.get('value');
 			psCombo.getStore().load();
 			psCombo.reset();
 			psCombo.enable();
-		    }
+		    },
+		    scope: this
 		}
 	    }),
 	    physical_server: new Ext.ux.StoreComboBox({

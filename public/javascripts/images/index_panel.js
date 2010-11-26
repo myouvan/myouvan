@@ -46,6 +46,7 @@ Images.IndexPanel = Ext.extend(Ext.Panel, {
     makeButtons: function() {
 	this.createButton = new Ext.Button({
 	    text: 'Create Image',
+	    width: 80,
 	    border: false,
 	    handler: function() {
 		this.fireEvent('createImage');

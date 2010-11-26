@@ -117,7 +117,8 @@ var Servers = Ext.extend(Ext.util.Observable, {
             method: 'POST',
             waitMsg: 'Migrating...',
             success: function(f, action) {
-		this.fireEvent('updatedServer', { status: 'Migrating' });
+		var item = action.result.item;
+		this.fireEvent('updatedServer', item);
 		this.selectServerWindow.hide();
             },
             failure: function(f, action) {
@@ -125,7 +126,8 @@ var Servers = Ext.extend(Ext.util.Observable, {
             },
 	    scope: this
 	});
-	selectServerWindow.show();
+	this.selectServerWindow.setExcept(item.physical_server);
+	this.selectServerWindow.show();
     },
 
     addTag: function(tag) {
@@ -140,13 +142,13 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	    failure: function(res, opts) {
 		Ext.MessageBox.alert('Error', 'Failed to add tag');
 	    },
-	    scopt: this
+	    scope: this
 	});
     },
 
     destroyTag: function(item) {
 	Ext.Ajax.request({
-	    url: item.tag,
+	    url: item.paths.tag,
 	    method: 'DELETE',
 	    success: function(res, opts) {
 		var item = Ext.decode(res.responseText).item;
@@ -215,6 +217,9 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	this.indexPanel.on('terminateServer', this.terminateServer.createDelegate(this));
 	this.indexPanel.on('restartServer', this.restartServer.createDelegate(this));
 	this.indexPanel.on('migrateServer', this.migrateServer.createDelegate(this));
+
+	this.subcontentTab.on('addTag', this.addTag.createDelegate(this));
+	this.subcontentTab.on('destroyTag', this.destroyTag.createDelegate(this));
     },
 
     startTasks: function() {

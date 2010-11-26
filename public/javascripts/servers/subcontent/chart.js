@@ -2,6 +2,9 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
+
+	this.showChartDelegate =  this.showChart.createDelegate(this);
+	this.updateChartDelegate =  this.updateChart.createDelegate(this);
     },
 
     makeComponents: function() {
@@ -20,8 +23,8 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
 		this.chartContainer
 	    ],
 	    listeners: {
-		added: this.addEventHandlers,
-		destroy: this.removeEventHandlers
+		added: this.addEventHandlers.createDelegate(this),
+		beforedestroy: this.removeEventHandlers.createDelegate(this)
 	    }
 	});
     },
@@ -36,13 +39,13 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
     },
 
     addEventHandlers: function() {
-	servers.on('gotServer', this.showChart.createDelegate(this));
-	servers.on('monitorServer', this.updateChart.createDelegate(this));
+	servers.on('gotServer', this.showChartDelegate);
+	servers.on('monitorServer', this.updateChartDelegate);
     },
 
     removeEventHandlers: function() {
-	servers.un('gotServer', this.showChart.createDelegate(this));
-	servers.un('monitorServer', this.updateChart.createDelegate(this));
+	servers.un('gotServer', this.showChartDelegate);
+	servers.un('monitorServer', this.updateChartDelegate);
     },
 
     showChart: function(item) {

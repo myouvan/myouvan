@@ -2,6 +2,8 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 
     constructor: function() {
 	this.makeComponents();
+
+	this.setAvatarDelegate = this.setAvatar.createDelegate(this);
     },
 
     makeComponents: function() {
@@ -42,7 +44,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 		    this.tagsPanel.resetPanel();
 		},
 		added: this.addEventHandlers.createDelegate(this),
-		destroy: this.removeEventHandlers.createDelegate(this)
+		beforedestroy: this.removeEventHandlers.createDelegate(this)
 	    }
 	});
     },
@@ -130,11 +132,11 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
     },
 
     addEventHandlers: function() {
-	this.flashPanel.on('setAvatar', this.setAvatar.createDelegate(this));
+	this.flashPanel.on('setAvatar', this.setAvatarDelegate);
     },
 
     removeEventHandlers: function() {
-	this.flashPanel.un('setAvatar', this.setAvatar.createDelegate(this));
+	this.flashPanel.un('setAvatar', this.setAvatarDelegate);
     },
 
     setAvatar: function(thumb, icon) {

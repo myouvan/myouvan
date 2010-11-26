@@ -7,6 +7,10 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.enableBubble('updateImage');
 	this.addEvents('destroyImage');
 	this.enableBubble('destroyImage');
+
+	this.addRecordDelegate = this.addRecord.createDelegate(this);
+	this.updateRecordDelegate = this.updateRecord.createDelegate(this);
+	this.destroyRecordDelegate = this.destroyRecord.createDelegate(this);
     },
 
     makeComponents: function() {
@@ -24,8 +28,8 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		    e.stopEvent();
 		    this.contextMenu.showAt(e.getXY());
 		},
-		added: this.addEventHandlers,
-		destroy: this.removeEventHandlers
+		added: this.addEventHandlers.createDelegate(this),
+		beforedestroy: this.removeEventHandlers.createDelegate(this)
 	    }
 	});
     },
@@ -107,15 +111,15 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     addEventHandlers: function() {
-	images.on('createdImage', this.addRecord.createDelegate(this));
-	images.on('updatedImage', this.updateRecord.createDelegate(this));
-	images.on('destroyedImage', this.destroyRecord.createDelegate(this));
+	images.on('createdImage', this.addRecordDelegate);
+	images.on('updatedImage', this.updateRecordDelegate);
+	images.on('destroyedImage', this.destroyRecordDelegate);
     },
 
     removeEventHandlers: function() {
-	images.un('createdImage', this.addRecord.createDelegate(this));
-	images.un('updatedImage', this.updateRecord.createDelegate(this));
-	images.un('destroyedImage', this.destroyRecord.createDelegate(this));
+	images.un('createdImage', this.addRecordDelegate);
+	images.un('updatedImage', this.updateRecordDelegate);
+	images.un('destroyedImage', this.destroyRecordDelegate);
     },
 
     addRecord: function(item) {
