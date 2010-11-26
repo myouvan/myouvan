@@ -115,7 +115,6 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 	    success: function(res, opts) {
 		indexPanel.updateTags();
 		subcontentTab.updateTags();
-		panel.
 	    },
 	    failure: function(res, opts) {
 		Ext.MessageBox.alert('Error', 'Failed to add tag');

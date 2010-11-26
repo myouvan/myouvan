@@ -2,6 +2,18 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
     constructor: function() {
 	this.makeComponents();
+
+	this.addEvents('updateImage');
+	this.enableBubble('updateImage');
+	this.addEvents('destroyImage');
+	this.enableBubble('destroyImage');
+    },
+
+    makeComponents: function() {
+	this.makeColModel();
+	this.makeStore();
+	this.makeContextMenu();
+
 	Images.IndexGrid.superclass.constructor.call(this, {
 	    colModel: this.colModel,
 	    store: this.store,
@@ -11,15 +23,11 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		    this.getSelectionModel().selectRow(row);
 		    e.stopEvent();
 		    this.contextMenu.showAt(e.getXY());
-		}
+		},
+		added: this.addEventHandlers,
+		destroy: this.removeEventHandlers
 	    }
 	});
-    },
-
-    makeComponents: function() {
-	this.makeColModel();
-	this.makeStore();
-	this.makeContextMenu();
     },
 
     makeColModel: function() {
@@ -72,34 +80,42 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     makeContextMenu: function() {
-	var grid = this;
 	this.contextMenu = new Ext.menu.Menu({
 	    style: {
 		overflow: 'visible'
+	    },
+	    defaults: {
+		scope: this
 	    },
 	    items: [
 		{
 		    text: 'Edit',
 		    handler: function() {
-			grid.updateImage();
+			var record = this.getSelectionModel().getSelected();
+			this.fireEvent('updateImage', record.data);
 		    }
 		},
 		{
 		    text: 'Destroy',
 		    handler: function() {
-			grid.destroyImage();
+			var record = this.getSelectionModel().getSelected();
+			this.fireEvent('destroyImage', record.data);
 		    }
 		}
 	    ]
 	});
     },
 
-    selectedId: function() {
-	return this.getSelectionModel().getSelected().get('id');
+    addEventHandlers: function() {
+	images.on('createdImage', this.addRecord.createDelegate(this));
+	images.on('updatedImage', this.updateRecord.createDelegate(this));
+	images.on('destroyedImage', this.destroyRecord.createDelegate(this));
     },
 
-    selectedPaths: function() {
-	return this.getSelectionModel().getSelected().get('paths');
+    removeEventHandlers: function() {
+	images.un('createdImage', this.addRecord.createDelegate(this));
+	images.un('updatedImage', this.updateRecord.createDelegate(this));
+	images.un('destroyedImage', this.destroyRecord.createDelegate(this));
     },
 
     addRecord: function(item) {
@@ -108,17 +124,21 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.store.add(record);
     },
 
-    updateSelectedValues: function(item) {
-	var record = grid.getSelectionModel().getSelected();
-	for (var field in item) {
-	    record.set(field, item[field]);
-	    record.commit();
+    updateRecord: function(item) {
+	var ri = this.store.findExact('id', item.id);
+	if (ri != -1) {
+	    var record = this.store.getAt(ri);
+	    for (var field in item) {
+		record.set(field, item[field]);
+		record.commit();
+	    }
 	}
     },
 
-    removeSelected: function() {
-	var record = grid.getSelectionModel().getSelected();
-	this.store.remove(record);
+    destroyRecord: function(item) {
+	var ri = this.store.findExact('id', item.id);
+	if (ri != -1)
+	    this.store.removeAt(ri);
     }
 
 });

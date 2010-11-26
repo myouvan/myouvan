@@ -51,8 +51,9 @@ class ImagesController < ApplicationController
 
   def destroy
     image = Image.find(params[:id])
+    id = image.id
     image.delete
-    render :json => { :success => true }
+    render :json => { :success => true, :item => { :id => id } }
   end
 
   def attributes_with_paths(image)

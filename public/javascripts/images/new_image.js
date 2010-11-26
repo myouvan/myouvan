@@ -2,6 +2,13 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
 
     constructor: function() {
 	this.makeComponents();
+    },
+
+    makeComponents: function() {
+	this.makeFormItems();
+	this.makeForm();
+	this.makeButtons();
+
 	Images.NewImageWindow.superclass.constructor.call(this, {
 	    modal: true,
 	    width: 625,
@@ -16,12 +23,6 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
 		this.closeButton
 	    ]
 	});
-    },
-
-    makeComponents: function() {
-	this.makeFormItems();
-	this.makeForm();
-	this.makeButtons();
     },
 
     makeFormItems: function() {
@@ -73,19 +74,19 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
     },
 
     makeButtons: function() {
-	var wdw = this;
-
 	this.submitButton = new Ext.Button({
 	    handler: function() {
-		this.form.getForm().submit(wdw.submitOpts);
-	    }
+		this.form.getForm().submit(this.submitOpts);
+	    },
+	    scope: this
 	});
 
 	this.closeButton = new Ext.Button({
 	    text: 'Close',
 	    handler: function() {
-		wdw.hide();
-	    }
+		this.hide();
+	    },
+	    scope: this
 	});
     },
 

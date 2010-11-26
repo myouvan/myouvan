@@ -2,6 +2,16 @@ Images.IndexPanel = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
+
+	this.addEvents('createImage');
+	this.addEvents('updateImage');
+	this.addEvents('destroyImage');
+    },
+
+    makeComponents: function() {
+	this.indexGrid = new Images.IndexGrid();
+	this.makeButtons();
+
 	Images.IndexPanel.superclass.constructor.call(this, {
 	    layout: 'vbox',
 	    layoutConfig: {
@@ -38,19 +48,14 @@ Images.IndexPanel = Ext.extend(Ext.Panel, {
 	});
     },
 
-    makeComponents: function() {
-	this.indexGrid = new Images.IndexGrid();
-	this.makeButtons();
-    },
-
     makeButtons: function() {
-	var panel = this;
 	this.createButton = new Ext.Button({
 	    text: 'Create Image',
 	    border: false,
 	    handler: function() {
-		panel.createImage();
-	    }
+		this.fireEvent('createImage');
+	    },
+	    scope: this
 	});
     }
 
