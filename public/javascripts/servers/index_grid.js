@@ -3,19 +3,19 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     constructor: function() {
 	this.makeComponents();
 
-	this.addEvent('showServer');
+	this.addEvents('showServer');
 	this.enableBubble('showServer');
-	this.addEvent('suspendServer');
+	this.addEvents('suspendServer');
 	this.enableBubble('suspendServer');
-	this.addEvent('resumeServer');
+	this.addEvents('resumeServer');
 	this.enableBubble('resumeServer');
-	this.addEvent('rebootServer');
+	this.addEvents('rebootServer');
 	this.enableBubble('rebootServer');
-	this.addEvent('terminateServer');
+	this.addEvents('terminateServer');
 	this.enableBubble('terminateServer');
-	this.addEvent('restartServer');
+	this.addEvents('restartServer');
 	this.enableBubble('restartServer');
-	this.addEvent('migrateServer');
+	this.addEvents('migrateServer');
 	this.enableBubble('migrateServer');
     },
 
@@ -33,12 +33,12 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		},
 		rowcontextmenu: function(grid, row, e) {
 		    this.getSelectionModel().selectRow(row);
-		    this.showServer();
+		    this.operateServer('showServer');
 		    e.stopEvent();
 		    this.contextMenu.showAt(e.getXY());
 		},
-		added: this.addEventHandlers,
-		destroy: this.removeEventHandlers
+		added: this.addEventHandlers.createDelegate(this),
+		destroy: this.removeEventHandlers.createDelegate(this),
 	    }
 	});
     },
@@ -202,13 +202,13 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.fireEvent(operation, record.data);
     },
 
-    addEventHandler: function() {
+    addEventHandlers: function() {
 	servers.on('createdServer', this.addRecord.createDelegate(this));
 	servers.on('updatedServer', this.updateRecord.createDelegate(this));
 	servers.on('updatedServers', this.updateRecords.createDelegate(this));
     },
 
-    removeEventHandler: function() {
+    removeEventHandlers: function() {
 	servers.un('createdServer', this.addRecord.createDelegate(this));
 	servers.un('updatedServer', this.updateRecord.createDelegate(this));
 	servers.un('updatedServers', this.updateRecords.createDelegate(this));
@@ -236,13 +236,13 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    var ri = this.store.findExact('id', items[i].id);
 	    if (ri != -1) {
 		var RecordType = this.store.recordType;
-		var record = new RecordType(item);
+		var record = new RecordType(items[i]);
 		this.store.add(record);
 		walkedRecords[record.get('id')] = true;
 	    } else {
 		var record = this.store.getAt(ri);
-		for (var field in item)
-		    record.set(field, item[field]);
+		for (var field in items[i])
+		    record.set(field, items[i][field]);
 		record.commit();
 		walkedRecords[record.get('id')] = true;
 	    }

@@ -70,7 +70,8 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 		    return;
 		this.tagsGrid.addTag(value);
 		this.addCombo.reset();
-	    }
+	    },
+	    scope: this
 	});
     },
 
@@ -100,9 +101,9 @@ Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 	    store: this.store,
 	    listeners: {
 		rowcontextmenu: function(grid, row, e) {
-		    grid.getSelectionModel().selectRow(row);
+		    this.getSelectionModel().selectRow(row);
 		    e.stopEvent();
-		    grid.contextMenu.showAt(e.getXY());
+		    this.contextMenu.showAt(e.getXY());
 		}
 	    }
 	});
@@ -136,7 +137,8 @@ Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 		    handler: function() {
 			var record = grid.getSelectionModel().getSelected();
 			this.store.remove(record);
-		    }
+		    },
+		    scope: this
 		}
 	    ],
 	    scope: this

@@ -37,8 +37,8 @@ Servers.SubcontentTab.DescriptionPanel = Ext.extend(Ext.Panel, {
 		this.propPanels['avatar']
 	    ],
 	    listeners: {
-		added: this.addEventHandlers,
-		destroy: this.deleteEventHandlers
+		added: this.addEventHandlers.createDelegate(this),
+		destroy: this.removeEventHandlers.createDelegate(this)
 	    }
 	});
     },
@@ -117,16 +117,18 @@ Servers.SubcontentTab.DescriptionPanel = Ext.extend(Ext.Panel, {
     },
 
     addEventHandlers: function() {
-	servers.on('gotServer', this.showValues.createDelegate(this));
-	servers.on('updateServer', this.updateValues.createDelegate(this));
+	servers.on('gotServer', this.showServer.createDelegate(this));
+	servers.on('updatedServer', this.updateServer.createDelegate(this));
+	servers.on('updatedServers', this.updateServers.createDelegate(this));
     },
 
     removeEventHandlers: function() {
-	servers.un('gotServer', this.showValues.createDelegate(this));
-	servers.un('updateServer', this.updateValues.createDelegate(this));
+	servers.un('gotServer', this.showServer.createDelegate(this));
+	servers.un('updatedServer', this.updateServer.createDelegate(this));
+	servers.un('updatedServers', this.updateServers.createDelegate(this));
     },
 
-    showValues: function(item) {
+    showServer: function(item) {
 	for (var field in item.server)
 	    if (this.propPanels[field])
 		this.propPanels[field].setValue(item.server[field]);
@@ -142,12 +144,21 @@ Servers.SubcontentTab.DescriptionPanel = Ext.extend(Ext.Panel, {
 	this.currentItem = item;
     },
 
-    updateValues: function(items) {
-	for (var i = 0; i < items.length; ++i) {
-	    if (items[i].id == this.currentItem.id)
-		for (var field in items[i])
+    updateServer: function(item) {
+	if (this.currentItem)
+	    if (item.id == this.currentItem.id)
+		for (var field in item)
 		    if (this.propPanels[field])
-			this.propPanels[field].setValue(items[i][field]);
+			this.propPanels[field].setValue(item[field]);
+    },
+
+    updateServers: function(items) {
+	if (this.currentItem)
+	    for (var i = 0; i < items.length; ++i)
+		if (items[i].id == this.currentItem.id)
+		    for (var field in items[i])
+			if (this.propPanels[field])
+			    this.propPanels[field].setValue(items[i][field]);
     }
 
 });
@@ -155,10 +166,10 @@ Servers.SubcontentTab.DescriptionPanel = Ext.extend(Ext.Panel, {
 Servers.SubcontentTab.PropPanel = Ext.extend(Ext.Panel, {
 
     constructor: function(config) {
-	makeComponents();
+	this.makeComponents(config);
     },
 
-    makeComponents: function() {
+    makeComponents: function(config) {
 	this.makeValuePanel();
 
 	Servers.SubcontentTab.PropPanel.superclass.constructor.call(this, {

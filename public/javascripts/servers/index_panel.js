@@ -100,13 +100,13 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
     },
 
     addEventHandlers: function() {
-	server.on('addedTag', this.updateTags.createDelegate(this));
-	server.on('destroyedTag', this.updateTags.createDelegate(this));
+	servers.on('addedTag', this.updateTags.createDelegate(this));
+	servers.on('destroyedTag', this.updateTags.createDelegate(this));
     },
 
     removeEventHandlers: function() {
-	server.un('addedTag', this.updateTags.createDelegate(this));
-	server.un('destroyedTag', this.updateTags.createDelegate(this));
+	servers.un('addedTag', this.updateTags.createDelegate(this));
+	servers.un('destroyedTag', this.updateTags.createDelegate(this));
     },
 
     updateTags: function() {

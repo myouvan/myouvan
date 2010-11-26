@@ -41,8 +41,8 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 		    this.formPanel.resetPanel();
 		    this.tagsPanel.resetPanel();
 		},
-		added: this.addEventHandlers,
-		destroy: this.removeEventHandlers
+		added: this.addEventHandlers.createDelegate(this),
+		destroy: this.removeEventHandlers.createDelegate(this)
 	    }
 	});
     },

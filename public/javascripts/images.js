@@ -86,7 +86,7 @@ var Images = Ext.extend(Ext.util.Observable, {
     initEventHandlers: function() {
 	this.indexPanel.on('destroy', function() {
 	    this.newImageWindow.destroy();
-	});
+	}, this);
 
 	this.indexPanel.on('createImage', this.createImage.createDelegate(this));
 	this.indexPanel.on('updateImage', this.updateImage.createDelegate(this));
