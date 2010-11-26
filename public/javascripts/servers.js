@@ -55,11 +55,7 @@ Servers.prototype.show = function() {
 	    success: function(res, opts) {
 		var result = Ext.decode(res.responseText);
 
-		var server = result.items.server;
-		var interfaces = result.items.interfaces;
-		var monitorPath = indexGrid.selectedPaths().monitor;
-
-		subcontentTab.showContent(server, interfaces, monitorPath);
+		subcontentTab.showContent(result.item);
 		subcontentTab.show();
 
 		Ext.getCmp('content-container').doLayout();
@@ -122,6 +118,20 @@ Servers.prototype.show = function() {
             }
 	});
 	selectServerWindow.show();
+    };
+
+    subcontentTab.destroyTag = function(config) {
+	Ext.Ajax.request({
+	    url: config.url,
+	    method: 'DELETE',
+	    success: function(res, opts) {
+		indexPanel.updateTags();
+		subcontentTab.updateTags();
+	    },
+	    failure: function(res, opts) {
+		Ext.MessageBox.alert('Error', 'Failed to add tag');
+	    }
+	});
     };
 
     var updateValues = function() {

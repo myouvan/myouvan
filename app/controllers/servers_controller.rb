@@ -67,10 +67,21 @@ class ServersController < ApplicationController
     render :json => { :success => true, :items => items }
   end
 
+  def tags
+    server = Server.find(params[:id])
+    render :json => {
+      :success => true,
+      :items => server.tags.collect {|tag|
+        tag.attributes.merge({ :paths => { :tag => url_for(tag) } })
+      }
+    }
+  end
+
   def show
     server = Server.includes(:interfaces).find(params[:id])
     render :json => {
-      :success => true, :items => {
+      :success => true,
+      :item => {
         :server => attributes_with_paths(server),
         :interfaces => server.interfaces.collect {|interface| interface.attributes }
       }
@@ -249,6 +260,7 @@ class ServersController < ApplicationController
       :paths => {
         :server => url_for(server),
         :monitor => monitor_server_path(server),
+        :tags => tags_server_path(server),
         :suspend => suspend_server_path(server),
         :resume => resume_server_path(server),
         :reboot => reboot_server_path(server),

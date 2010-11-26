@@ -111,17 +111,17 @@ Servers.SubcontentTab.DescriptionPanel = Ext.extend(Ext.Panel, {
 	};
     },
 
-    showContent: function(server, interfaces) {
-	for (var field in server)
+    showContent: function(item) {
+	for (var field in item.server)
 	    if (this.propPanels[field])
-		this.propPanels[field].setValue(server[field]);
+		this.propPanels[field].setValue(item.server[field]);
 
-	for (var i = 0; i < interfaces.length; ++i)
-	    for (var field in interfaces[i])
+	for (var i = 0; i < item.interfaces.length; ++i)
+	    for (var field in item.interfaces[i])
 		if (this.propPanels[field + i])
-		    this.propPanels[field + i].setValue(interfaces[i][field]);
+		    this.propPanels[field + i].setValue(item.interfaces[i][field]);
 
-	avatarImg = '<img src="' + server.paths.avatarThumb + '" width="150" height="150" />';
+	avatarImg = '<img src="' + item.server.paths.avatarThumb + '" width="150" height="150" />';
 	this.propPanels['avatar'].setValue(avatarImg);
     },
 

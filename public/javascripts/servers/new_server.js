@@ -116,7 +116,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 
 		this.prevButton.enable();
 	    } else if (this.activeItem == 2) {
-		this.formPanel.setTags(this.tagsPanel.tags);
+		this.formPanel.setTags(this.tagsPanel.tags());
 
 		this.nextButton.setText('Create');
 		this.nextButton.disable();

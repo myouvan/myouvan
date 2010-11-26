@@ -90,5 +90,10 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 	    width: 40,
 	    border: false
 	});
+    },
+
+    updateTags: function() {
+	this.tagFilterCombo.getStore().load();
     }
+
 });

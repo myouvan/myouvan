@@ -9,6 +9,7 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 		align: 'stretch',
 		pack: 'center',
 	    },
+	    border: false,
 	    items: {
 		width: 300,
 		layout: 'vbox',
@@ -24,7 +25,7 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 			flex: 1,
 			layout: 'fit',
 			border: false,
-			items: this.grid
+			items: this.tagsGrid
 		    }),
 		    new Ext.Panel({
 			layout: 'hbox',
@@ -47,7 +48,7 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
     },
 
     makeComponents: function() {
-	this.grid = new Servers.NewServerWindow.TagsGrid();
+	this.tagsGrid = new Servers.NewServerWindow.TagsGrid();
 	this.makeAddComponents();
     },
 
@@ -68,19 +69,19 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 		var value = panel.addCombo.getValue();
 		if (value == '')
 		    return;
-		panel.grid.addTag(value);
+		panel.tagsGrid.addTag(value);
 		panel.addCombo.reset();
 	    }
 	});
     },
 
     resetPanel: function() {
-	this.grid.resetGrid();
+	this.tagsGrid.resetGrid();
 	this.addCombo.reset();
     },
 
     tags: function() {
-	return this.grid.tags();
+	return this.tagsGrid.tags();
     }
 });
 

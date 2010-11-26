@@ -12,6 +12,7 @@ Provisioning::Application.routes.draw do
   resources :servers, :except => [:new, :edit, :update, :destroy] do
     member do
       get :monitor
+      get :tags
       post :suspend
       post :resume
       post :reboot
@@ -36,7 +37,7 @@ Provisioning::Application.routes.draw do
     end
   end
 
-  resources :tags, :only => [:index]
+  resources :tags, :only => [:index, :create, :destroy]
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

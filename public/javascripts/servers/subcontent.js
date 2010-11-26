@@ -12,14 +12,27 @@ Servers.SubcontentTab = Ext.extend(Ext.TabPanel, {
 		    autoScroll: true,
 		    items: this.descriptionPanel,
 		    border: false,
-		    bodyStyle: 'padding: 10px'
+		    bodyStyle: {
+			padding: '10px'
+		    }
 		},
 		{
 		    title: 'Monitoring',
 		    autoScroll: true,
 		    items: this.chartPanel,
 		    border: false,
-		    bodyStyle: 'padding: 10px'
+		    bodyStyle: {
+			padding: '10px'
+		    }
+		},
+		{
+		    title: 'Tags',
+		    autoScroll: true,
+		    items: this.tagsPanel,
+		    border: false,
+		    bodyStyle: {
+			padding: '10px'
+		    }
 		}
 	    ]
 	});
@@ -28,11 +41,21 @@ Servers.SubcontentTab = Ext.extend(Ext.TabPanel, {
     makeComponents: function() {
 	this.descriptionPanel = new Servers.SubcontentTab.DescriptionPanel();
 	this.chartPanel = new  Servers.SubcontentTab.ChartPanel();
+	this.tagsPanel = new Servers.SubcontentTab.TagsPanel();
+
+	var tab = this;
+	this.tagsPanel.addTag = function(tag) {
+	    tab.addTag(tag);
+	};
+	this.tagsPanel.destroyTag = function(config) {
+	    tab.destroyTag(config)
+	};
     },
 
-    showContent: function(server, interfaces, monitorPath) {
-	this.descriptionPanel.showContent(server, interfaces);
-	this.chartPanel.showContent(monitorPath);
+    showContent: function(item) {
+	this.descriptionPanel.showContent(item);
+	this.chartPanel.showContent(item);
+	this.tagsPanel.showContent(item);
     },
 
     updateValues: function(item) {
@@ -41,6 +64,10 @@ Servers.SubcontentTab = Ext.extend(Ext.TabPanel, {
 
     updateMonitor: function() {
 	this.chartPanel.updateMonitor();
+    },
+
+    updateTags: function() {
+	this.tagsPanel.updateTags();
     }
 
 });
