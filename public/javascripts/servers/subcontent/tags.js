@@ -192,9 +192,9 @@ Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     destroyRecord: function(item) {
-	var record = this.store.getById(item.id);
-	if (record)
-	    this.store.remove(record);
+	var ri = this.store.findExact('id', item.id);
+	if (ri != -1)
+	    this.store.removeAt(ri);
     }
 
 });

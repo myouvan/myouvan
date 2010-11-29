@@ -1,6 +1,7 @@
 Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 
     constructor: function(config) {
+	this.except = config.except;
 	this.submitConfig = config.submitConfig;
 
 	this.makeComponents();
@@ -37,10 +38,9 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
     },
 
     makeFormItems: function() {
-	formItems = [{
+	this.formItems = [{
 	    xtype: 'storecombobox',
 	    name: 'server[zone]',
-	    itemId: 'zone',
 	    fieldLabel: 'Zone',
 	    width: 150,
 	    storeConfig: {
@@ -49,7 +49,7 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 	    listeners: {
 		select: function(combo, record, index) {
 		    var psCombo = this.form.getComponent('physical_server');
-		    psCombo.getStore().baseParams['zone'] = record.get('value');
+		    psCombo.getStore().baseParams.zone = record.get('value');
 		    psCombo.getStore().load();
 		    psCombo.reset();
 		    psCombo.enable();
@@ -64,7 +64,10 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 	    width: 150,
 	    disabled: true,
 	    storeConfig: {
-		url: paths.servers.physical_servers
+		url: paths.servers.physical_servers,
+		baseParams: {
+		    except: this.except
+		}
 	    }
 	}];
     },
@@ -79,10 +82,5 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 	    items: this.formItems
 	});
     },
-
-    setExcept: function(value) {
-	var psCombo = this.form.getComponent('physical_server');
-	psCombo.getStore().baseParams['except'] = value;
-    }
 
 });

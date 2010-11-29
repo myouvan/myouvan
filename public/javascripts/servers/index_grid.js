@@ -10,7 +10,8 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    'rebootServer',
 	    'terminateServer',
 	    'restartServer',
-	    'migrateServer'
+	    'migrateServer',
+	    'destroyMetaData'
 	];
 	this.addEvents(events);
 	this.enableBubble(events);
@@ -18,6 +19,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.addRecordDelegate = this.addRecord.createDelegate(this);
 	this.updateRecordDelegate = this.updateRecord.createDelegate(this);
 	this.updateRecordsDelegate = this.updateRecords.createDelegate(this);
+	this.destroyRecordDelegate = this.destroyRecord.createDelegate(this);
     },
 
     makeComponents: function() {
@@ -34,6 +36,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		    this.operateServer('showServer');
 		},
 		rowcontextmenu: function(grid, row, e) {
+		    this.menuDisable(this.store.getAt(row));
 		    this.getSelectionModel().selectRow(row);
 		    this.operateServer('showServer');
 		    e.stopEvent();
@@ -135,10 +138,10 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		'cpus',
 		'memory',
 		'comment',
+		'user_terminate',
 		'tags',
 		'paths'
-	    ],
-	    storeId: 'id'
+	    ]
 	});
     },
 
@@ -151,37 +154,60 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		scope: this
 	    },
 	    items: [{
-		text: 'Suspend',
+		text: 'Suspend Server',
+		itemId: 'suspend',
 		handler: function() {
 		    this.operateServer('suspendServer')
 		}
 	    }, {
-		text: 'Resume',
+		text: 'Resume Server',
+		itemId: 'resume',
 		handler: function() {
 		    this.operateServer('resumeServer')
 		}
-	    }, {
-		text: 'Reboot',
+	    }, '-',{
+		text: 'Reboot Server',
+		itemId: 'reboot',
 		handler: function() {
 		    this.operateServer('rebootServer')
 		}
 	    }, {
-		text: 'Terminate',
+		text: 'Terminate Server',
+		itemId: 'terminate',
 		handler: function() {
 		    this.operateServer('terminateServer')
 		}
 	    }, {
-		text: 'Restart',
+		text: 'Restart Server',
+		itemId: 'restart',
 		handler: function() {
 		    this.operateServer('restartServer')
 		}
-	    }, {
-		text: 'Migrate',
+	    }, '-', {
+		text: 'Migrate Server',
+		itemId: 'migrate',
 		handler: function() {
 		    this.operateServer('migrateServer')
 		}
+	    }, '-', {
+		text: 'Destroy MetaData',
+		itemId: 'destroy',
+		handler: function() {
+		    this.operateServer('destroyMetaData')
+		}
 	    }]
 	});
+    },
+
+    menuDisable: function(record) {
+	var status = record.get('status');
+	var userTerminate = record.get('user_terminate');
+	this.contextMenu.getComponent('suspend').setDisabled(status != 'Running');
+	this.contextMenu.getComponent('resume').setDisabled(status != 'Paused');
+	this.contextMenu.getComponent('reboot').setDisabled(status != 'Running');
+	this.contextMenu.getComponent('terminate').setDisabled(status != 'Running');
+	this.contextMenu.getComponent('restart').setDisabled(status != 'Terminated' || userTerminate);
+	this.contextMenu.getComponent('migrate').setDisabled(status != 'Running');
     },
 
     operateServer: function(operation) {
@@ -202,12 +228,14 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	servers.on('createdServer', this.addRecordDelegate);
 	servers.on('updatedServer', this.updateRecordDelegate);
 	servers.on('updatedServers', this.updateRecordsDelegate);
+	servers.on('destroyedMetaData', this.destroyRecordDelegate);
     },
 
     removeEventHandlers: function() {
 	servers.un('createdServer', this.addRecordDelegate);
 	servers.un('updatedServer', this.updateRecordDelegate);
 	servers.un('updatedServers', this.updateRecordsDelegate);
+	servers.un('destroyedMetaData', this.destroyRecordDelegate);
     },
 
     addRecord: function(item) {
@@ -217,30 +245,32 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     updateRecord: function(item) {
-	var record = this.store.getById(item.id);
-	if (record) {
+	var ri = this.store.findExact('id', item.id);
+	if (ri != -1) {
+	    var record = this.store.getAt(ri);
 	    for (var field in item)
 		record.set(field, item[field]);
-	    record.commit();
 	}
+	this.store.commitChanges();
     },
 
     updateRecords: function(items) {
 	var walkedRecords = new Object();
 	for (var i = 0; i < items.length; ++i) {
 	    var item = items[i];
-	    var record = this.store.getById(item.id);
-	    if (!record) {
+	    var ri = this.store.findExact('id', item.id);
+	    if (ri == -1) {
 		var RecordType = this.store.recordType;
 		var record = new RecordType(items);
 		this.store.add(record);
 	    } else {
+		var record = this.store.getAt(ri);
 		for (var field in item)
 		    record.set(field, item[field]);
-		record.commit();
 	    }
 	    walkedRecords[item.id] = true;
 	}
+	this.store.commitChanges();
 
 	var deletedRecords = new Array();
 	this.store.each(function(record) {
@@ -250,6 +280,12 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
 	for (var i = 0; i < deletedRecords.length; ++i)
 	    this.store.remove(deletedRecords[i]);
+    },
+
+    destroyRecord: function(item) {
+	var ri = this.store.findExact('id', item.id);
+	if (ri != -1)
+	    this.store.removeAt(ri);
     }
 
 });

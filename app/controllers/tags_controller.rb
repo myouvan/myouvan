@@ -27,7 +27,7 @@ class TagsController < ApplicationController
   def attributes_with_paths(tag)
     tag.attributes.merge({
       :paths => {
-        :tag => url_for(tag)
+        :tag => tag_path(tag)
       }
     })
   end

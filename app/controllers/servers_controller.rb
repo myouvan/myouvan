@@ -78,7 +78,7 @@ class ServersController < ApplicationController
     render :json => {
       :success => true,
       :items => server.tags.collect {|tag|
-        tag.attributes.merge({ :paths => { :tag => url_for(tag) } })
+        tag.attributes.merge({ :paths => { :tag => tag_path(tag) } })
       }
     }
   end
@@ -127,8 +127,10 @@ class ServersController < ApplicationController
 
     server.avatar = Avatar.new(params[:avatar])
 
-    JSON.parse(params[:tags]).each do |params_tag|
-      server.tags << Tag.new(params_tag)
+    unless params[:tags].blank?
+      JSON.parse(params[:tags]).each do |params_tag|
+        server.tags << Tag.new(params_tag)
+      end
     end
 
     if server.save
@@ -154,6 +156,34 @@ class ServersController < ApplicationController
 
     starling = Starling.new(Settings.starling.server)
     starling.set(Settings.starling.queue, item)
+  end
+
+  def import
+    server = Server.new(params[:server])
+    server.status = 'Running'
+
+    params[:interface].keys.sort.each do |i|
+      server.interfaces << Interface.new(params[:interface][i])
+    end
+
+    server.avatar = Avatar.new(params[:avatar])
+
+    unless params[:tags].blank?
+      JSON.parse(params[:tags]).each do |params_tag|
+        server.tags << Tag.new(params_tag)
+      end
+    end
+
+    if server.save
+      tags = server.tags.collect {|tag| tag.value }
+      render :json => {
+        :success => true,
+        :item => attributes_with_paths(server).merge(:tags => tags)
+      }
+    else
+      render :json => { :success => false, :errors => server.errors_for_ext }
+      return
+    end
   end
 
   def suspend
@@ -284,11 +314,18 @@ class ServersController < ApplicationController
     starling.set(Settings.starling.queue, item)
   end
 
+  def destroy
+    server = Server.find(params[:id])
+    id = server.id
+    server.destroy
+    render :json => { :success => true, :item => { :id => id } }
+  end
+
   def attributes_with_paths(server)
     avatar = Avatar.select(:id).where(:server_id => server.id).first
     server.attributes.merge({
       :paths => {
-        :server => url_for(server),
+        :server => server_path(server),
         :monitor => monitor_server_path(server),
         :tags => tags_server_path(server),
         :suspend => suspend_server_path(server),

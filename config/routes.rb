@@ -9,7 +9,7 @@ Provisioning::Application.routes.draw do
     end
   end
 
-  resources :servers, :except => [:new, :edit, :update, :destroy] do
+  resources :servers, :except => [:new, :edit, :update] do
     member do
       get :monitor
       get :tags
@@ -39,7 +39,7 @@ Provisioning::Application.routes.draw do
   end
 
   resources :tags, :only => [:index, :create, :destroy]
-  resources :targets, :only => [:index]
+  resources :targets, :only => [:index, :show]
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

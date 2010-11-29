@@ -4,6 +4,8 @@ require 'rexml/document'
 class TargetsController < ApplicationController
 
   def index
+    server_names = Server.all.collect {|server| server.name }
+
     targets = Array.new
     Settings.physical_server.each do |ps|
       ps['physical_servers'].each do |physical_server|
@@ -11,6 +13,8 @@ class TargetsController < ApplicationController
         begin
           domains = conn.list_domains.collect {|domain_id|
             conn.lookup_domain_by_id(domain_id)
+          }.select {|domain|
+            not server_names.include?(domain.name)
           }.sort_by {|domain|
             domain.name
           }
@@ -21,6 +25,11 @@ class TargetsController < ApplicationController
               :physical_server => physical_server,
             }
             target.merge!(parse_xml_desc(domain.xml_desc))
+            target.merge!({
+              :paths => {
+                :target => target_path(target[:name])
+              }
+            })
             targets << target
           end
         ensure
@@ -54,6 +63,26 @@ class TargetsController < ApplicationController
       :storage_iqn => storage_iqn.to_s,
       :mac_address0 => mac_address0.to_s,
       :mac_address1 => mac_address1.to_s
+    }
+  end
+
+  def show
+    name = params[:id]
+    physical_server = params[:physical_server]
+
+    el = Equallogic.new
+    pool = el.get_pool(params[:id])
+
+    centos = Centos.new
+    ip_address0, ip_address1 = centos.get_ip_addresses(name, physical_server)
+
+    render :json => {
+      :success => true,
+      :item => {
+        :pool => pool,
+        :ip_address0 => ip_address0,
+        :ip_address1 => ip_address1
+      }
     }
   end
 

@@ -3,13 +3,13 @@ require 'my_expect'
 
 class Centos
 
-  def initialize(logger)
-    @logger = logger
+  def initialize(logger = nil)
+    @logger = logger || Rails.logger
   end
 
-  def connect(server)
-    @prompt = /.*\[root@vmiw-tmp01 ~\]# /
-    ssh_cmd = "ssh -t -l root #{server.physical_server} virsh console #{server.name}"
+  def connect(name, physical_server)
+    @prompt = /.*\[root@.* ~\]# /
+    ssh_cmd = "ssh -t -l root #{physical_server} virsh console #{name}"
 
     PTY.spawn(ssh_cmd) {|r, w, pid|
       begin
@@ -21,7 +21,7 @@ class Centos
           self.print "\r"
         end
 
-        @logger.debug "starting up server #{server.name}"
+        @logger.debug "connected server #{name} on #{physical_server} through console"
 
         yield r, w
       ensure
@@ -31,7 +31,7 @@ class Centos
   end
 
   def config_server(server)
-    connect(server) {|r, w|
+    connect(server.name, server.physical_server) {|r, w|
       r.expect(/login: /, 300) {|m|
         w.cmd Settings.virtual_server.centos.account
       }
@@ -71,7 +71,7 @@ class Centos
     r.expect(@prompt, 20) {|m|
       w.cmd 'sed -i -f - /etc/sysconfig/network'
     }
-    r.expect(/\r\n/, 20) {|m|
+    r.expect(/\r?\n/, 20) {|m|
       w.cmd "s/^\\(HOSTNAME=\\).*$/\\1#{server.name}/"
       w.print "\C-d"
     }
@@ -82,7 +82,7 @@ class Centos
       r.expect(@prompt, 20) {|m|
         w.cmd "sed -i -f - /etc/sysconfig/network-scripts/ifcfg-eth#{interface.number}"
       }
-      r.expect(/\r\n/, 20) {|m|
+      r.expect(/\r?\n/, 20) {|m|
         w.cmd "s/^\\(HWADDR=\\).*$/\\1#{interface.mac_address}/"
         w.cmd "s/^\\(IPADDR=\\).*$/\\1#{interface.ip_address}/"
         w.cmd "s/^\\(ONBOOT=\\).*$/\\1yes/"
@@ -92,10 +92,49 @@ class Centos
   end
 
   def wait_for_started(server)
-    connect(server) {|r, w|
+    connect(server.name, server.physical_server) {|r, w|
       r.expect(/login: /, 300) {|m|
       }
     }
+  end
+
+  def get_ip_addresses(name, physical_server)
+    ip_address0, ip_address1 = nil, nil
+
+    connect(name, physical_server) {|r, w|
+      r.expect(/Escape character is \^\]/, 20) {|m|
+        w.cmd ''
+      }
+
+      r.expect(/login: /, 20) {|m|
+        w.cmd Settings.virtual_server.centos.account
+      }
+      r.expect(/Password: /, 20) {|m|
+        w.cmd Settings.virtual_server.centos.password
+      }
+
+      r.expect(@prompt, 20) {|m|
+        w.cmd 'cat /etc/sysconfig/network-scripts/ifcfg-eth0'
+      }
+      r.expect(/IPADDR=(.*)\r?\n/, 20) {|m|
+        ip_address0 = m[1]
+      }
+
+      r.expect(@prompt, 20) {|m|
+        w.cmd 'cat /etc/sysconfig/network-scripts/ifcfg-eth1'
+      }
+      r.expect(/IPADDR=(.*)\r?\n/, 20) {|m|
+        ip_address1 = m[1]
+      }
+
+      r.expect(@prompt, 20) {|m|
+        w.cmd 'exit'
+      }
+      r.expect(/login: /, 20) {|m|
+      }
+    }
+
+    [ip_address0, ip_address1]
   end
 
 end

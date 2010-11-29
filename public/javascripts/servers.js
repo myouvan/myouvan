@@ -7,6 +7,7 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	    'updatedServers',
 	    'gotServer',
 	    'monitorServer',
+	    'destroyedMetaData',
 	    'addedTag',
 	    'destroyedTag'
 	]);
@@ -56,7 +57,7 @@ var Servers = Ext.extend(Ext.util.Observable, {
 		success: function(f, action) {
 		    var item = action.result.item;
 		    this.fireEvent('createdServer', item);
-		    this.newServerWindow.close();
+		    newServerWindow.close();
 		},
 		failure: function(f, action) {
 		    Ext.MessageBox.alert('Error', 'Failed to create server');
@@ -107,20 +108,21 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	this.operateServer(item, 'resume');
     },
 
-    rebootServer: function() {
+    rebootServer: function(item) {
 	this.operateServer(item, 'reboot');
     },
 
-    terminateServer: function() {
+    terminateServer: function(item) {
 	this.operateServer(item, 'terminate');
     },
 
-    restartServer: function() {
+    restartServer: function(item) {
 	this.operateServer(item, 'restart');
     },
 
     migrateServer: function(item) {
 	var selectServerWindow = new Servers.SelectServerWindow({
+	    except: item.physical_server,
 	    submitConfig: {
 		url: item.paths.migrate,
 		method: 'POST',
@@ -136,8 +138,21 @@ var Servers = Ext.extend(Ext.util.Observable, {
 		scope: this
 	    }
 	});
-	selectServerWindow.setExcept(item.physical_server);
 	selectServerWindow.show();
+    },
+
+    destroyMetaData: function(item) {
+	Ext.Ajax.request({
+	    url: item.paths.server,
+	    method: 'DELETE',
+	    success: function(res, opts) {
+		this.fireEvent('destroytedMetaData', item);
+	    },
+	    failure: function(res, opts) {
+		Ext.MessageBox.alert('Error', 'Failed to ' + operation + ' server');
+	    },
+	    scope: this
+	});
     },
 
     addTag: function(tag) {
@@ -223,6 +238,7 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	this.indexPanel.on('terminateServer', this.terminateServer.createDelegate(this));
 	this.indexPanel.on('restartServer', this.restartServer.createDelegate(this));
 	this.indexPanel.on('migrateServer', this.migrateServer.createDelegate(this));
+	this.indexPanel.on('destroyMetaData', this.destroyMetaData.createDelegate(this));
 
 	this.subcontentTab.on('addTag', this.addTag.createDelegate(this));
 	this.subcontentTab.on('destroyTag', this.destroyTag.createDelegate(this));

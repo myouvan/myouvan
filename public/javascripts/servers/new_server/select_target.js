@@ -85,7 +85,8 @@ Servers.NewServerWindow.SelectTargetGrid = Ext.extend(Ext.grid.GridPanel, {
 		'memory',
 		'storage_iqn',
 		'mac_address0',
-		'mac_address1'
+		'mac_address1',
+		'paths'
 	    ]
 	});
     }

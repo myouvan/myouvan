@@ -1,6 +1,8 @@
 Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 
-    constructor: function() {
+    constructor: function(config) {
+	this.action = config.action;
+
 	this.makeComponents();
     },
 
@@ -25,13 +27,14 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	this.formItems = [{
 	    xtype: 'hidden',
 	    name: 'server[image_id]',
-	    itemId: 'image_id'
+	    itemId: 'image_id',
 	}, {
 	    xtype: 'textfield',
 	    name: 'server[name]',
 	    itemId: 'name',
 	    fieldLabel: 'Name',
 	    width: 100,
+	    readOnly: this.action == 'import',
 	    msgTarget: 'qtip'
 	}, {
 	    xtype: 'textfield',
@@ -46,6 +49,7 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    itemId: 'zone',
 	    fieldLabel: 'Zone',
 	    width: 150,
+	    readOnly: this.action == 'import',
 	    storeConfig: {
 		url: paths.servers.zones
 	    },
@@ -65,7 +69,8 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    itemId: 'physical_server',
 	    fieldLabel: 'Physical Server',
 	    width: 150,
-	    disabled: true,
+	    readOnly: this.action == 'import',
+	    disabled: this.action == 'create',
 	    storeConfig: {
 		url: paths.servers.physical_servers
 	    }
@@ -75,6 +80,7 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    itemId: 'pool',
 	    fieldLabel: 'Pool',
 	    width: 150,
+	    readOnly: this.action == 'import',
 	    storeConfig: {
 		url: paths.servers.pools
 	    }
@@ -93,6 +99,7 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    itemId: 'cpus',
 	    fieldLabel: 'CPUs',
 	    width: 100,
+	    readOnly: this.action == 'import',
 	    allowDecimals: false,
 	    msgTarget: 'qtip'
 	}, {
@@ -101,6 +108,7 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    itemId: 'memory',
 	    fieldLabel: 'Memory(MB)',
 	    width: 100,
+	    readOnly: this.action == 'import',
 	    allowDecimals: false,
 	    msgTarget: 'qtip'
 	}, {
@@ -114,18 +122,28 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    itemId: 'ip_address0',
 	    fieldLabel: 'IP Address(1)',
 	    width: 150,
+	    readOnly: this.action == 'import',
 	    msgTarget: 'qtip'
+	}, {
+	    xtype: 'hidden',
+	    name: 'interface[0][mac_address]',
+	    itemId: 'mac_address0'
 	}, {
 	    xtype: 'hidden',
 	    name: 'interface[1][number]',
 	    itemId: 'interface_number1',
 	    value: '1'
 	}, {
+	    xtype: 'hidden',
+	    name: 'interface[1][mac_address]',
+	    itemId: 'mac_address1'
+	}, {
 	    xtype: 'textfield',
 	    name: 'interface[1][ip_address]',
 	    itemId: 'ip_address1',
 	    fieldLabel: 'IP Address(2)',
 	    width: 150,
+	    readOnly: this.action == 'import',
 	    msgTarget: 'qtip'
 	}, {
 	    xtype: 'textarea',
@@ -177,12 +195,8 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
     setValues: function(item) {
 	for (var field in item) {
 	    var cmp = this.form.getComponent(field);
-	    if (cmp) {
+	    if (cmp)
 		cmp.setValue(item[field]);
-		cmp.setReadOnly(true);
-		if (cmp.setHideTrigger)
-		    cmp.setHideTrigger(true);
-	    }
 	}
     },
 

@@ -26,7 +26,7 @@ class IO
         c = getc.chr
       end
       buf << c
-      logger.debug c if logger
+      logger.debug c.inspect if logger
       if mat=e_pat.match(buf)
         result = [buf, *mat.to_a[1..-1]]
         break

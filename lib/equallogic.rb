@@ -3,8 +3,8 @@ require 'my_expect'
 
 class Equallogic
 
-  def initialize(logger)
-    @logger = logger
+  def initialize(logger = nil)
+    @logger = logger || Rails.logger
     @prompt = /^#{Settings.storage.server}> /
   end
 
@@ -88,6 +88,33 @@ class Equallogic
     }
 
     @logger.debug "deleted volume #{server.name}"
+  end
+
+  def get_pool(name)
+    pool = nil
+
+    connect {|r, w|
+      r.expect(@prompt, 20) {|m|
+        w.cmd "volume select #{name} show"
+      }
+
+      until pool
+        r.expect(/Pool: (.*)[\r\n]|Press any key to continue \(Q to quit\)/, 20) {|m|
+          if m[1]
+            pool = m[1]
+          else
+            w.print ' '
+          end
+        }
+      end
+
+      r.expect(/Press any key to continue \(Q to quit\)/, 20) {|m|
+        w.print 'Q'
+        w.cmd ''
+      }
+    }
+
+    pool
   end
 
 end

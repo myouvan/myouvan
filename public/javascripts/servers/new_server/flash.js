@@ -4,7 +4,7 @@ Servers.NewServerWindow.FlashPanel = Ext.extend(Ext.Panel, {
 	this.makeComponents();
 
 	this.addEvents('setAvatar');
-	ovater_set = this.setAvatar;
+	ovater_set = this.setAvatar.createDelegate(this);
     },
 
     makeComponents: function() {

@@ -12,6 +12,7 @@ Ext.ux.ItemsStore = Ext.extend(Ext.data.JsonStore, {
 		    Accept: 'application/json'
 		}
 	    });
+
 	    delete config.url;
 	}
 

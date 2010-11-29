@@ -59,7 +59,7 @@ class ImagesController < ApplicationController
   def attributes_with_paths(image)
     image.attributes.merge({
       :paths => {
-        :image => url_for(image)
+        :image => image_path(image)
       }
     })
   end

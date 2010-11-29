@@ -75,8 +75,7 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		'iqn',
 		'comment',
 		'paths'
-	    ],
-	    storeId: 'id'
+	    ]
 	});
     },
 
@@ -123,18 +122,19 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     updateRecord: function(item) {
-	var record = this.store.getById(item.id);
-	if (record) {
+	var ri = this.store.findExact('id', item.id);
+	if (ri != -1) {
+	    var record = this.store.getAt(ri);
 	    for (var field in item)
 		record.set(field, item[field]);
-	    record.commit();
 	}
+	this.store.commitChanges();
     },
 
     destroyRecord: function(item) {
-	var record = this.store.getById(item.id);
-	if (record)
-	    this.store.remove(record);
+	var ri = this.store.findExact('id', item.id);
+	if (ri != -1)
+	    this.store.removeAt(ri);
     }
 
 });
