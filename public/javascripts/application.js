@@ -68,3 +68,6 @@ Ext.ux.EditableStoreComboBox = Ext.extend(Ext.form.ComboBox, {
 	Ext.ux.StoreComboBox.superclass.constructor.call(this, config);
     }
 });
+
+Ext.reg('storecombobox', Ext.ux.StoreComboBox);
+Ext.reg('editablestorecombobox', Ext.ux.EditableStoreComboBox);

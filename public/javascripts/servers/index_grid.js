@@ -66,69 +66,59 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		   ' style="vertical-align: top" />';
 	};
 
-	this.colModel = new Ext.grid.ColumnModel([
-	    {
-		header: 'ID',
-		dataIndex: 'id',
-		width: 30,
-		sortable: true
-	    },
-	    {
-		header: 'Image ID',
-		dataIndex: 'image_id',
-		width: 60,
-		sortable: true
-	    },
-	    {
-		header: 'Name',
-		dataIndex: 'name',
-		width: 120,
-		sortable: true,
-		renderer: function(value, metadata, record) {
-		    var url = record.get('paths').avatarIcon;
-		    return img(url, 32, 32) + value;
-		}
-	    },
-	    {
-		header: 'Title',
-		dataIndex: 'title',
-		width: 200,
-		sortable: true
-	    },
-	    {
-		header: 'Status',
-		dataIndex: 'status',
-		width: 100,
-		sortable: true,
-		renderer: function(value, metadata, record) {
-		    var url = '/images/' + imagePaths[value];
-		    return img(url, 16, 16) + value;
-		}
-	    },
-	    {
-		header: 'Physical Server',
-		dataIndex: 'physical_server',
-		width: 150,
-		sortable: true
-	    },
-	    {
-		header: 'CPUs',
-		dataIndex: 'cpus',
-		width: 50,
-		sortable: true
-	    },
-	    {
-		header: 'Memory(MB)',
-		dataIndex: 'memory',
-		width: 80,
-		sortable: true
-	    },
-	    {
-		header: 'Comment',
-		dataIndex: 'comment',
-		width: 250
+	this.colModel = new Ext.grid.ColumnModel([{
+	    header: 'ID',
+	    dataIndex: 'id',
+	    width: 30,
+	    sortable: true
+	}, {
+	    header: 'Image ID',
+	    dataIndex: 'image_id',
+	    width: 60,
+	    sortable: true
+	}, {
+	    header: 'Name',
+	    dataIndex: 'name',
+	    width: 120,
+	    sortable: true,
+	    renderer: function(value, metadata, record) {
+		var url = record.get('paths').avatarIcon;
+		return img(url, 32, 32) + value;
 	    }
-	]);
+	}, {
+	    header: 'Title',
+	    dataIndex: 'title',
+	    width: 200,
+	    sortable: true
+	}, {
+	    header: 'Status',
+	    dataIndex: 'status',
+	    width: 100,
+	    sortable: true,
+	    renderer: function(value, metadata, record) {
+		var url = '/images/' + imagePaths[value];
+		return img(url, 16, 16) + value;
+	    }
+	}, {
+	    header: 'Physical Server',
+	    dataIndex: 'physical_server',
+	    width: 150,
+	    sortable: true
+	}, {
+	    header: 'CPUs',
+	    dataIndex: 'cpus',
+	    width: 50,
+	    sortable: true
+	}, {
+	    header: 'Memory(MB)',
+	    dataIndex: 'memory',
+	    width: 80,
+	    sortable: true
+	}, {
+	    header: 'Comment',
+	    dataIndex: 'comment',
+	    width: 250
+	}]);
     },
 
     makeStore: function() {
@@ -147,7 +137,8 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		'comment',
 		'tags',
 		'paths'
-	    ]
+	    ],
+	    storeId: 'id'
 	});
     },
 
@@ -159,44 +150,37 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    defaults: {
 		scope: this
 	    },
-	    items: [
-		{
-		    text: 'Suspend',
-		    handler: function() {
-			this.operateServer('suspendServer')
-		    }
-		},
-		{
-		    text: 'Resume',
-		    handler: function() {
-			this.operateServer('resumeServer')
-		    }
-		},
-		{
-		    text: 'Reboot',
-		    handler: function() {
-			this.operateServer('rebootServer')
-		    }
-		},
-		{
-		    text: 'Terminate',
-		    handler: function() {
-			this.operateServer('terminateServer')
-		    }
-		},
-		{
-		    text: 'Restart',
-		    handler: function() {
-			this.operateServer('restartServer')
-		    }
-		},
-		{
-		    text: 'Migrate',
-		    handler: function() {
-			this.operateServer('migrateServer')
-		    }
+	    items: [{
+		text: 'Suspend',
+		handler: function() {
+		    this.operateServer('suspendServer')
 		}
-	    ]
+	    }, {
+		text: 'Resume',
+		handler: function() {
+		    this.operateServer('resumeServer')
+		}
+	    }, {
+		text: 'Reboot',
+		handler: function() {
+		    this.operateServer('rebootServer')
+		}
+	    }, {
+		text: 'Terminate',
+		handler: function() {
+		    this.operateServer('terminateServer')
+		}
+	    }, {
+		text: 'Restart',
+		handler: function() {
+		    this.operateServer('restartServer')
+		}
+	    }, {
+		text: 'Migrate',
+		handler: function() {
+		    this.operateServer('migrateServer')
+		}
+	    }]
 	});
     },
 
@@ -233,9 +217,8 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     updateRecord: function(item) {
-	var ri = this.store.findExact('id', item.id);
-	if (ri != -1) {
-	    var record = this.store.getAt(ri);
+	var record = this.store.getById(item.id);
+	if (record) {
 	    for (var field in item)
 		record.set(field, item[field]);
 	    record.commit();
@@ -245,24 +228,23 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     updateRecords: function(items) {
 	var walkedRecords = new Object();
 	for (var i = 0; i < items.length; ++i) {
-	    var ri = this.store.findExact('id', items[i].id);
-	    if (ri == -1) {
+	    var item = items[i];
+	    var record = this.store.getById(item.id);
+	    if (!record) {
 		var RecordType = this.store.recordType;
-		var record = new RecordType(items[i]);
+		var record = new RecordType(items);
 		this.store.add(record);
-		walkedRecords[record.get('id')] = true;
 	    } else {
-		var record = this.store.getAt(ri);
-		for (var field in items[i])
-		    record.set(field, items[i][field]);
+		for (var field in item)
+		    record.set(field, item[field]);
 		record.commit();
-		walkedRecords[record.get('id')] = true;
 	    }
+	    walkedRecords[item.id] = true;
 	}
 
 	var deletedRecords = new Array();
 	this.store.each(function(record) {
-	    if (!walkedRecords[record.id])
+	    if (!walkedRecords[record.get('id')])
 		deletedRecords.push(record);
 	});
 

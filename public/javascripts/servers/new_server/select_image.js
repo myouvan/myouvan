@@ -19,11 +19,11 @@ Servers.NewServerWindow.SelectImagePanel = Ext.extend(Ext.Panel, {
     },
 
     isSelected: function() {
-	return this.grid.isSelected();
+	return this.grid.getSelectionModel().hasSelection();
     },
 
     selectedId: function() {
-	return this.grid.selectedId();
+	return this.grid.getSelectionModel().getSelected().get('id');
     },
 
     resetPanel: function() {
@@ -50,31 +50,26 @@ Servers.NewServerWindow.SelectImageGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     makeColModel: function() {
-	this.colModel = new Ext.grid.ColumnModel([
-	    {
-		header: 'ID',
-		dataIndex: 'id',
-		width: 30,
-		sortable: true
-	    },
-	    {
-		header: 'Title',
-		dataIndex: 'title',
-		width: 200,
-		sortable: true
-	    },
-	    {
-		header: 'OS',
-		dataIndex: 'os',
-		width: 150,
-		sortable: true
-	    },
-	    {
-		header: 'Comment',
-		dataIndex: 'comment',
-		width: 230
-	    }
-	]);
+	this.colModel = new Ext.grid.ColumnModel([{
+	    header: 'ID',
+	    dataIndex: 'id',
+	    width: 30,
+	    sortable: true
+	}, {
+	    header: 'Title',
+	    dataIndex: 'title',
+	    width: 200,
+	    sortable: true
+	}, {
+	    header: 'OS',
+	    dataIndex: 'os',
+	    width: 150,
+	    sortable: true
+	}, {
+	    header: 'Comment',
+	    dataIndex: 'comment',
+	    width: 230
+	}]);
     },
 
     makeStore: function() {
@@ -88,14 +83,6 @@ Servers.NewServerWindow.SelectImageGrid = Ext.extend(Ext.grid.GridPanel, {
 		'comment'
 	    ]
 	});
-    },
-
-    isSelected: function() {
-	return this.getSelectionModel().hasSelection();
-    },
-
-    selectedId: function() {
-	return this.getSelectionModel().getSelected().get('id');	
     },
 
     resetGrid: function() {

@@ -10,9 +10,6 @@ Servers.NewServerWindow.SelectTargetPanel = Ext.extend(Ext.Panel, {
 	Servers.NewServerWindow.SelectTargetPanel.superclass.constructor.call(this, {
 	    title: 'Select Target',
 	    layout: 'fit',
-	    layoutConfig: {
-		align: 'stretch'
-	    },
 	    border: false,
 	    items: this.grid,
 	    listeners: {
@@ -24,11 +21,11 @@ Servers.NewServerWindow.SelectTargetPanel = Ext.extend(Ext.Panel, {
     },
 
     isSelected: function() {
-	return this.grid.isSelected();
+	return this.grid.getSelectionModel().hasSelection()
     },
 
-    selectedId: function() {
-	return this.grid.selectedId();
+    selectedRecord: function() {
+	return this.grid.getSelectionModel().getSelected();
     },
 
     resetPanel: function() {
@@ -55,38 +52,32 @@ Servers.NewServerWindow.SelectTargetGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     makeColModel: function() {
-	this.colModel = new Ext.grid.ColumnModel([
-	    {
-		header: 'Zone',
-		dataIndex: 'zone',
-		width: 100,
-		sortable: true
-	    },
-	    {
-		header: 'Physical Server',
-		dataIndex: 'physical_server',
-		width: 100,
-		sortable: true
-	    },
-	    {
-		header: 'Name',
-		dataIndex: 'name',
-		width: 150,
-		sortable: true
-	    },
-	    {
-		header: 'CPUs',
-		dataIndex: 'cpus',
-		width: 80,
-		sortable: true
-	    },
-	    {
-		header: 'Memory(MB)',
-		dataIndex: 'memory',
-		width: 100,
-		sortable: true
-	    }
-	]);
+	this.colModel = new Ext.grid.ColumnModel([{
+	    header: 'Zone',
+	    dataIndex: 'zone',
+	    width: 100,
+	    sortable: true
+	}, {
+	    header: 'Physical Server',
+	    dataIndex: 'physical_server',
+	    width: 100,
+	    sortable: true
+	}, {
+	    header: 'Name',
+	    dataIndex: 'name',
+	    width: 150,
+	    sortable: true
+	}, {
+	    header: 'CPUs',
+	    dataIndex: 'cpus',
+	    width: 80,
+	    sortable: true
+	}, {
+	    header: 'Memory(MB)',
+	    dataIndex: 'memory',
+	    width: 100,
+	    sortable: true
+	}]);
     },
 
     makeStore: function() {
@@ -105,14 +96,6 @@ Servers.NewServerWindow.SelectTargetGrid = Ext.extend(Ext.grid.GridPanel, {
 		'mac_address1'
 	    ]
 	});
-    },
-
-    isSelected: function() {
-	return this.getSelectionModel().hasSelection();
-    },
-
-    selectedId: function() {
-	return this.getSelectionModel().getSelected().get('id');	
     },
 
     resetGrid: function() {

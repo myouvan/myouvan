@@ -3,7 +3,10 @@ Servers.SubcontentTab = Ext.extend(Ext.TabPanel, {
     constructor: function() {
 	this.makeComponents();
 
-	this.addEvents(['addTag', 'destroyTag']);
+	this.addEvents([
+	    'addTag',
+	    'destroyTag'
+	]);
     },
 
     makeComponents: function() {
@@ -15,35 +18,23 @@ Servers.SubcontentTab = Ext.extend(Ext.TabPanel, {
 	    activeTab: 0,
 	    layoutOnTabChange: true,
 	    border: false,
-	    items: [
-		{
-		    title: 'Description',
-		    autoScroll: true,
-		    items: this.descriptionPanel,
-		    border: false,
-		    bodyStyle: {
-			padding: '10px'
-		    }
-		},
-		{
-		    title: 'Monitoring',
-		    autoScroll: true,
-		    items: this.chartPanel,
-		    border: false,
-		    bodyStyle: {
-			padding: '10px'
-		    }
-		},
-		{
-		    title: 'Tags',
-		    autoScroll: true,
-		    items: this.tagsPanel,
-		    border: false,
-		    bodyStyle: {
-			padding: '10px'
-		    }
+	    defaults: {
+		autoScroll: true,
+		border: false,
+		bodyStyle: {
+		    padding: '10px'
 		}
-	    ]
+	    },
+	    items: [{
+		title: 'Description',
+		items: this.descriptionPanel,
+	    }, {
+		title: 'Monitoring',
+		items: this.chartPanel,
+	    }, {
+		title: 'Tags',
+		items: this.tagsPanel,
+	    }]
 	});
     }
 

@@ -3,7 +3,10 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     constructor: function() {
 	this.makeComponents();
 
-	var events = ['updateImage', 'destroyImage'];
+	var events = [
+	    'updateImage',
+	    'destroyImage'
+	];
 	this.addEvents(events);
 	this.enableBubble(events);
 
@@ -34,37 +37,31 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     makeColModel: function() {
-	this.colModel = new Ext.grid.ColumnModel([
-	    {
-		header: 'ID',
-		dataIndex: 'id',
-		width: 30,
-		sortable: true
-	    },
-	    {
-		header: 'Title',
-		dataIndex: 'title',
-		width: 200,
-		sortable: true
-	    },
-	    {
-		header: 'OS',
-		dataIndex: 'os',
-		width: 150,
-		sortable: true
-	    },
-	    {
-		header: 'IQN',
-		dataIndex: 'iqn',
-		width: 450,
-		sortable: true
-	    },
-	    {
-		header: 'Comment',
-		dataIndex: 'comment',
-		width: 250
-	    }
-	]);
+	this.colModel = new Ext.grid.ColumnModel([{
+	    header: 'ID',
+	    dataIndex: 'id',
+	    width: 30,
+	    sortable: true
+	}, {
+	    header: 'Title',
+	    dataIndex: 'title',
+	    width: 200,
+	    sortable: true
+	}, {
+	    header: 'OS',
+	    dataIndex: 'os',
+	    width: 150,
+	    sortable: true
+	}, {
+	    header: 'IQN',
+	    dataIndex: 'iqn',
+	    width: 450,
+	    sortable: true
+	}, {
+	    header: 'Comment',
+	    dataIndex: 'comment',
+	    width: 250
+	}]);
     },
 
     makeStore: function() {
@@ -78,7 +75,8 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		'iqn',
 		'comment',
 		'paths'
-	    ]
+	    ],
+	    storeId: 'id'
 	});
     },
 
@@ -90,22 +88,19 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    defaults: {
 		scope: this
 	    },
-	    items: [
-		{
-		    text: 'Edit',
-		    handler: function() {
-			var record = this.getSelectionModel().getSelected();
-			this.fireEvent('updateImage', record.data);
-		    }
-		},
-		{
-		    text: 'Destroy',
-		    handler: function() {
-			var record = this.getSelectionModel().getSelected();
-			this.fireEvent('destroyImage', record.data);
-		    }
+	    items: [{
+		text: 'Edit',
+		handler: function() {
+		    var record = this.getSelectionModel().getSelected();
+		    this.fireEvent('updateImage', record.data);
 		}
-	    ]
+	    }, {
+		text: 'Destroy',
+		handler: function() {
+		    var record = this.getSelectionModel().getSelected();
+		    this.fireEvent('destroyImage', record.data);
+		}
+	    }]
 	});
     },
 
@@ -128,9 +123,8 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     updateRecord: function(item) {
-	var ri = this.store.findExact('id', item.id);
-	if (ri != -1) {
-	    var record = this.store.getAt(ri);
+	var record = this.store.getById(item.id);
+	if (record) {
 	    for (var field in item)
 		record.set(field, item[field]);
 	    record.commit();
@@ -138,9 +132,9 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     destroyRecord: function(item) {
-	var ri = this.store.findExact('id', item.id);
-	if (ri != -1)
-	    this.store.removeAt(ri);
+	var record = this.store.getById(item.id);
+	if (record)
+	    this.store.remove(record);
     }
 
 });

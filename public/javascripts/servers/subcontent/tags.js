@@ -12,51 +12,40 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
     },
 
     makeComponents: function() {
-	this.makeTagsGridContainer();
 	this.makeAddComponents();
 
 	Servers.SubcontentTab.TagsPanel.superclass.constructor.call(this, {
-	    layout: 'fit',
+	    layout: 'vbox',
+	    layoutConfig: {
+		align: 'stretch'
+	    },
 	    width: 300,
 	    height: 300,
 	    border: false,
-	    items: {
-		layout: 'vbox',
-		layoutConfig: {
-		    align: 'stretch'
-		},
+	    items: [{
+		flex: 1,
+		layout: 'fit',
+		itemId: 'container',
+		border: false
+	    }, {
+		layout: 'hbox',
+		height: 30,
 		border: false,
+		layoutConfig: {
+		    align: 'middle'
+		},
+		defaults: {
+		    margins: '0 2 0 2'
+		},
 		items: [
-		    this.tagsGridContainer,
-		    new Ext.Panel({
-			layout: 'hbox',
-			height: 30,
-			border: false,
-			layoutConfig: {
-			    align: 'middle'
-			},
-			defaults: {
-			    margins: '0 2 0 2'
-			},
-			items: [
-			    this.addCombo,
-			    this.addButton
-			]
-		    })
+		    this.addCombo,
+		    this.addButton
 		]
-	    },
+	    }],
 	    listeners: {
 		added: this.addEventHandlers.createDelegate(this),
 		beforedestroy: this.removeEventHandlers.createDelegate(this)
 	    }
-	});
-    },
-
-    makeTagsGridContainer: function() {
-	this.tagsGridContainer = new Ext.Panel({
-	    flex: 1,
-	    layout: 'fit',
-	    border: false
 	});
     },
 
@@ -104,8 +93,9 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 	    url: item.server.paths.tags
 	});
 
-	this.tagsGridContainer.removeAll();
-	this.tagsGridContainer.add(this.tagsGrid);
+	var container = this.getComponent('container');
+	container.removeAll();
+	container.add(this.tagsGrid);
 
 	this.currentItem = item;
     },
@@ -150,14 +140,12 @@ Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     makeColModel: function() {
-	this.colModel = new Ext.grid.ColumnModel([
-	    {
-		header: 'Value',
-		dataIndex: 'value',
-		width: 250,
-		sortable: true
-	    }
-	]);
+	this.colModel = new Ext.grid.ColumnModel([{
+	    header: 'Value',
+	    dataIndex: 'value',
+	    width: 250,
+	    sortable: true
+	}]);
     },
 
     makeStore: function(config) {
@@ -168,7 +156,8 @@ Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 		'id',
 		'value',
 		'paths'
-	    ]
+	    ],
+	    storeId: 'id'
 	});
     },
 
@@ -177,16 +166,14 @@ Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 	    style: {
 		overflow: 'visible'
 	    },
-	    items: [
-		{
-		    text: 'Delete',
-		    handler: function() {
-			var record = this.getSelectionModel().getSelected();
-			this.fireEvent('destroyTag', record.data);
-		    },
-		    scope: this
-		}
-	    ]
+	    items: [{
+		text: 'Delete',
+		handler: function() {
+		    var record = this.getSelectionModel().getSelected();
+		    this.fireEvent('destroyTag', record.data);
+		},
+		scope: this
+	    }]
 	});
     },
 
@@ -207,9 +194,9 @@ Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     destroyRecord: function(item) {
-	var ri = this.store.findExact('id', item.id);
-	if (ri != -1)
-	    this.store.removeAt(ri);
+	var record = this.store.getById(item.id);
+	if (record)
+	    this.store.remove(record);
     }
 
 });

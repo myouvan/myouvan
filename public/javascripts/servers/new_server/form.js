@@ -13,7 +13,7 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    layout: 'hbox',
 	    layoutConfig: {
 		align: 'stretch',
-		pack: 'center',
+		pack: 'center'
 	    },
 	    border: false,
 	    items: this.form
@@ -21,121 +21,137 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
     },
 
     makeFormItems: function() {
-	var panel = this;
-	this.formItems = {
-	    image_id: new Ext.form.Hidden({
-		name: 'server[image_id]'
-	    }),
-	    name: new Ext.form.TextField({
-		name: 'server[name]',
-		fieldLabel: 'Name',
-		width: 100,
-		msgTarget: 'qtip'
-	    }),
-	    title: new Ext.form.TextField({
-		name: 'server[title]',
-		fieldLabel: 'Title',
-		width: 200,
-		msgTarget: 'qtip'
-	    }),
-	    zone: new Ext.ux.StoreComboBox({
-		name: 'server[zone]',
-		fieldLabel: 'Zone',
-		width: 150,
-		storeConfig: {
-		    url: paths.servers.zones
+	this.formItems = [{
+	    xtype: 'hidden',
+	    name: 'server[image_id]',
+	    itemId: 'image_id'
+	}, {
+	    xtype: 'textfield',
+	    name: 'server[name]',
+	    itemId: 'name',
+	    fieldLabel: 'Name',
+	    width: 100,
+	    msgTarget: 'qtip'
+	}, {
+	    xtype: 'textfield',
+	    name: 'server[title]',
+	    itemId: 'title',
+	    fieldLabel: 'Title',
+	    width: 200,
+	    msgTarget: 'qtip'
+	}, {
+	    xtype: 'storecombobox',
+	    name: 'server[zone]',
+	    itemId: 'zone',
+	    fieldLabel: 'Zone',
+	    width: 150,
+	    storeConfig: {
+		url: paths.servers.zones
+	    },
+	    listeners: {
+		select: function(combo, record, index) {
+		    var psCombo = this.getComponent('physical_server');
+		    psCombo.getStore().baseParams['zone'] = record.get('value');
+		    psCombo.getStore().load();
+		    psCombo.reset();
+		    psCombo.enable();
 		},
-		listeners: {
-		    select: function(combo, record, index) {
-			var psCombo = this.formItems['physical_server'];
-			psCombo.getStore().baseParams['zone'] = record.get('value');
-			psCombo.getStore().load();
-			psCombo.reset();
-			psCombo.enable();
-		    },
-		    scope: this
-		}
-	    }),
-	    physical_server: new Ext.ux.StoreComboBox({
-		name: 'server[physical_server]',
-		fieldLabel: 'Physical Server',
-		width: 150,
-		storeConfig: {
-		    url: paths.servers.physical_servers
-		}
-	    }),
-	    pool: new Ext.ux.StoreComboBox({
-		name: 'server[pool]',
-		fieldLabel: 'Pool',
-		width: 150,
-		storeConfig: {
-		    url: paths.servers.pools
-		}
-	    }),
-	    virtualization: new Ext.ux.StoreComboBox({
-		name: 'server[virtualization]',
-		fieldLabel: 'Virtualization',
-		width: 200,
-		storeConfig: {
-		    url: paths.servers.virtualizations
-		}
-	    }),
-	    cpus: new Ext.form.NumberField({
-		name: 'server[cpus]',
-		fieldLabel: 'CPUs',
-		width: 100,
-		allowDecimals: false,
-		msgTarget: 'qtip'
-	    }),
-	    memory: new Ext.form.NumberField({
-		name: 'server[memory]',
-		fieldLabel: 'Memory(MB)',
-		width: 100,
-		allowDecimals: false,
-		msgTarget: 'qtip'
-	    }),
-	    interface_number0: new Ext.form.Hidden({
-		name: 'interface[0][number]',
-		value: '0'
-	    }),
-	    ip_address0: new Ext.form.TextField({
-		name: 'interface[0][ip_address]',
-		fieldLabel: 'IP Address(1)',
-		width: 150,
-		msgTarget: 'qtip'
-	    }),
-	    interface_number1: new Ext.form.Hidden({
-		name: 'interface[1][number]',
-		value: '1'
-	    }),
-	    ip_address1: new Ext.form.TextField({
-		name: 'interface[1][ip_address]',
-		fieldLabel: 'IP Address(2)',
-		width: 150,
-		msgTarget: 'qtip'
-	    }),
-	    comment: new Ext.form.TextArea({
-		name: 'server[comment]',
-		fieldLabel: 'Comment',
-		width: 300,
-		height: 100
-	    }),
-	    auto_restart: new Ext.form.Checkbox({
-		name: 'server[auto_restart]',
-		fieldLabel: 'Auto Restart',
-		boxLabel: 'Restart automatically on unintentional shutdown',
-		inputValue: 'true'
-	    }),
-	    tags: new Ext.form.Hidden({
-		name: 'tags'
-	    }),
-	    avatar_thumb: new Ext.form.Hidden({
-		name: 'avatar[thumb]'
-	    }),
-	    avatar_icon: new Ext.form.Hidden({
-		name: 'avatar[icon]'
-	    })
-	};
+		scope: this
+	    }
+	}, {
+	    xtype: 'storecombobox',
+	    name: 'server[physical_server]',
+	    itemId: 'physical_server',
+	    fieldLabel: 'Physical Server',
+	    width: 150,
+	    storeConfig: {
+		url: paths.servers.physical_servers
+	    }
+	}, {
+	    xtype: 'storecombobox',
+	    name: 'server[pool]',
+	    itemId: 'pool',
+	    fieldLabel: 'Pool',
+	    width: 150,
+	    storeConfig: {
+		url: paths.servers.pools
+	    }
+	}, {
+	    xtype: 'storecombobox',
+	    name: 'server[virtualization]',
+	    itemId: 'virtualization',
+	    fieldLabel: 'Virtualization',
+	    width: 200,
+	    storeConfig: {
+		url: paths.servers.virtualizations
+	    }
+	}, {
+	    xtype: 'numberfield',
+	    name: 'server[cpus]',
+	    itemId: 'cpus',
+	    fieldLabel: 'CPUs',
+	    width: 100,
+	    allowDecimals: false,
+	    msgTarget: 'qtip'
+	}, {
+	    xtype: 'numberfield',
+	    name: 'server[memory]',
+	    itemId: 'memory',
+	    fieldLabel: 'Memory(MB)',
+	    width: 100,
+	    allowDecimals: false,
+	    msgTarget: 'qtip'
+	}, {
+	    xtype: 'hidden',
+	    name: 'interface[0][number]',
+	    itemId: 'interface_number0',
+	    value: '0'
+	}, {
+	    xtype: 'textfield',
+	    name: 'interface[0][ip_address]',
+	    itemId: 'ip_address0',
+	    fieldLabel: 'IP Address(1)',
+	    width: 150,
+	    msgTarget: 'qtip'
+	}, {
+	    xtype: 'hidden',
+	    name: 'interface[1][number]',
+	    itemId: 'interface_number1',
+	    value: '1'
+	}, {
+	    xtype: 'textfield',
+	    name: 'interface[1][ip_address]',
+	    itemId: 'ip_address1',
+	    fieldLabel: 'IP Address(2)',
+	    width: 150,
+	    msgTarget: 'qtip'
+	}, {
+	    xtype: 'textarea',
+	    name: 'server[comment]',
+	    itemId: 'comment',
+	    fieldLabel: 'Comment',
+	    width: 300,
+	    height: 100
+	}, {
+	    xtype: 'checkbox',
+	    name: 'server[auto_restart]',
+	    itemId: 'auto_restart',
+	    fieldLabel: 'Auto Restart',
+	    boxLabel: 'Restart automatically on unintentional shutdown',
+	    inputValue: 'true'
+	}, {
+	    xtype: 'hidden',
+	    name: 'tags',
+	    itemId: 'tags',
+	}, {
+	    xtype: 'hidden',
+	    itemId: 'avatar_thumb',
+	    name: 'avatar[thumb]'
+	}, {
+	    xtype: 'hidden',
+	    itemId: 'avatar_icon',
+	    name: 'avatar[icon]'
+	}];
     },
 
     makeForm: function() {
@@ -148,45 +164,26 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    },
 	    border: false,
 	    autoScroll: true,
-	    items: [
-		this.formItems['image_id'],
-		this.formItems['name'],
-		this.formItems['title'],
-		this.formItems['zone'],
-		this.formItems['physical_server'],
-		this.formItems['pool'],
-		this.formItems['virtualization'],
-		this.formItems['cpus'],
-		this.formItems['memory'],
-		this.formItems['interface_number0'],
-		this.formItems['ip_address0'],
-		this.formItems['interface_number1'],
-		this.formItems['ip_address1'],
-		this.formItems['comment'],
-		this.formItems['auto_restart'],
-		this.formItems['tags'],
-		this.formItems['avatar_thumb'],
-		this.formItems['avatar_icon']
-	    ]
+	    items: this.formItems
 	});
     },
 
     setImageId: function(id) {
-	this.formItems['image_id'].setValue(id);
+	this.form.getComponent('image_id').setValue(id);
     },
 
     setTags: function(tags) {
-	this.formItems['tags'].setValue(Ext.encode(tags));
+	this.form.getComponent('tags').setValue(Ext.encode(tags));
     },
 
     setAvatar: function(thumb, icon) {
-	this.formItems['avatar_thumb'].setValue(thumb);
-	this.formItems['avatar_icon'].setValue(icon);
+	this.form.getComponent('avatar_thumb').setValue(thumb);
+	this.form.getComponent('avatar_icon').setValue(icon);
     },
 
     resetPanel: function() {
 	this.form.getForm().reset();
-	this.formItems['physical_server'].disable();
+	this.form.getComponent('physical_server').disable();
     },
 
     setSubmitOpts: function(opts) {

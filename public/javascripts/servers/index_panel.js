@@ -20,97 +20,55 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 
     makeComponents: function() {
 	this.indexGrid = new Servers.IndexGrid();
-	this.makeButtons();
 
 	Servers.IndexPanel.superclass.constructor.call(this, {
-	    layout: 'vbox',
-	    layoutConfig: {
-		align: 'stretch'
-	    },
+	    layout: 'fit',
 	    border: false,
-	    items: [
-		{
-		    layout: 'hbox',
-		    height: 32,
-		    border: false,
-                    layoutConfig: {
-                        padding: 3,
-                        align: 'middle'
-		    },
-		    defaults: {
-			margins: '0 5 0 0'
-		    },
-		    items: [
-			this.createButton,
-			this.importButton,
-			{
-			    xtype: 'spacer',
-			    flex: 1
-			},
-			{
-			    html: 'Tag Filter:',
-			    border: false
-			},
-			this.tagFilterCombo,
-			this.clearTagFilterButton
-		    ]
+	    tbar: [{
+		xtype: 'button',
+		text: 'Create Server',
+		handler: function() {
+		    this.fireEvent('createServer');
 		},
-		{
-		    flex: 1,
-		    layout: 'fit',
-		    border: false,
-		    items: this.indexGrid
+		scope: this
+	    }, {
+		xtype: 'button',
+		text: 'Import Server',
+		handlers: function() {
+		    this.fireEvent('importServer');
+		},
+		scope: this
+	    }, '->', 'Tag Filter:', {
+		xtype: 'storecombobox',
+		itemId: 'tagFilterCombo',
+		storeConfig: {
+		    url: paths.tags.index
+		},
+		listeners: {
+		    select: function(combo, record, index) {
+			this.indexGrid.setFilter(combo.getValue());
+		    },
+		    scope: this
 		}
-	    ],
+	    }, {
+		xtype: 'button',
+		text: 'Clear',
+		handler: function() {
+		    var tfCombo = this.getTopToolbar().getComponent('tagFilterCombo');
+		    tfCombo.clearValue();
+		    this.indexGrid.setFilter(tfCombo.getValue());
+		},
+		scope: this
+	    }],
+	    items: {
+		layout: 'fit',
+		border: false,
+		items: this.indexGrid
+	    },
 	    listeners: {
 		added: this.addEventHandlers,
 		beforedestroy: this.removeEventHandlers
 	    }
-	});
-    },
-
-    makeButtons: function() {
-	this.createButton = new Ext.Button({
-	    text: 'Create Server',
-	    width: 80,
-	    border: false,
-	    handler: function() {
-		this.fireEvent('createServer');
-	    },
-	    scope: this
-	});
-
-	this.importButton = new Ext.Button({
-	    text: 'Import Server',
-	    width: 80,
-	    border: false,
-	    handlers: function() {
-		this.fireEvent('importServer');
-	    },
-	    scope: this
-	});
-
-	this.tagFilterCombo = new Ext.ux.StoreComboBox({
-	    storeConfig: {
-		url: paths.tags.index
-	    },
-	    listeners: {
-		select: function(combo, record, index) {
-		    this.indexGrid.setFilter(combo.getValue());
-		},
-		scope: this
-	    }
-	});
-
-	this.clearTagFilterButton = new Ext.Button({
-	    text: 'Clear',
-	    width: 40,
-	    border: false,
-	    handler: function() {
-		this.tagFilterCombo.clearValue();
-		this.indexGrid.setFilter(this.tagFilterCombo.getValue());
-	    },
-	    scope: this
 	});
     },
 
@@ -125,7 +83,7 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
     },
 
     updateTags: function() {
-	this.tagFilterCombo.getStore().load();
+	this.getTopToolbar().getComponent('tagFilterCombo').getStore().load();
     }
 
 });

@@ -22,33 +22,27 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 		layoutConfig: {
 		    align: 'stretch'
 		},
-		defaults: {
-		    margins: '5 0 2 0'
-		},
 		border: false,
-		items: [
-		    new Ext.Panel({
-			flex: 1,
-			layout: 'fit',
-			border: false,
-			items: this.tagsGrid
-		    }),
-		    new Ext.Panel({
-			layout: 'hbox',
-			height: 30,
-			border: false,
-			layoutConfig: {
-			    align: 'middle'
-			},
-			defaults: {
-			    margins: '0 2 0 2'
-			},
-			items: [
-			    this.addCombo,
-			    this.addButton
-			]
-		    })
-		]
+		items: [{
+		    flex: 1,
+		    layout: 'fit',
+		    border: false,
+		    items: this.tagsGrid
+		}, {
+		    layout: 'hbox',
+		    height: 30,
+		    border: false,
+		    layoutConfig: {
+			align: 'middle'
+		    },
+		    defaults: {
+			margins: '0 2 0 2'
+		    },
+		    items: [
+			this.addCombo,
+			this.addButton
+		    ]
+		}]
 	    }
 	});
     },
@@ -110,14 +104,12 @@ Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     makeColModel: function() {
-	this.colModel = new Ext.grid.ColumnModel([
-	    {
-		header: 'Value',
-		dataIndex: 'value',
-		width: 250,
-		sortable: true
-	    }
-	]);
+	this.colModel = new Ext.grid.ColumnModel([{
+	    header: 'Value',
+	    dataIndex: 'value',
+	    width: 250,
+	    sortable: true
+	}]);
     },
 
     makeStore: function() {
@@ -131,16 +123,14 @@ Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 	    style: {
 		overflow: 'visible'
 	    },
-	    items: [
-		{
-		    text: 'Delete',
-		    handler: function() {
-			var record = grid.getSelectionModel().getSelected();
-			this.store.remove(record);
-		    },
-		    scope: this
-		}
-	    ],
+	    items: {
+		text: 'Delete',
+		handler: function() {
+		    var record = grid.getSelectionModel().getSelected();
+		    this.store.remove(record);
+		},
+		scope: this
+	    },
 	    scope: this
 	});
     },

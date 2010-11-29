@@ -8,33 +8,25 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
     },
 
     makeComponents: function() {
-	this.makeChartContainer();
-
 	Servers.SubcontentTab.ChartPanel.superclass.constructor.call(this, {
 	    border: false,
-	    items: [
-		{
-		    html: 'CPU use',
-		    bodyStyle: {
-			padding: '3px'
-		    },
-		    border: false
+	    items: [{
+		html: 'CPU use',
+		bodyStyle: {
+		    padding: '3px'
 		},
-		this.chartContainer
-	    ],
+		border: false
+	    }, {
+		layout: "fit",
+		itemId: 'container',
+		border: false,
+		width: 400,
+		height: 250
+	    }],
 	    listeners: {
 		added: this.addEventHandlers.createDelegate(this),
 		beforedestroy: this.removeEventHandlers.createDelegate(this)
 	    }
-	});
-    },
-
-    makeChartContainer: function() {
-	this.chartContainer = new Ext.Panel({
-	    layout: "fit",
-	    border: false,
-	    width: 400,
-	    height: 250
 	});
     },
 
@@ -53,8 +45,9 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
 	    url: item.server.paths.monitor
 	});
 
-	this.chartContainer.removeAll();
-	this.chartContainer.add(this.chart);
+	var container = this.getComponent('container');
+	container.removeAll();
+	container.add(this.chart);
     },
 
     updateChart: function() {
@@ -76,14 +69,12 @@ Servers.SubcontentTab.Chart = Ext.extend(Ext.chart.LineChart, {
 	Servers.SubcontentTab.Chart.superclass.constructor.call(this, {
 	    store: this.store,
 	    xField: 'index',
-	    series: [
-		{
-		    yField: "cpu_use",
-		    style: {
-			size: 0
-		    }
+	    series: [{
+		yField: "cpu_use",
+		style: {
+		    size: 0
 		}
-	    ],
+	    }],
 	    extraStyle: {
 		animationEnabled: false,
 		xAxis: {
