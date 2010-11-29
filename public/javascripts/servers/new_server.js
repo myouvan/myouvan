@@ -119,6 +119,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	} else if (cardId == 'form') {
 	    this.card.layout.setActiveItem('tags');
 	} else if (cardId == 'tags') {
+	    this.formPanel.setTags(this.tagsPanel.tags());
 	    this.card.layout.setActiveItem('flash');
 	    this.nextButton.disable();
 	    if (this.action == 'create')
@@ -134,6 +135,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 
     setValues: function(item) {
 	this.formPanel.setValues(item);
+	this.formPanel.showLoadMask();
 
 	Ext.Ajax.request({
 	    url: item.paths.target,
@@ -144,9 +146,10 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    success: function(res, opts) {
 		var additionalItem = Ext.decode(res.responseText).item;
 		this.formPanel.setValues(additionalItem);
+		this.formPanel.hideLoadMask();
 	    },
 	    failure: function(res, opts) {
-		Ext.MessageBox.alert('Error', 'Failed to ' + operation + ' server');
+		Ext.MessageBox.alert('Error', 'Failed to get target');
 	    },
 	    scope: this
 	});

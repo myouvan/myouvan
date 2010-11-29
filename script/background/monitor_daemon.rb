@@ -98,6 +98,7 @@ class MonitorDaemon < SimpleDaemon::Base
 
   def self.set_status(server, domain)
     state = domain.info.state
+    @logger.debug "#{server.name} : #{state} : #{STATES[state]}"
     @memcache.set("#{Settings.memcached.key.state}:#{server.id}", STATES[state])
 
     if state == Libvirt::Domain::SHUTOFF and

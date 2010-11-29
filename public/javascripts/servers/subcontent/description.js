@@ -22,7 +22,7 @@ Servers.SubcontentTab.DescriptionPanel = Ext.extend(Ext.Panel, {
 	    defaultType: 'proppanel',
 	    items: [{
 		label: 'Name',
-		itemId: 'items',
+		itemId: 'name',
 		colspan: 2
 	    }, {
 		label: 'UUID',
@@ -34,10 +34,20 @@ Servers.SubcontentTab.DescriptionPanel = Ext.extend(Ext.Panel, {
 		colspan: 2
 	    }, {
 		label: 'Status',
-		itemId: 'status'
+		itemId: 'status',
+		colspan: 2
 	    }, {
 		label: 'Auto Restart',
-		itemId: 'auto_restart'
+		itemId: 'auto_restart',
+		renderer: function(value) {
+		    return value ? 'Yes' : 'No';
+		}
+	    }, {
+		label: 'User Terminate',
+		itemId: 'user_terminate',
+		renderer: function(value) {
+		    return value ? 'Yes' : 'No';
+		}
 	    }, {
 		label: 'Zone',
 		itemId: 'zone'
@@ -149,6 +159,9 @@ Servers.SubcontentTab.PropPanel = Ext.extend(Ext.Panel, {
 	    colspan: 1
 	});
 
+	if (config.renderer)
+	    this.renderer = config.renderer;
+
 	Servers.SubcontentTab.PropPanel.superclass.constructor.call(this, {
 	    layout: 'hbox',
 	    itemId: config.itemId,
@@ -173,7 +186,13 @@ Servers.SubcontentTab.PropPanel = Ext.extend(Ext.Panel, {
     },
 
     setValue: function(value) {
-	this.getComponent('valuePanel').update(value);
+	var v = null;
+	if (this.renderer)
+	    v = this.renderer.call(this, value);
+	else
+	    v = value;
+
+	this.getComponent('valuePanel').update(v);
     }
 
 });

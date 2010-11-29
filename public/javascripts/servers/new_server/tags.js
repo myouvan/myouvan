@@ -60,7 +60,7 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 	    text: 'Add Tag',
 	    width: 70,
 	    handler: function() {
-		var value = panel.addCombo.getValue();
+		var value = this.addCombo.getValue();
 		if (value == '')
 		    return;
 		this.tagsGrid.addTag(value);

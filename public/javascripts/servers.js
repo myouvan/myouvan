@@ -9,7 +9,8 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	    'monitorServer',
 	    'destroyedMetaData',
 	    'addedTag',
-	    'destroyedTag'
+	    'destroyedTag',
+	    'updatedTags'
 	]);
 
 	this.tasks = {
@@ -36,6 +37,7 @@ var Servers = Ext.extend(Ext.util.Observable, {
 		success: function(f, action) {
 		    var item = action.result.item;
 		    this.fireEvent('createdServer', item);
+		    this.fireEvent('updatedTags');
 		    newServerWindow.close();
 		},
 		failure: function(f, action) {
@@ -57,6 +59,7 @@ var Servers = Ext.extend(Ext.util.Observable, {
 		success: function(f, action) {
 		    var item = action.result.item;
 		    this.fireEvent('createdServer', item);
+		    this.fireEvent('updatedTags');
 		    newServerWindow.close();
 		},
 		failure: function(f, action) {
@@ -83,6 +86,10 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	    },
 	    scope: this
 	});
+    },
+
+    unshowServer: function() {
+	this.subcontentTab.hide();
     },
 
     operateServer: function(item, operation) {
@@ -146,10 +153,11 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	    url: item.paths.server,
 	    method: 'DELETE',
 	    success: function(res, opts) {
-		this.fireEvent('destroytedMetaData', item);
+		this.fireEvent('destroyedMetaData', item);
+		this.fireEvent('updatedTags');
 	    },
 	    failure: function(res, opts) {
-		Ext.MessageBox.alert('Error', 'Failed to ' + operation + ' server');
+		Ext.MessageBox.alert('Error', 'Failed to destroy metadata');
 	    },
 	    scope: this
 	});
@@ -232,6 +240,7 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	this.indexPanel.on('createServer', this.createServer.createDelegate(this));
 	this.indexPanel.on('importServer', this.importServer.createDelegate(this));
 	this.indexPanel.on('showServer', this.showServer.createDelegate(this));
+	this.indexPanel.on('unshowServer', this.unshowServer.createDelegate(this));
 	this.indexPanel.on('suspendServer', this.suspendServer.createDelegate(this));
 	this.indexPanel.on('resumeServer', this.resumeServer.createDelegate(this));
 	this.indexPanel.on('rebootServer', this.rebootServer.createDelegate(this));

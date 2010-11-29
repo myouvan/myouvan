@@ -161,6 +161,10 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    inputValue: 'true'
 	}, {
 	    xtype: 'hidden',
+	    name: 'server[storage_iqn]',
+	    itemId: 'storage_iqn',
+	}, {
+	    xtype: 'hidden',
 	    name: 'tags',
 	    itemId: 'tags',
 	}, {
@@ -190,6 +194,15 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 
     setImageId: function(id) {
 	this.form.getComponent('image_id').setValue(id);
+    },
+
+    showLoadMask: function() {
+	this.loadMask = new Ext.LoadMask(this.getEl());
+	this.loadMask.show();
+    },
+
+    hideLoadMask: function() {
+	this.loadMask.hide();
     },
 
     setValues: function(item) {

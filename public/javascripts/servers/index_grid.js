@@ -5,6 +5,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
 	var events = [
 	    'showServer',
+	    'unshowServer',
 	    'suspendServer',
 	    'resumeServer',
 	    'rebootServer',
@@ -278,14 +279,21 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		deletedRecords.push(record);
 	});
 
-	for (var i = 0; i < deletedRecords.length; ++i)
-	    this.store.remove(deletedRecords[i]);
+	for (var i = 0; i < deletedRecords.length; ++i) {
+	    var record = deletedRecords[i];
+	    if (this.getSelectionModel().isSelected(record))
+		this.fireEvent('unshowServer');
+	    this.store.remove(record);
+	}
     },
 
     destroyRecord: function(item) {
 	var ri = this.store.findExact('id', item.id);
-	if (ri != -1)
+	if (ri != -1) {
+	    if (this.getSelectionModel().isSelected(ri))
+		this.fireEvent('unshowServer');
 	    this.store.removeAt(ri);
+	}
     }
 
 });

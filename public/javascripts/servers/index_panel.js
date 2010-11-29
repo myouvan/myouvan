@@ -75,11 +75,13 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
     addEventHandlers: function() {
 	servers.on('addedTag', this.updateTagsDelegate);
 	servers.on('destroyedTag', this.updateTagsDelegate);
+	servers.on('updatedTags', this.updateTagsDelegate);
     },
 
     removeEventHandlers: function() {
 	servers.un('addedTag', this.updateTagsDelegate);
 	servers.un('destroyedTag', this.updateTagsDelegate);
+	servers.un('updatedTags', this.updateTagsDelegate);
     },
 
     updateTags: function() {

@@ -78,12 +78,14 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 	servers.on('gotServer', this.showTagsDelegate);
 	servers.on('addedTag', this.updateTagsDelegate);
 	servers.on('destroyedTag', this.updateTagsDelegate);
+	servers.on('updatedTags', this.updateTagsDelegate);
     },
 
     removeEventHandlers: function() {
 	servers.un('gotServer', this.showTagsDelegate);
 	servers.un('addedTag', this.updateTagsDelegate);
 	servers.un('destroyedTag', this.updateTagsDelegate);
+	servers.un('updatedTags', this.updateTagsDelegate);
     },
 
     showTags: function(item) {
