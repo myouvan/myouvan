@@ -1,6 +1,9 @@
 Images.NewImageWindow = Ext.extend(Ext.Window, {
 
-    constructor: function() {
+    constructor: function(config) {
+	this.action = config.action;
+	this.submitConfig = config.submitConfig;
+
 	this.makeComponents();
     },
 
@@ -8,7 +11,9 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
 	this.makeFormItems();
 	this.makeForm();
 
+	var actionStr = (this.action == 'create' ? 'Create' : 'Update');
 	Images.NewImageWindow.superclass.constructor.call(this, {
+	    title: actionStr + ' Image',
 	    modal: true,
 	    width: 625,
 	    height: 260,
@@ -18,15 +23,15 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
 	    items: this.form,
 	    buttonAlign: 'center',
 	    buttons: [{
-		itemId: 'submitButton',
+		text: actionStr,
 		handler: function() {
-		    this.form.getForm().submit(this.submitOpts);
+		    this.form.getForm().submit(this.submitConfig);
 		},
 		scope: this
 	    }, {
 		text: 'Close',
 		handler: function() {
-		    this.hide();
+		    this.close();
 		},
 		scope: this
 	    }]
@@ -77,20 +82,6 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
 	    },
 	    items: this.formItems
 	});
-    },
-
-    setForCreate: function(submitOpts) {
-	this.form.getForm().reset();
-	this.setTitle('Create Image');
-	this.getComponent('submitButton').setText('Create');
-	this.submitOpts = submitOpts;
-    },
-
-    setForUpdate: function(submitOpts) {
-	this.form.getForm().reset();
-	this.setTitle('Update Image');
-	this.getComponent('submitButton').setText('Update');
-	this.submitOpts = submitOpts;
     },
 
     setValues: function(image) {

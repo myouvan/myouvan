@@ -9,10 +9,8 @@ Servers.NewServerWindow.SelectImagePanel = Ext.extend(Ext.Panel, {
 
 	Servers.NewServerWindow.SelectImagePanel.superclass.constructor.call(this, {
 	    title: 'Select Image',
+	    itemId: 'selectImage',
 	    layout: 'fit',
-	    layoutConfig: {
-		align: 'stretch'
-	    },
 	    border: false,
 	    items: this.grid
 	});
@@ -24,10 +22,6 @@ Servers.NewServerWindow.SelectImagePanel = Ext.extend(Ext.Panel, {
 
     selectedId: function() {
 	return this.grid.getSelectionModel().getSelected().get('id');
-    },
-
-    resetPanel: function() {
-	this.grid.resetGrid();
     }
 
 });
@@ -75,7 +69,7 @@ Servers.NewServerWindow.SelectImageGrid = Ext.extend(Ext.grid.GridPanel, {
     makeStore: function() {
 	this.store = new Ext.ux.ItemsStore({
 	    url: paths.images.index,
-	    autoLoad: false,
+	    autoLoad: true,
 	    fields: [
 		'id',
 		'title',
@@ -83,11 +77,6 @@ Servers.NewServerWindow.SelectImageGrid = Ext.extend(Ext.grid.GridPanel, {
 		'comment'
 	    ]
 	});
-    },
-
-    resetGrid: function() {
-	this.store.load();
-	this.getSelectionModel().clearSelections();
     }
 
 });

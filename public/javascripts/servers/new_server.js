@@ -1,20 +1,24 @@
 Servers.NewServerWindow = Ext.extend(Ext.Window, {
 
-    constructor: function() {
-	this.makeComponents();
+    constructor: function(config) {
+	this.action = config.action;
+	this.submitConfig = config.submitConfig;
+
+	this.makeComponents(config);
 
 	this.setAvatarDelegate = this.setAvatar.createDelegate(this);
     },
 
     makeComponents: function() {
-	this.selectTargetPanel = new Servers.NewServerWindow.SelectTargetPanel();
+	if (this.action == 'import')
+	    this.selectTargetPanel = new Servers.NewServerWindow.SelectTargetPanel();
+
 	this.selectImagePanel = new Servers.NewServerWindow.SelectImagePanel();
 	this.formPanel = new Servers.NewServerWindow.FormPanel();
 	this.tagsPanel = new Servers.NewServerWindow.TagsPanel();
 	this.flashPanel = new Servers.NewServerWindow.FlashPanel();
 
-	this.makeCard();
-	this.makeButtons();
+	makeCard();
 
 	Servers.NewServerWindow.superclass.constructor.call(this, {
 	    title: 'Create Server',
@@ -26,112 +30,105 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    closable: false,
 	    items: this.card,
 	    buttonAlign: 'center',
-	    buttons: [
-		this.prevButton,
-		this.nextButton,
-		this.closeButton
-	    ],
-	    listeners: {
-		beforeshow: function() {
-		    this.activeItem = 0;
-		    this.card.layout.setActiveItem(this.activeItem);
-
-		    this.prevButton.disable();
-		    this.nextButton.enable();
-		    this.nextButton.setText('Next');
-
-		    this.selectTargetPanel.resetPanel();
-		    this.selectImagePanel.resetPanel();
-		    this.formPanel.resetPanel();
-		    this.tagsPanel.resetPanel();
+	    buttons: [{
+		text: 'Prev',
+		disabled: true,
+		handler: this.prevCard.createDelegate(this),
+		scopt: this
+	    }, {
+		text: 'Next',
+		handler: this.nextCard.createDelegate(this),
+		scopt: this
+	    }, {
+		text: 'Close',
+		handler: function() {
+		    this.close();
 		},
+		scope: this
+	    }],
+	    listeners: {
 		added: this.addEventHandlers.createDelegate(this),
 		beforedestroy: this.removeEventHandlers.createDelegate(this)
 	    }
 	});
+
+	this.prevButton = this.buttons[0];
+	this.nextButton = this.buttons[1];
     },
 
     makeCard: function() {
-	this.activeItem = 0;
+	var items = [
+	    this.selectImagePanel,
+	    this.formPanel,
+	    this.tagsPanel,
+	    this.flashPanel
+	];
+
+	if (this.action == 'import')
+	    items.insert(0, this.selectTargetPanel);
+
 	this.card = new Ext.Panel({
 	    layout: 'card',
 	    activeItem: 0,
 	    width: 400,
-	    items: [
-		this.selectTargetPanel,
-		this.selectImagePanel,
-		this.formPanel,
-		this.tagsPanel,
-		this.flashPanel
-	    ]
-	});
-    },
-
-    makeButtons: function() {
-	this.prevButton = new Ext.Button({
-	    text: 'Prev',
-	    handler: this.prevCard.createDelegate(this),
-	    scopt: this
-	});
-
-	this.nextButton = new Ext.Button({
-	    text: 'Next',
-	    handler: this.nextCard.createDelegate(this),
-	    scopt: this
-	});
-
-	this.closeButton = new Ext.Button({
-	    text: 'Close',
-	    handler: function() {
-		this.hide();
-	    },
-	    scope: this
+	    items: items
 	});
     },
 
     prevCard: function() {
-	if (this.activeItem > 0) {
-	    if (this.activeItem == 1) {
+	var cardId = this.card.layout.activeItem.getItemId();
+	if (cardId == 'selectImage') {
+	    if (this.action == 'import') {
+		this.card.layout.setActiveItem('selectTarget');
 		this.prevButton.disable();
-	    } else if (this.activeItem == 3) {
-		this.nextButton.setText('Next');
-		this.nextButton.enable();
 	    }
-
-	    this.activeItem--;
-	    this.card.layout.setActiveItem(this.activeItem);
+	} else if (cardId == 'form') {
+	    this.card.layout.setActiveItem('selectImage');
+	    if (this.action == 'create')
+		this.prevButton.disable();
+	} else if (cardId == 'tags') {
+	    this.card.layout.setActiveItem('form');
+	} else if (cardId == 'flash') {
+	    this.card.layout.setActiveItem('tags');
+	    this.nextButton.enable();
+	    this.nextButton.setText('Next');
 	}
     },
 
     nextCard: function() {
-	if (this.activeItem < 3) {
-	    if (this.activeItem == 0) {
-		if (!this.selectImagePanel.isSelected()) {
-		    Ext.MessageBox.alert('Error', 'Select an image');
-		    return;
-		}
-		var id = this.selectImagePanel.selectedId();
-		this.formPanel.setImageId(id);
-
-		this.prevButton.enable();
-	    } else if (this.activeItem == 2) {
-		this.formPanel.setTags(this.tagsPanel.tags());
-
-		this.nextButton.setText('Create');
-		this.nextButton.disable();
+	var cardId = this.card.layout.activeItem.getItemId();
+	if (cardId == 'selectTarget') {
+	    if (!this.selectTargetPanel.isSelected()) {
+		Ext.MessageBox.alert('Error', 'Select an target');
+		return;
 	    }
-
-	    this.activeItem++;
-	    this.card.layout.setActiveItem(this.activeItem);
-	} else if (this.activeItem == 3) {
+	    var item = this.selectTargetPanel.selectedRecord().data;
+	    this.formPanel.setValues(item);
+	    this.card.layout.setActiveItem('selectImage');
+	    this.prevButton.enable();
+	} else if (cardId == 'selectImage') {
+	    if (!this.selectImagePanel.isSelected()) {
+		Ext.MessageBox.alert('Error', 'Select an image');
+		return;
+	    }
+	    var id = this.selectImagePanel.selectedId();
+	    this.formPanel.setImageId(id);
+	    this.card.layout.setActiveItem('form');
+	    this.prevButton.enable();
+	} else if (cardId == 'form') {
+	    this.card.layout.setActiveItem('tags');
+	} else if (cardId == 'tags') {
+	    this.card.layout.setActiveItem('flash');
+	    this.nextButton.disable();
+	    if (this.action == 'create')
+		this.nextButton.setText('Create');
+	    else if (this.action == 'import')
+		this.nextButton.setText('Import');
+	} else if (cardId == 'flash') {
 	    this.prevCard();
 	    this.prevCard();
-	    this.formPanel.submit();
+	    this.formPanel.submit(this.submitConfig);
 	}
-    },
-
-    setSubmitOpts: function(opts) {
-	this.formPanel.setSubmitOpts(opts);
     },
 
     addEventHandlers: function() {

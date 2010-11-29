@@ -9,46 +9,51 @@ var Images = Ext.extend(Ext.util.Observable, {
     },
 
     createImage: function() {
-	this.newImageWindow.setForCreate({
-            url: paths.images.index,
-            method: 'POST',
-            waitMsg: 'Creating...',
-            success: function(f, action) {
-		var item = action.result.item;
-		this.fireEvent('createdImage', item);
-		this.newImageWindow.hide();
-            },
-            failure: function(f, action) {
-		Ext.MessageBox.alert('Error', 'Failed to create image');
-            },
-	    scope: this
+	var newImageWindow = new Images.NewImageWindow({
+	    action: 'create',
+	    submitConfig: {
+		url: paths.images.index,
+		method: 'POST',
+		waitMsg: 'Creating...',
+		success: function(f, action) {
+		    var item = action.result.item;
+		    this.fireEvent('createdImage', item);
+		    newImageWindow.close();
+		},
+		failure: function(f, action) {
+		    Ext.MessageBox.alert('Error', 'Failed to create image');
+		},
+		scope: this
+	    }
 	});
-	this.newImageWindow.show();
+	newImageWindow.show();
     },
 
     updateImage: function(item) {
-	this.newImageWindow.setForUpdate({
-            url: item.paths.image,
-            method: 'PUT',
-            waitMsg: 'Updating...',
-            success: function(f, action) {
-		var item = action.result.item;
-		this.fireEvent('updatedImage', item);
-		this.newImageWindow.hide();
-            },
-            failure: function(form, action) {
-		alert('Failed to update image');
-            },
-	    scope: this
+	var newImageWindow = new Images.NewImageWindow({
+	    action: 'update',
+	    submitConfig: {
+		url: item.paths.image,
+		method: 'PUT',
+		waitMsg: 'Updating...',
+		success: function(f, action) {
+		    var item = action.result.item;
+		    this.fireEvent('updatedImage', item);
+		    newImageWindow.close();
+		},
+		failure: function(form, action) {
+		    alert('Failed to update image');
+		},
+		scope: this
+	    }
 	});
-
 	Ext.Ajax.request({
 	    url: item.paths.image,
 	    method: 'GET',
 	    success: function(res, opts) {
 		var item = Ext.decode(res.responseText).item;
-		this.newImageWindow.setValues(item);
-		this.newImageWindow.show();
+		newImageWindow.setValues(item);
+		newImageWindow.show();
 	    },
 	    failure: function(res, opts) {
 		alert('Error');
@@ -74,7 +79,6 @@ var Images = Ext.extend(Ext.util.Observable, {
 
     show: function() {
 	this.indexPanel = new Images.IndexPanel();
-	this.newImageWindow = new Images.NewImageWindow();
 
 	this.initEventHandlers();
 
@@ -86,10 +90,6 @@ var Images = Ext.extend(Ext.util.Observable, {
     },
 
     initEventHandlers: function() {
-	this.indexPanel.on('destroy', function() {
-	    this.newImageWindow.destroy();
-	}, this);
-
 	this.indexPanel.on('createImage', this.createImage.createDelegate(this));
 	this.indexPanel.on('updateImage', this.updateImage.createDelegate(this));
 	this.indexPanel.on('destroyImage', this.destroyImage.createDelegate(this));

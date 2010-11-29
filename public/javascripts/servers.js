@@ -26,39 +26,45 @@ var Servers = Ext.extend(Ext.util.Observable, {
     },
 
     createServer: function() {
-	this.newServerWindow.setSubmitOpts({
-            url: paths.servers.index,
-            method: 'POST',
-            waitMsg: 'Creating...',
-            success: function(f, action) {
-		var item = action.result.item;
-		this.fireEvent('createdServer', item);
-		this.newServerWindow.hide();
-            },
-            failure: function(f, action) {
-		Ext.MessageBox.alert('Error', 'Failed to create server');
-            },
-	    scope: this
+	var newServerWindow = new Servers.NewServerWindow({
+	    action: 'create',
+	    submitConfig: {
+		url: paths.servers.index,
+		method: 'POST',
+		waitMsg: 'Creating...',
+		success: function(f, action) {
+		    var item = action.result.item;
+		    this.fireEvent('createdServer', item);
+		    newServerWindow.close();
+		},
+		failure: function(f, action) {
+		    Ext.MessageBox.alert('Error', 'Failed to create server');
+		},
+		scope: this
+	    }
 	});
-	this.newServerWindow.show();
+	newServerWindow.show();
     },
 
     importServer: function() {
-	this.newServerWindow.setSubmitOpts({
-            url: paths.servers.import,
-            method: 'POST',
-            waitMsg: 'Importing...',
-            success: function(f, action) {
-		var item = action.result.item;
-		this.fireEvent('createdServer', item);
-		this.newServerWindow.hide();
-            },
-            failure: function(f, action) {
-		Ext.MessageBox.alert('Error', 'Failed to create server');
-            },
-	    scope: this
+	var newServerWindow = new Servers.NewServerWindow({
+	    action: 'import',
+	    submitConfig: {
+		url: paths.servers.import,
+		method: 'POST',
+		waitMsg: 'Importing...',
+		success: function(f, action) {
+		    var item = action.result.item;
+		    this.fireEvent('createdServer', item);
+		    this.newServerWindow.close();
+		},
+		failure: function(f, action) {
+		    Ext.MessageBox.alert('Error', 'Failed to create server');
+		},
+		scope: this
+	    }
 	});
-	this.newServerWindow.show();
+	newServerWindow.show();
     },
 
     showServer: function(item) {
@@ -114,22 +120,24 @@ var Servers = Ext.extend(Ext.util.Observable, {
     },
 
     migrateServer: function(item) {
-	this.selectServerWindow.setSubmitOpts({
-            url: item.paths.migrate,
-            method: 'POST',
-            waitMsg: 'Migrating...',
-            success: function(f, action) {
-		var item = action.result.item;
-		this.fireEvent('updatedServer', item);
-		this.selectServerWindow.hide();
-            },
-            failure: function(f, action) {
-		Ext.MessageBox.alert('Error', 'Failed to create server');
-            },
-	    scope: this
+	var selectServerWindow = new Servers.SelectServerWindow({
+	    submitConfig: {
+		url: item.paths.migrate,
+		method: 'POST',
+		waitMsg: 'Migrating...',
+		success: function(f, action) {
+		    var item = action.result.item;
+		    this.fireEvent('updatedServer', item);
+		    selectServerWindow.close();
+		},
+		failure: function(f, action) {
+		    Ext.MessageBox.alert('Error', 'Failed to create server');
+		},
+		scope: this
+	    }
 	});
-	this.selectServerWindow.setExcept(item.physical_server);
-	this.selectServerWindow.show();
+	selectServerWindow.setExcept(item.physical_server);
+	selectServerWindow.show();
     },
 
     addTag: function(tag) {
@@ -184,8 +192,6 @@ var Servers = Ext.extend(Ext.util.Observable, {
     show: function() {
 	this.indexPanel = new Servers.IndexPanel();
 	this.subcontentTab = new Servers.SubcontentTab();
-	this.newServerWindow = new Servers.NewServerWindow();
-	this.selectServerWindow = new Servers.SelectServerWindow();
 
 	this.initEventHandlers();
 
@@ -206,8 +212,6 @@ var Servers = Ext.extend(Ext.util.Observable, {
 
 	this.indexPanel.on('destroy', function() {
 	    this.stopTasks();
-	    this.newServerWindow.destroy();
-	    this.selectServerWindow.destroy();
 	}, this);
 
 	this.indexPanel.on('createServer', this.createServer.createDelegate(this));

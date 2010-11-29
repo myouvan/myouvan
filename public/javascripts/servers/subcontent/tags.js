@@ -57,8 +57,6 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 	    }
 	});
 
-	var panel = this;
-
 	this.addButton = new Ext.Button({
 	    text: 'Add Tag',
 	    width: 70,

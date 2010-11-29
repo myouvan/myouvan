@@ -10,6 +10,7 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 
 	Servers.NewServerWindow.TagsPanel.superclass.constructor.call(this, {
 	    title: 'Add Tags',
+	    itemId: 'tags',
 	    layout: 'hbox',
 	    layoutConfig: {
 		align: 'stretch',
@@ -67,11 +68,6 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 	    },
 	    scope: this
 	});
-    },
-
-    resetPanel: function() {
-	this.tagsGrid.resetGrid();
-	this.addCombo.reset();
     },
 
     tags: function() {
@@ -141,10 +137,6 @@ Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 	    value: value
 	});
 	this.store.add(record);
-    },
-
-    resetGrid: function() {
-	this.store.removeAll();
     },
 
     tags: function() {

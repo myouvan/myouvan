@@ -9,14 +9,10 @@ Servers.NewServerWindow.SelectTargetPanel = Ext.extend(Ext.Panel, {
 
 	Servers.NewServerWindow.SelectTargetPanel.superclass.constructor.call(this, {
 	    title: 'Select Target',
+	    itemId: 'selectTarget',
 	    layout: 'fit',
 	    border: false,
-	    items: this.grid,
-	    listeners: {
-		beforeshow: function() {
-		    this.grid.store.load();
-		}
-	    }
+	    items: this.grid
 	});
     },
 
@@ -26,10 +22,6 @@ Servers.NewServerWindow.SelectTargetPanel = Ext.extend(Ext.Panel, {
 
     selectedRecord: function() {
 	return this.grid.getSelectionModel().getSelected();
-    },
-
-    resetPanel: function() {
-	this.grid.resetGrid();
     }
 
 });
@@ -83,7 +75,7 @@ Servers.NewServerWindow.SelectTargetGrid = Ext.extend(Ext.grid.GridPanel, {
     makeStore: function() {
 	this.store = new Ext.ux.ItemsStore({
 	    url: paths.targets.index,
-	    autoLoad: false,
+	    autoLoad: true,
 	    fields: [
 		'zone',
 		'physical_server',
@@ -96,11 +88,6 @@ Servers.NewServerWindow.SelectTargetGrid = Ext.extend(Ext.grid.GridPanel, {
 		'mac_address1'
 	    ]
 	});
-    },
-
-    resetGrid: function() {
-	this.store.load();
-	this.getSelectionModel().clearSelections();
     }
 
 });

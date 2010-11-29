@@ -10,6 +10,7 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 
 	Servers.NewServerWindow.FormPanel.superclass.constructor.call(this, {
 	    title: 'Input Specifications',
+	    itemId: 'form',
 	    layout: 'hbox',
 	    layoutConfig: {
 		align: 'stretch',
@@ -50,7 +51,7 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    },
 	    listeners: {
 		select: function(combo, record, index) {
-		    var psCombo = this.getComponent('physical_server');
+		    var psCombo = this.form.getComponent('physical_server');
 		    psCombo.getStore().baseParams['zone'] = record.get('value');
 		    psCombo.getStore().load();
 		    psCombo.reset();
@@ -64,6 +65,7 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    itemId: 'physical_server',
 	    fieldLabel: 'Physical Server',
 	    width: 150,
+	    disabled: true,
 	    storeConfig: {
 		url: paths.servers.physical_servers
 	    }
@@ -172,6 +174,18 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	this.form.getComponent('image_id').setValue(id);
     },
 
+    setValues: function(item) {
+	for (var field in item) {
+	    var cmp = this.form.getComponent(field);
+	    if (cmp) {
+		cmp.setValue(item[field]);
+		cmp.setReadOnly(true);
+		if (cmp.setHideTrigger)
+		    cmp.setHideTrigger(true);
+	    }
+	}
+    },
+
     setTags: function(tags) {
 	this.form.getComponent('tags').setValue(Ext.encode(tags));
     },
@@ -181,16 +195,7 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	this.form.getComponent('avatar_icon').setValue(icon);
     },
 
-    resetPanel: function() {
-	this.form.getForm().reset();
-	this.form.getComponent('physical_server').disable();
-    },
-
-    setSubmitOpts: function(opts) {
-	this.submitOpts = opts;
-    },
-
-    submit: function() {
-	this.form.getForm().submit(this.submitOpts);
+    submit: function(submitConfig) {
+	this.form.getForm().submit(submitConfig);
     }
 });

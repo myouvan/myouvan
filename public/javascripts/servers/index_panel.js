@@ -34,7 +34,7 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 	    }, {
 		xtype: 'button',
 		text: 'Import Server',
-		handlers: function() {
+		handler: function() {
 		    this.fireEvent('importServer');
 		},
 		scope: this

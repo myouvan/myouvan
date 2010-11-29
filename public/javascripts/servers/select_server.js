@@ -1,6 +1,8 @@
 Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 
-    constructor: function() {
+    constructor: function(config) {
+	this.submitConfig = config.submitConfig;
+
 	this.makeComponents();
     },
 
@@ -21,7 +23,7 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 	    buttons: [{
 		text: 'Migrate',
 		handler: function() {
-		    this.form.getForm().submit(this.submitOpts);
+		    this.form.getForm().submit(this.submitConfig);
 		},
 		scope: this
 	    }, {
@@ -30,13 +32,7 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 		    this.hide();
 		},
 		scope: this
-	    }],
-	    listeners: {
-		beforeshow: function() {
-		    this.form.getForm().reset();
-		    this.form.getComponent('physical_server').disable();
-		}
-	    }
+	    }]
 	});
     },
 
@@ -66,6 +62,7 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 	    itemId: 'physical_server',
 	    fieldLabel: 'Physical Server',
 	    width: 150,
+	    disabled: true,
 	    storeConfig: {
 		url: paths.servers.physical_servers
 	    }
@@ -86,10 +83,6 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
     setExcept: function(value) {
 	var psCombo = this.form.getComponent('physical_server');
 	psCombo.getStore().baseParams['except'] = value;
-    },
-
-    setSubmitOpts: function(opts) {
-	this.submitOpts = opts;
     }
 
 });
