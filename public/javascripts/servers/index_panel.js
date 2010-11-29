@@ -3,15 +3,17 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
     constructor: function() {
 	this.makeComponents();
 
-	this.addEvents('createServer');
-	this.addEvents('importServer');
-	this.addEvents('showServer');
-	this.addEvents('suspendServer');
-	this.addEvents('resumeServer');
-	this.addEvents('rebootServer');
-	this.addEvents('terminateServer');
-	this.addEvents('restartServer');
-	this.addEvents('migrateServer');
+	this.addEvents([
+	    'createServer',
+	    'importServer',
+	    'showServer',
+	    'suspendServer',
+	    'resumeServer',
+	    'rebootServer',
+	    'terminateServer',
+	    'restartServer',
+	    'migrateServer'
+	]);
 
 	this.updateTagsDelegate = this.updateTags.createDelegate(this);
     },
@@ -91,13 +93,24 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 	this.tagFilterCombo = new Ext.ux.StoreComboBox({
 	    storeConfig: {
 		url: paths.tags.index
+	    },
+	    listeners: {
+		select: function(combo, record, index) {
+		    this.indexGrid.setFilter(combo.getValue());
+		},
+		scope: this
 	    }
 	});
 
 	this.clearTagFilterButton = new Ext.Button({
 	    text: 'Clear',
 	    width: 40,
-	    border: false
+	    border: false,
+	    handler: function() {
+		this.tagFilterCombo.clearValue();
+		this.indexGrid.setFilter(this.tagFilterCombo.getValue());
+	    },
+	    scope: this
 	});
     },
 

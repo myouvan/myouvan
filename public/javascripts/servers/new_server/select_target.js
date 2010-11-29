@@ -1,20 +1,25 @@
-Servers.NewServerWindow.SelectImagePanel = Ext.extend(Ext.Panel, {
+Servers.NewServerWindow.SelectTargetPanel = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
     },
 
     makeComponents: function() {
-	this.grid = new Servers.NewServerWindow.SelectImageGrid();
+	this.grid = new Servers.NewServerWindow.SelectTargetGrid();
 
-	Servers.NewServerWindow.SelectImagePanel.superclass.constructor.call(this, {
-	    title: 'Select Image',
+	Servers.NewServerWindow.SelectTargetPanel.superclass.constructor.call(this, {
+	    title: 'Select Target',
 	    layout: 'fit',
 	    layoutConfig: {
 		align: 'stretch'
 	    },
 	    border: false,
-	    items: this.grid
+	    items: this.grid,
+	    listeners: {
+		beforeshow: function() {
+		    this.grid.store.load();
+		}
+	    }
 	});
     },
 
@@ -32,7 +37,7 @@ Servers.NewServerWindow.SelectImagePanel = Ext.extend(Ext.Panel, {
 
 });
 
-Servers.NewServerWindow.SelectImageGrid = Ext.extend(Ext.grid.GridPanel, {
+Servers.NewServerWindow.SelectTargetGrid = Ext.extend(Ext.grid.GridPanel, {
 
     constructor: function() {
 	this.makeComponents();
@@ -42,7 +47,7 @@ Servers.NewServerWindow.SelectImageGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.makeColModel();
 	this.makeStore();
 
-	Servers.NewServerWindow.SelectImageGrid.superclass.constructor.call(this, {
+	Servers.NewServerWindow.SelectTargetGrid.superclass.constructor.call(this, {
 	    colModel: this.colModel,
 	    store: this.store,
 	    loadMask: true
@@ -52,40 +57,52 @@ Servers.NewServerWindow.SelectImageGrid = Ext.extend(Ext.grid.GridPanel, {
     makeColModel: function() {
 	this.colModel = new Ext.grid.ColumnModel([
 	    {
-		header: 'ID',
-		dataIndex: 'id',
-		width: 30,
+		header: 'Zone',
+		dataIndex: 'zone',
+		width: 100,
 		sortable: true
 	    },
 	    {
-		header: 'Title',
-		dataIndex: 'title',
-		width: 200,
+		header: 'Physical Server',
+		dataIndex: 'physical_server',
+		width: 100,
 		sortable: true
 	    },
 	    {
-		header: 'OS',
-		dataIndex: 'os',
+		header: 'Name',
+		dataIndex: 'name',
 		width: 150,
 		sortable: true
 	    },
 	    {
-		header: 'Comment',
-		dataIndex: 'comment',
-		width: 230
+		header: 'CPUs',
+		dataIndex: 'cpus',
+		width: 80,
+		sortable: true
+	    },
+	    {
+		header: 'Memory(MB)',
+		dataIndex: 'memory',
+		width: 100,
+		sortable: true
 	    }
 	]);
     },
 
     makeStore: function() {
 	this.store = new Ext.ux.ItemsStore({
-	    url: paths.images.index,
+	    url: paths.targets.index,
 	    autoLoad: false,
 	    fields: [
-		'id',
-		'title',
-		'os',
-		'comment'
+		'zone',
+		'physical_server',
+		'name',
+		'uuid',
+		'cpus',
+		'memory',
+		'storage_iqn',
+		'mac_address0',
+		'mac_address1'
 	    ]
 	});
     },

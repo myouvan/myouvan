@@ -81,7 +81,7 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 		    'tag[server_id]': this.currentItem.server.id,
 		    'tag[value]': value
 		});
-		this.addCombo.setValue('');
+		this.addCombo.clearValue();
 	    },
 	    scope: this
 	});
@@ -136,6 +136,7 @@ Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 	Servers.SubcontentTab.TagsGrid.superclass.constructor.call(this, {
 	    colModel: this.colModel,
 	    store: this.store,
+	    loadMask: true,
 	    listeners: {
 		rowcontextmenu: function(grid, row, e) {
 		    grid.getSelectionModel().selectRow(row);

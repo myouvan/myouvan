@@ -21,6 +21,7 @@
   <%= javascript_include_tag 'servers/subcontent/chart' %>
   <%= javascript_include_tag 'servers/subcontent/tags' %>
   <%= javascript_include_tag 'servers/new_server' %>
+  <%= javascript_include_tag 'servers/new_server/select_target' %>
   <%= javascript_include_tag 'servers/new_server/select_image' %>
   <%= javascript_include_tag 'servers/new_server/form' %>
   <%= javascript_include_tag 'servers/new_server/tags' %>
@@ -45,6 +46,9 @@
         },
         tags: {
            index: '<%= tags_path %>'
+        },
+        targets: {
+           index: '<%= targets_path %>'
         }
     };
   </script>

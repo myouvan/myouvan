@@ -3,8 +3,7 @@ Servers.SubcontentTab = Ext.extend(Ext.TabPanel, {
     constructor: function() {
 	this.makeComponents();
 
-	this.addEvents('addTag');
-	this.addEvents('destroyTag');
+	this.addEvents(['addTag', 'destroyTag']);
     },
 
     makeComponents: function() {

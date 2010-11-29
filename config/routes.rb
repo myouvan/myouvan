@@ -38,6 +38,7 @@ Provisioning::Application.routes.draw do
   end
 
   resources :tags, :only => [:index, :create, :destroy]
+  resources :targets, :only => [:index]
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

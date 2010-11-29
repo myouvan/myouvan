@@ -1,13 +1,15 @@
 var Servers = Ext.extend(Ext.util.Observable, {
 
     constructor: function() {
-	this.addEvents('createdServer');
-	this.addEvents('updatedServer');
-	this.addEvents('updatedServers');
-	this.addEvents('gotServer');
-	this.addEvents('monitorServer');
-	this.addEvents('addedTag');
-	this.addEvents('destroyedTag');
+	this.addEvents([
+	    'createdServer',
+	    'updatedServer',
+	    'updatedServers',
+	    'gotServer',
+	    'monitorServer',
+	    'addedTag',
+	    'destroyedTag'
+	]);
 
 	this.tasks = {
 	    updateServer: {
@@ -43,7 +45,7 @@ var Servers = Ext.extend(Ext.util.Observable, {
 
     importServer: function() {
 	this.newServerWindow.setSubmitOpts({
-            url: paths.servers.index,
+            url: paths.servers.import,
             method: 'POST',
             waitMsg: 'Importing...',
             success: function(f, action) {

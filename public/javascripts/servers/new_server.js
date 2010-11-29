@@ -7,6 +7,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
     },
 
     makeComponents: function() {
+	this.selectTargetPanel = new Servers.NewServerWindow.SelectTargetPanel();
 	this.selectImagePanel = new Servers.NewServerWindow.SelectImagePanel();
 	this.formPanel = new Servers.NewServerWindow.FormPanel();
 	this.tagsPanel = new Servers.NewServerWindow.TagsPanel();
@@ -39,6 +40,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 		    this.nextButton.enable();
 		    this.nextButton.setText('Next');
 
+		    this.selectTargetPanel.resetPanel();
 		    this.selectImagePanel.resetPanel();
 		    this.formPanel.resetPanel();
 		    this.tagsPanel.resetPanel();
@@ -56,6 +58,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    activeItem: 0,
 	    width: 400,
 	    items: [
+		this.selectTargetPanel,
 		this.selectImagePanel,
 		this.formPanel,
 		this.tagsPanel,

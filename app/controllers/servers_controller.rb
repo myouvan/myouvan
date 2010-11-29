@@ -9,7 +9,8 @@ class ServersController < ApplicationController
         render :json => {
           :success => true,
           :items => Server.all.collect {|server|
-            attributes_with_paths(server)
+            tags = server.tags.collect {|tag| tag.value }
+            attributes_with_paths(server).merge(:tags => tags)
           }
         }
       }
@@ -33,7 +34,8 @@ class ServersController < ApplicationController
     render :json => {
       :success => true,
       :items => servers.collect {|server|
-        attributes_with_paths(server)
+        tags = server.tags.collect {|tag| tag.value }
+        attributes_with_paths(server).merge(:tags => tags)
       }
     }
   end
@@ -87,8 +89,7 @@ class ServersController < ApplicationController
       :success => true,
       :item => {
         :server => attributes_with_paths(server),
-        :interfaces => server.interfaces.collect {|interface| interface.attributes },
-        :tags => server.tags.collect {|tag| tag.value }
+        :interfaces => server.interfaces.collect {|interface| interface.attributes }
       }
     }
   end
@@ -131,7 +132,11 @@ class ServersController < ApplicationController
     end
 
     if server.save
-      render :json => { :success => true, :item => attributes_with_paths(server) }
+      tags = server.tags.collect {|tag| tag.value }
+      render :json => {
+        :success => true,
+        :item => attributes_with_paths(server).merge(:tags => tags)
+      }
     else
       render :json => { :success => false, :errors => server.errors_for_ext }
       return

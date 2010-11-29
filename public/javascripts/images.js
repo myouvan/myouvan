@@ -1,9 +1,11 @@
 var Images = Ext.extend(Ext.util.Observable, {
 
     constructor: function() {
-	this.addEvents('createdImage');
-	this.addEvents('updatedImage');
-	this.addEvents('destroyedImage');
+	this.addEvents([
+	    'createdImage',
+	    'updatedImage',
+	    'destroyedImage'
+	]);
     },
 
     createImage: function() {

@@ -3,20 +3,17 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     constructor: function() {
 	this.makeComponents();
 
-	this.addEvents('showServer');
-	this.enableBubble('showServer');
-	this.addEvents('suspendServer');
-	this.enableBubble('suspendServer');
-	this.addEvents('resumeServer');
-	this.enableBubble('resumeServer');
-	this.addEvents('rebootServer');
-	this.enableBubble('rebootServer');
-	this.addEvents('terminateServer');
-	this.enableBubble('terminateServer');
-	this.addEvents('restartServer');
-	this.enableBubble('restartServer');
-	this.addEvents('migrateServer');
-	this.enableBubble('migrateServer');
+	var events = [
+	    'showServer',
+	    'suspendServer',
+	    'resumeServer',
+	    'rebootServer',
+	    'terminateServer',
+	    'restartServer',
+	    'migrateServer'
+	];
+	this.addEvents(events);
+	this.enableBubble(events);
 
 	this.addRecordDelegate = this.addRecord.createDelegate(this);
 	this.updateRecordDelegate = this.updateRecord.createDelegate(this);
@@ -31,6 +28,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	Servers.IndexGrid.superclass.constructor.call(this, {
 	    colModel: this.colModel,
 	    store: this.store,
+	    loadMask: true,
 	    listeners: {
 		rowclick: function(grid, row, e) {
 		    this.operateServer('showServer');
@@ -147,6 +145,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		'cpus',
 		'memory',
 		'comment',
+		'tags',
 		'paths'
 	    ]
 	});
@@ -204,6 +203,15 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     operateServer: function(operation) {
 	var record = this.getSelectionModel().getSelected();
 	this.fireEvent(operation, record.data);
+    },
+
+    setFilter: function(value) {
+	if (value == '')
+	    this.store.clearFilter();
+	else
+	    this.store.filterBy(function(record) {
+		return (record.get('tags').indexOf(value) != -1);
+	    });
     },
 
     addEventHandlers: function() {

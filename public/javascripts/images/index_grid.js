@@ -3,10 +3,9 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     constructor: function() {
 	this.makeComponents();
 
-	this.addEvents('updateImage');
-	this.enableBubble('updateImage');
-	this.addEvents('destroyImage');
-	this.enableBubble('destroyImage');
+	var events = ['updateImage', 'destroyImage'];
+	this.addEvents(events);
+	this.enableBubble(events);
 
 	this.addRecordDelegate = this.addRecord.createDelegate(this);
 	this.updateRecordDelegate = this.updateRecord.createDelegate(this);
@@ -21,7 +20,7 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	Images.IndexGrid.superclass.constructor.call(this, {
 	    colModel: this.colModel,
 	    store: this.store,
-	    autoHeight: true,
+	    loadMask: true,
 	    listeners: {
 		rowcontextmenu: function(grid, row, e) {
 		    this.getSelectionModel().selectRow(row);
