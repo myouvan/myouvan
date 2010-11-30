@@ -44,6 +44,11 @@ class TargetsController < ApplicationController
   def parse_xml_desc(xml)
     doc = REXML::Document.new(xml)
 
+    type = REXML::XPath.first(doc, '/domain/@type').value
+    if type == 'kvm'
+      virtualization = 'KVM FullVirtualization'
+    end
+
     name = REXML::XPath.first(doc, '/domain/name/text()')
     uuid = REXML::XPath.first(doc, '/domain/uuid/text()')
     cpus = REXML::XPath.first(doc, '/domain/vcpu/text()')
@@ -58,6 +63,7 @@ class TargetsController < ApplicationController
     return {
       :name => name.to_s,
       :uuid => uuid.to_s,
+      :virtualization => virtualization,
       :cpus => cpus.to_s.to_i,
       :memory => memory.to_s.to_i / 1024,
       :storage_iqn => storage_iqn.to_s,

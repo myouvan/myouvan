@@ -83,6 +83,7 @@ Servers.NewServerWindow.SelectTargetGrid = Ext.extend(Ext.grid.GridPanel, {
 		'physical_server',
 		'name',
 		'uuid',
+		'virtualization',
 		'cpus',
 		'memory',
 		'storage_iqn',

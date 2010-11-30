@@ -90,6 +90,7 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    itemId: 'virtualization',
 	    fieldLabel: 'Virtualization',
 	    width: 200,
+	    readOnly: this.action == 'import',
 	    storeConfig: {
 		url: paths.servers.virtualizations
 	    }
