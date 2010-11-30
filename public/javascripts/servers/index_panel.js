@@ -5,14 +5,7 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 
 	this.addEvents([
 	    'createServer',
-	    'importServer',
-	    'showServer',
-	    'suspendServer',
-	    'resumeServer',
-	    'rebootServer',
-	    'terminateServer',
-	    'restartServer',
-	    'migrateServer'
+	    'importServer'
 	]);
 
 	this.updateTagsDelegate = this.updateTags.createDelegate(this);

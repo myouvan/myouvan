@@ -5,7 +5,6 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 
 	this.addEvents('addTag');
 	this.enableBubble('addTag');
-	this.addEvents('destroyTag');
 
 	this.showTagsDelegate = this.showTags.createDelegate(this);
 	this.updateTagsDelegate = this.updateTags.createDelegate(this);

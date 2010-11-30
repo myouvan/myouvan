@@ -3,11 +3,7 @@ Images.IndexPanel = Ext.extend(Ext.Panel, {
     constructor: function() {
 	this.makeComponents();
 
-	this.addEvents([
-	    'createImage',
-	    'updateImage',
-	    'destroyImage'
-	]);
+	this.addEvents('createImage');
     },
 
     makeComponents: function() {
