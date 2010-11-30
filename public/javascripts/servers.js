@@ -54,7 +54,7 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	var newServerWindow = new Servers.NewServerWindow({
 	    action: 'import',
 	    submitConfig: {
-		url: paths.servers.import,
+		url: paths.servers.import_,
 		method: 'POST',
 		waitMsg: 'Importing...',
 		success: function(f, action) {
