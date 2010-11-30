@@ -41,6 +41,9 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
     },
 
     showChart: function(item) {
+	if (this.currentItem && this.currentItem.server.id == item.server.id)
+	    return;
+
 	this.chart = new Servers.SubcontentTab.Chart({
 	    url: item.server.paths.monitor
 	});
@@ -48,6 +51,8 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
 	var container = this.getComponent('container');
 	container.removeAll();
 	container.add(this.chart);
+
+	this.currentItem = item;
     },
 
     updateChart: function() {

@@ -85,6 +85,9 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
     },
 
     showTags: function(item) {
+	if (this.currentItem && this.currentItem.server.id == item.server.id)
+	    return;
+
 	this.tagsGrid = new Servers.SubcontentTab.TagsGrid({
 	    url: item.server.paths.tags
 	});

@@ -19,7 +19,6 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.enableBubble(events);
 
 	this.addRecordDelegate = this.addRecord.createDelegate(this);
-	this.addRecordsDelegate = this.addRecords.createDelegate(this);
 	this.updateRecordDelegate = this.updateRecord.createDelegate(this);
 	this.updateRecordsDelegate = this.updateRecords.createDelegate(this);
 	this.destroyRecordDelegate = this.destroyRecord.createDelegate(this);
@@ -231,7 +230,6 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
     addEventHandlers: function() {
 	servers.on('createdServer', this.addRecordDelegate);
-	servers.on('gotServers', this.addRecordsDelegate);
 	servers.on('updatedServer', this.updateRecordDelegate);
 	servers.on('updatedServers', this.updateRecordsDelegate);
 	servers.on('destroyedMetaData', this.destroyRecordDelegate);
@@ -239,7 +237,6 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
     removeEventHandlers: function() {
 	servers.un('createdServer', this.addRecordDelegate);
-	servers.un('gotServers', this.addRecordsDelegate);
 	servers.un('updatedServer', this.updateRecordDelegate);
 	servers.un('updatedServers', this.updateRecordsDelegate);
 	servers.un('destroyedMetaData', this.destroyRecordDelegate);

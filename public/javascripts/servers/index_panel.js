@@ -15,6 +15,7 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 	    'migrateServer'
 	]);
 
+	this.addRecordsDelegate = this.addRecords.createDelegate(this);
 	this.updateTagsDelegate = this.updateTags.createDelegate(this);
     },
 
@@ -46,7 +47,8 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 		},
 		listeners: {
 		    select: function(combo, record, index) {
-			this.indexGrid.setFilter(combo.getValue());
+			this.filterValue = combo.getValue();
+			this.indexGrid.setFilter(this.filterValue);
 		    },
 		    scope: this
 		}
@@ -56,7 +58,8 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 		handler: function() {
 		    var tfCombo = this.getTopToolbar().getComponent('tagFilterCombo');
 		    tfCombo.clearValue();
-		    this.indexGrid.setFilter(tfCombo.getValue());
+		    this.filterValue = tfCombo.getValue();
+		    this.indexGrid.setFilter(this.filterValue);
 		},
 		scope: this
 	    }, '|', {
@@ -80,15 +83,25 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
     },
 
     addEventHandlers: function() {
+	servers.on('gotServers', this.addRecordsDelegate);
 	servers.on('addedTag', this.updateTagsDelegate);
 	servers.on('destroyedTag', this.updateTagsDelegate);
 	servers.on('updatedTags', this.updateTagsDelegate);
     },
 
     removeEventHandlers: function() {
+	servers.un('gotServers', this.addRecordsDelegate);
 	servers.un('addedTag', this.updateTagsDelegate);
 	servers.un('destroyedTag', this.updateTagsDelegate);
 	servers.un('updatedTags', this.updateTagsDelegate);
+    },
+
+    addRecords: function(items) {
+	var addingItems = new Array();
+	for (var i = 0; i < items.length; ++i)
+	    if (items[i].tags.indexOf(this.filterValue) != -1)
+		addingItems.push(items[i]);
+	this.indexGrid.addRecords(addingItems);
     },
 
     updateTags: function() {
