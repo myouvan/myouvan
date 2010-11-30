@@ -5,6 +5,14 @@ class Server < ActiveRecord::Base
   has_one :avatar, :dependent => :destroy
   has_many :tags, :dependent => :destroy
 
+  scope :filtered, lambda {|value|
+    if value.blank?
+      nil
+    else
+      joins(:tags).where('tags.value' => value)
+    end
+  }
+
   validates :name, :presence => true, :uniqueness => true
   validates :uuid, :presence => true
   validates :title, :presence => true

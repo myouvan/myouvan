@@ -6,10 +6,12 @@ class ServersController < ApplicationController
     respond_to do |format|
       format.html
       format.json {
+        filtered_server = Server.filtered(params[:filter_value])
+
         if params[:ids].blank?
-          servers = Server.all
+          servers = filtered_server.all
         else
-          servers = Server.find(JSON.parse(params[:ids]))
+          servers = filtered_server.find(JSON.parse(params[:ids]))
         end
 
         render :json => {
@@ -24,7 +26,7 @@ class ServersController < ApplicationController
   end
 
   def status
-    servers = Server.all
+    servers = Server.filtered(params[:filter_value])
 
     render :json => {
       :success => true,

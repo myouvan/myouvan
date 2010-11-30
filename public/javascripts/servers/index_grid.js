@@ -7,6 +7,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    'showServer',
 	    'unshowServer',
 	    'getServers',
+	    'setFilter',
 	    'suspendServer',
 	    'resumeServer',
 	    'rebootServer',
@@ -19,9 +20,12 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.enableBubble(events);
 
 	this.addRecordDelegate = this.addRecord.createDelegate(this);
+	this.addRecordsDelegate = this.addRecords.createDelegate(this);
 	this.updateRecordDelegate = this.updateRecord.createDelegate(this);
 	this.updateRecordsDelegate = this.updateRecords.createDelegate(this);
 	this.destroyRecordDelegate = this.destroyRecord.createDelegate(this);
+
+	this.filterValue = '';
     },
 
     makeComponents: function() {
@@ -220,16 +224,22 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     setFilter: function(value) {
-	if (value == '')
-	    this.store.clearFilter();
-	else
-	    this.store.filterBy(function(record) {
-		return (record.get('tags').indexOf(value) != -1);
-	    });
+	this.filterValue = value;
+	this.store.setBaseParam('filter_value', value);
+	this.store.load({
+	    callback: function() {
+		if (!this.getSelectionModel().hasSelection())
+		    this.fireEvent('unshowServer');
+	    },
+	    scope: this
+	});
+
+	this.fireEvent('setFilter', value);
     },
 
     addEventHandlers: function() {
 	servers.on('createdServer', this.addRecordDelegate);
+	servers.on('gotServers', this.addRecordsDelegate);
 	servers.on('updatedServer', this.updateRecordDelegate);
 	servers.on('updatedServers', this.updateRecordsDelegate);
 	servers.on('destroyedMetaData', this.destroyRecordDelegate);
@@ -237,15 +247,18 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
     removeEventHandlers: function() {
 	servers.un('createdServer', this.addRecordDelegate);
+	servers.un('gotServers', this.addRecordsDelegate);
 	servers.un('updatedServer', this.updateRecordDelegate);
 	servers.un('updatedServers', this.updateRecordsDelegate);
 	servers.un('destroyedMetaData', this.destroyRecordDelegate);
     },
 
     addRecord: function(item) {
-	var RecordType = this.store.recordType;
-	var record = new RecordType(item);
-	this.store.add(record);
+	if (this.filterValue == '' || item.tags.indexOf(this.filterValue) != -1) {
+	    var RecordType = this.store.recordType;
+	    var record = new RecordType(item);
+	    this.store.add(record);
+	}
     },
 
     addRecords: function(items) {
@@ -299,11 +312,11 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
     destroyRecord: function(item) {
 	var ri = this.store.findExact('id', item.id);
-	if (ri != -1) {
-	    if (this.getSelectionModel().isSelected(ri))
-		this.fireEvent('unshowServer');
+	if (ri != -1)
 	    this.store.removeAt(ri);
-	}
+
+	if (!this.getSelectionModel().hasSelection())
+	    this.fireEvent('unshowServer');
     }
 
 });

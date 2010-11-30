@@ -26,6 +26,8 @@ var Servers = Ext.extend(Ext.util.Observable, {
 		scope: this
 	    }
 	};
+
+	this.filterValue = '';
     },
 
     createServer: function() {
@@ -112,6 +114,10 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	    },
 	    scope: this
 	});
+    },
+
+    setFilter: function(value) {
+	this.filterValue = value;
     },
 
     operateServer: function(item, operation) {
@@ -220,6 +226,9 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	Ext.Ajax.request({
             url: paths.servers.status,
             method: 'GET',
+	    params: {
+		filter_value: this.filterValue
+	    },
             success: function(res, opts) {
 		var items = Ext.decode(res.responseText).items;
 		this.fireEvent('updatedServers', items);
@@ -263,6 +272,8 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	this.indexPanel.on('importServer', this.importServer.createDelegate(this));
 	this.indexPanel.on('showServer', this.showServer.createDelegate(this));
 	this.indexPanel.on('unshowServer', this.unshowServer.createDelegate(this));
+	this.indexPanel.on('getServers', this.getServers.createDelegate(this));
+	this.indexPanel.on('setFilter', this.setFilter.createDelegate(this));
 	this.indexPanel.on('suspendServer', this.suspendServer.createDelegate(this));
 	this.indexPanel.on('resumeServer', this.resumeServer.createDelegate(this));
 	this.indexPanel.on('rebootServer', this.rebootServer.createDelegate(this));
@@ -270,7 +281,6 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	this.indexPanel.on('restartServer', this.restartServer.createDelegate(this));
 	this.indexPanel.on('migrateServer', this.migrateServer.createDelegate(this));
 	this.indexPanel.on('destroyMetaData', this.destroyMetaData.createDelegate(this));
-	this.indexPanel.on('getServers', this.getServers.createDelegate(this));
 
 	this.subcontentTab.on('addTag', this.addTag.createDelegate(this));
 	this.subcontentTab.on('destroyTag', this.destroyTag.createDelegate(this));
