@@ -14,7 +14,8 @@ class TargetsController < ApplicationController
           domains = conn.list_domains.collect {|domain_id|
             conn.lookup_domain_by_id(domain_id)
           }.select {|domain|
-            not server_names.include?(domain.name)
+            not server_names.include?(domain.name) and
+            domain.info.state == Libvirt::Domain::RUNNING
           }.sort_by {|domain|
             domain.name
           }
