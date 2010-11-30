@@ -23,6 +23,8 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	Images.IndexGrid.superclass.constructor.call(this, {
 	    colModel: this.colModel,
 	    store: this.store,
+	    autoExpandColumn: 'comment',
+	    stripeRows: true,
 	    loadMask: true,
 	    listeners: {
 		rowcontextmenu: function(grid, row, e) {
@@ -60,7 +62,7 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	}, {
 	    header: 'Comment',
 	    dataIndex: 'comment',
-	    width: 250
+	    id: 'comment'
 	}]);
     },
 

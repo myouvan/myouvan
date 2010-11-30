@@ -51,7 +51,7 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
     },
 
     updateChart: function() {
-	if (this.chart)
+	if (this.chart && this.chart.isVisible())
 	    this.chart.store.load();
     }
 

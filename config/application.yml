@@ -8,7 +8,6 @@ defaults: &defaults
     key:
       cpus: provisioning_cpus
       monitor: provisioning_monitor
-      state: provisioning_state
 
   monitor_caches: 50
 

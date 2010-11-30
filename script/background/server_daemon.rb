@@ -37,7 +37,8 @@ class ServerDaemon < SimpleDaemon::Base
         begin
           item = starling.get(Settings.starling.queue)
         rescue MemCache::MemCacheError => v
-          raise unless v.message == 'No servers available (all dead)'
+          @logger.debug v.message
+          raise unless ['No servers available (all dead)', 'Broken pipe'].include?(v.message)
         end
 
         if item

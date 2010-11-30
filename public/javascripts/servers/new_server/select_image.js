@@ -39,6 +39,8 @@ Servers.NewServerWindow.SelectImageGrid = Ext.extend(Ext.grid.GridPanel, {
 	Servers.NewServerWindow.SelectImageGrid.superclass.constructor.call(this, {
 	    colModel: this.colModel,
 	    store: this.store,
+	    autoExpandColumn: 'comment',
+	    stripeRows: true,
 	    loadMask: true
 	});
     },
@@ -62,7 +64,7 @@ Servers.NewServerWindow.SelectImageGrid = Ext.extend(Ext.grid.GridPanel, {
 	}, {
 	    header: 'Comment',
 	    dataIndex: 'comment',
-	    width: 230
+	    id: 'comment'
 	}]);
     },
 

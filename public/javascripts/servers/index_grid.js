@@ -6,6 +6,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	var events = [
 	    'showServer',
 	    'unshowServer',
+	    'getServers',
 	    'suspendServer',
 	    'resumeServer',
 	    'rebootServer',
@@ -18,6 +19,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.enableBubble(events);
 
 	this.addRecordDelegate = this.addRecord.createDelegate(this);
+	this.addRecordsDelegate = this.addRecords.createDelegate(this);
 	this.updateRecordDelegate = this.updateRecord.createDelegate(this);
 	this.updateRecordsDelegate = this.updateRecords.createDelegate(this);
 	this.destroyRecordDelegate = this.destroyRecord.createDelegate(this);
@@ -31,6 +33,8 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	Servers.IndexGrid.superclass.constructor.call(this, {
 	    colModel: this.colModel,
 	    store: this.store,
+	    autoExpandColumn: 'comment',
+	    stripeRows: true,
 	    loadMask: true,
 	    listeners: {
 		rowclick: function(grid, row, e) {
@@ -83,11 +87,11 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	}, {
 	    header: 'Name',
 	    dataIndex: 'name',
-	    width: 120,
+	    width: 180,
 	    sortable: true,
 	    renderer: function(value, metadata, record) {
 		var url = record.get('paths').avatarIcon;
-		return img(url, 32, 32) + value;
+		return img(url, 32, 32) + ' ' + value;
 	    }
 	}, {
 	    header: 'Title',
@@ -106,7 +110,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	}, {
 	    header: 'Physical Server',
 	    dataIndex: 'physical_server',
-	    width: 150,
+	    width: 120,
 	    sortable: true
 	}, {
 	    header: 'CPUs',
@@ -121,7 +125,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	}, {
 	    header: 'Comment',
 	    dataIndex: 'comment',
-	    width: 250
+	    id: 'comment'
 	}]);
     },
 
@@ -227,6 +231,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
     addEventHandlers: function() {
 	servers.on('createdServer', this.addRecordDelegate);
+	servers.on('gotServers', this.addRecordsDelegate);
 	servers.on('updatedServer', this.updateRecordDelegate);
 	servers.on('updatedServers', this.updateRecordsDelegate);
 	servers.on('destroyedMetaData', this.destroyRecordDelegate);
@@ -234,6 +239,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
     removeEventHandlers: function() {
 	servers.un('createdServer', this.addRecordDelegate);
+	servers.un('gotServers', this.addRecordsDelegate);
 	servers.un('updatedServer', this.updateRecordDelegate);
 	servers.un('updatedServers', this.updateRecordsDelegate);
 	servers.un('destroyedMetaData', this.destroyRecordDelegate);
@@ -243,6 +249,11 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	var RecordType = this.store.recordType;
 	var record = new RecordType(item);
 	this.store.add(record);
+    },
+
+    addRecords: function(items) {
+	for (var i = 0; i < items.length; ++i)
+	    this.addRecord(items[i]);
     },
 
     updateRecord: function(item) {
@@ -257,21 +268,23 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
     updateRecords: function(items) {
 	var walkedRecords = new Object();
+	var addedIds = new Array();
 	for (var i = 0; i < items.length; ++i) {
 	    var item = items[i];
 	    var ri = this.store.findExact('id', item.id);
-	    if (ri == -1) {
-		var RecordType = this.store.recordType;
-		var record = new RecordType(items);
-		this.store.add(record);
-	    } else {
+	    if (ri != -1) {
 		var record = this.store.getAt(ri);
 		for (var field in item)
 		    record.set(field, item[field]);
+		walkedRecords[item.id] = true;
+	    } else {
+		addedIds.push(item.id);
 	    }
-	    walkedRecords[item.id] = true;
 	}
 	this.store.commitChanges();
+
+	if (addedIds.length > 0)
+	    this.fireEvent('getServers', addedIds);
 
 	var deletedRecords = new Array();
 	this.store.each(function(record) {

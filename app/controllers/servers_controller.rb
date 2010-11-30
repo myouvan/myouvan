@@ -6,9 +6,15 @@ class ServersController < ApplicationController
     respond_to do |format|
       format.html
       format.json {
+        if params[:ids].blank?
+          servers = Server.all
+        else
+          servers = Server.find(JSON.parse(params[:ids]))
+        end
+
         render :json => {
           :success => true,
-          :items => Server.all.collect {|server|
+          :items => servers.collect {|server|
             tags = server.tags.collect {|tag| tag.value }
             attributes_with_paths(server).merge(:tags => tags)
           }
@@ -20,22 +26,12 @@ class ServersController < ApplicationController
   def status
     servers = Server.all
 
-    servers.each do |server|
-      if %(Running Paused Terminated).include?(server.status)
-        memcache = MemCache.new(Settings.memcached.server)
-        state = memcache.get("#{Settings.memcached.key.state}:#{server.id}")
-        if state != server.status
-          server.status = state
-          server.save
-        end
-      end
-    end
-
     render :json => {
       :success => true,
       :items => servers.collect {|server|
-        tags = server.tags.collect {|tag| tag.value }
-        attributes_with_paths(server).merge(:tags => tags)
+        server.attributes.reject {|key, value|
+          not %w(id status physical_server user_terminate).include?(key)
+        }
       }
     }
   end

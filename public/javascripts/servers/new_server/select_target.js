@@ -39,6 +39,8 @@ Servers.NewServerWindow.SelectTargetGrid = Ext.extend(Ext.grid.GridPanel, {
 	Servers.NewServerWindow.SelectTargetGrid.superclass.constructor.call(this, {
 	    colModel: this.colModel,
 	    store: this.store,
+	    autoExpandColumn: 'name',
+	    stripeRows: true,
 	    loadMask: true
 	});
     },
@@ -57,8 +59,8 @@ Servers.NewServerWindow.SelectTargetGrid = Ext.extend(Ext.grid.GridPanel, {
 	}, {
 	    header: 'Name',
 	    dataIndex: 'name',
-	    width: 150,
-	    sortable: true
+	    sortable: true,
+	    id: 'name'
 	}, {
 	    header: 'CPUs',
 	    dataIndex: 'cpus',

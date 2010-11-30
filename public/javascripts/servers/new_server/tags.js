@@ -12,6 +12,7 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 	    title: 'Add Tags',
 	    itemId: 'tags',
 	    layout: 'hbox',
+	    padding: 10,
 	    layoutConfig: {
 		align: 'stretch',
 		pack: 'center',
@@ -31,14 +32,8 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 		    items: this.tagsGrid
 		}, {
 		    layout: 'hbox',
-		    height: 30,
+		    height: 27,
 		    border: false,
-		    layoutConfig: {
-			align: 'middle'
-		    },
-		    defaults: {
-			margins: '0 2 0 2'
-		    },
 		    items: [
 			this.addCombo,
 			this.addButton
@@ -50,6 +45,7 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 
     makeAddComponents: function() {
 	this.addCombo = new Ext.ux.EditableStoreComboBox({
+	    margins: '5 0 0 0',
 	    flex: 1,
 	    storeConfig: {
 		url: paths.tags.index
@@ -58,6 +54,7 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 
 	this.addButton = new Ext.Button({
 	    text: 'Add Tag',
+	    margins: '5 0 0 5',
 	    width: 70,
 	    handler: function() {
 		var value = this.addCombo.getValue();
@@ -89,6 +86,8 @@ Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 	Servers.NewServerWindow.TagsGrid.superclass.constructor.call(this, {
 	    colModel: this.colModel,
 	    store: this.store,
+	    autoExpandColumn: 'value',
+	    stripeRows: true,
 	    listeners: {
 		rowcontextmenu: function(grid, row, e) {
 		    this.getSelectionModel().selectRow(row);
@@ -101,10 +100,10 @@ Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 
     makeColModel: function() {
 	this.colModel = new Ext.grid.ColumnModel([{
-	    header: 'Value',
+	    header: 'Tags',
 	    dataIndex: 'value',
-	    width: 250,
-	    sortable: true
+	    sortable: true,
+	    id: 'value'
 	}]);
     },
 

@@ -31,7 +31,7 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 		    this.fireEvent('createServer');
 		},
 		scope: this
-	    }, {
+	    }, '|', {
 		xtype: 'button',
 		text: 'Import Server',
 		handler: function() {
@@ -57,6 +57,13 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 		    var tfCombo = this.getTopToolbar().getComponent('tagFilterCombo');
 		    tfCombo.clearValue();
 		    this.indexGrid.setFilter(tfCombo.getValue());
+		},
+		scope: this
+	    }, '|', {
+		xtype: 'button',
+		text: 'Reload',
+		handler: function() {
+		    this.indexGrid.store.load();
 		},
 		scope: this
 	    }],

@@ -22,6 +22,13 @@ Images.IndexPanel = Ext.extend(Ext.Panel, {
 		    this.fireEvent('createImage');
 		},
 		scope: this
+	    }, '->', {
+		xtype: 'button',
+		text: 'Reload',
+		handler: function() {
+		    this.indexGrid.store.load();
+		},
+		scope: this
 	    }],
 	    items: {
 		layout: 'fit',

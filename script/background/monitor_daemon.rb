@@ -98,8 +98,6 @@ class MonitorDaemon < SimpleDaemon::Base
 
   def self.set_status(server, domain)
     state = domain.info.state
-    @logger.debug "#{server.name} : #{state} : #{STATES[state]}"
-    @memcache.set("#{Settings.memcached.key.state}:#{server.id}", STATES[state])
 
     if state == Libvirt::Domain::SHUTOFF and
         server.status == 'Running' and
@@ -114,6 +112,12 @@ class MonitorDaemon < SimpleDaemon::Base
       }
 
       @starling.set(Settings.starling.queue, item)
+    end
+
+    if %(Running Paused Terminated).include?(server.status) and
+        STATES[state] != server.status
+      server.status = STATES[state]
+      server.save
     end
   end
   

@@ -6,6 +6,7 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	    'updatedServer',
 	    'updatedServers',
 	    'gotServer',
+	    'gotServers',
 	    'monitorServer',
 	    'destroyedMetaData',
 	    'addedTag',
@@ -90,6 +91,27 @@ var Servers = Ext.extend(Ext.util.Observable, {
 
     unshowServer: function() {
 	this.subcontentTab.hide();
+    },
+
+    getServers: function(ids) {
+	Ext.Ajax.request({
+	    url: paths.servers.index,
+	    method: 'GET',
+	    params: {
+		ids: Ext.encode(ids)
+	    },
+	    defaultHeaders: {
+		Accept: 'application/json'
+	    },
+	    success: function(res, opts) {
+		var items = Ext.decode(res.responseText).items;
+		this.fireEvent('gotServers', items);
+		this.fireEvent('updatedTags');
+	    },
+	    failure: function() {
+	    },
+	    scope: this
+	});
     },
 
     operateServer: function(item, operation) {
@@ -248,6 +270,7 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	this.indexPanel.on('restartServer', this.restartServer.createDelegate(this));
 	this.indexPanel.on('migrateServer', this.migrateServer.createDelegate(this));
 	this.indexPanel.on('destroyMetaData', this.destroyMetaData.createDelegate(this));
+	this.indexPanel.on('getServers', this.getServers.createDelegate(this));
 
 	this.subcontentTab.on('addTag', this.addTag.createDelegate(this));
 	this.subcontentTab.on('destroyTag', this.destroyTag.createDelegate(this));
