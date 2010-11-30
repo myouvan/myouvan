@@ -142,7 +142,7 @@ class ServersController < ApplicationController
 
     @server = server
     domain_xml = '' # because render_to_string returns ActionView::Buffer
-    domain_xml << (render_to_string :xml => { :action => 'domain', :layout => false })
+    domain_xml << (render_to_string :template => 'servers/domain.xml.builder', :layout => false)
 
     item = {
       :command => 'create_server',
