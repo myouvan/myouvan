@@ -24,6 +24,8 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.updateRecordDelegate = this.updateRecord.createDelegate(this);
 	this.updateRecordsDelegate = this.updateRecords.createDelegate(this);
 	this.destroyRecordDelegate = this.destroyRecord.createDelegate(this);
+	this.addTagDelegate = this.addTag.createDelegate(this);
+	this.destroyTagDelegate = this.destroyTag.createDelegate(this);
 	this.reloadServerDelegate = this.reloadServer.createDelegate(this);
 
 	this.filterValue = '';
@@ -256,6 +258,8 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	servers.on('updatedServer', this.updateRecordDelegate);
 	servers.on('updatedServers', this.updateRecordsDelegate);
 	servers.on('destroyedMetaData', this.destroyRecordDelegate);
+	servers.on('addedTag', this.addTagDelegate);
+	servers.on('destroyedTag', this.destroyTagDelegate);
 	servers.on('reloadServer', this.reloadServerDelegate);
     },
 
@@ -265,6 +269,8 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	servers.un('updatedServer', this.updateRecordDelegate);
 	servers.un('updatedServers', this.updateRecordsDelegate);
 	servers.un('destroyedMetaData', this.destroyRecordDelegate);
+	servers.un('addedTag', this.addTagDelegate);
+	servers.un('destroyedTag', this.destroyTagDelegate);
 	servers.un('reloadServer', this.reloadServerDelegate);
     },
 
@@ -332,6 +338,33 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
 	if (!this.getSelectionModel().hasSelection())
 	    this.fireEvent('unshowServer');
+    },
+
+    addTag: function(item) {
+	var ri = this.store.findExact('id', item.server_id);
+	if (ri != -1) {
+	    var record = this.store.getAt(ri);
+	    record.get('tags').push(item.value);
+	}
+    },
+
+    destroyTag: function(item) {
+	var ri = this.store.findExact('id', item.server_id);
+	if (ri != -1) {
+	    var record = this.store.getAt(ri);
+	    var ti = record.get('tags').indexOf(item.value);
+	    if (ti != -1) {
+		record.get('tags').splice(ti, 1);
+		if (this.filterValue == item.value) {
+		    ti = record.get('tags').indexOf(item.value);
+		    if (ti == -1) {
+			this.store.removeAt(ri);
+			if (!this.getSelectionModel().hasSelection())
+			    this.fireEvent('unshowServer');
+		    }
+		}
+	    }
+	}
     },
 
     reloadServer: function() {

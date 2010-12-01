@@ -314,9 +314,9 @@ class ServersController < ApplicationController
 
   def destroy
     server = Server.find(params[:id])
-    id = server.id
+    attrs = server.attributes
     server.destroy
-    render :json => { :success => true, :item => { :id => id } }
+    render :json => { :success => true, :item => attrs }
   end
 
   def attributes_with_paths(server)
