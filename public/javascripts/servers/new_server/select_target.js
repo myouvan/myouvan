@@ -37,6 +37,7 @@ Servers.NewServerWindow.SelectTargetGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.makeStore();
 
 	Servers.NewServerWindow.SelectTargetGrid.superclass.constructor.call(this, {
+	    border: false,
 	    colModel: this.colModel,
 	    store: this.store,
 	    autoExpandColumn: 'name',

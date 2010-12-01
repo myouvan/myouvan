@@ -13,11 +13,9 @@ Servers.NewServerWindow.FlashPanel = Ext.extend(Ext.Panel, {
 	    itemId: 'flash',
 	    layout: 'fit',
 	    border: false,
-	    html: '<div id="avatar-flash" />',
-	    listeners: {
-		beforeshow: function() {
-		    swfobject.embedSWF('/ova.swf', 'avatar-flash', '630', '400', '9.0.0');
-		}
+	    items: {
+		xtype: 'flash',
+		url: '/ova.swf'
 	    }
 	});
     },

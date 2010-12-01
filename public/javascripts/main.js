@@ -30,7 +30,6 @@ var showViewport = function() {
     new Ext.Viewport({
 	layout: 'fit',
 	items: {
-	    title: 'Provisioning Tool',
 	    layout: 'border',
 	    items: [{
 		region: 'west',
@@ -38,6 +37,7 @@ var showViewport = function() {
 		title: 'Navigation',
 		headerCssClass: 'ec2-panel-header',
 		width: 150,
+		margins: '5 0 5 5',
 		padding: 5,
 		defaults: {
 		    border: false,
@@ -53,6 +53,7 @@ var showViewport = function() {
 		layout: 'border',
 		region: 'center',
 		border: false,
+		margins: '5 5 5 0',
 		items: [{
 		    id: 'content',
 		    region: 'center',

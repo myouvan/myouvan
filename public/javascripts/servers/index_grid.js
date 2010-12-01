@@ -34,6 +34,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.makeContextMenu();
 
 	Servers.IndexGrid.superclass.constructor.call(this, {
+	    border: false,
 	    colModel: this.colModel,
 	    store: this.store,
 	    autoExpandColumn: 'comment',

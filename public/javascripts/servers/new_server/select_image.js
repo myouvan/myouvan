@@ -37,6 +37,7 @@ Servers.NewServerWindow.SelectImageGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.makeStore();
 
 	Servers.NewServerWindow.SelectImageGrid.superclass.constructor.call(this, {
+	    border: false,
 	    colModel: this.colModel,
 	    store: this.store,
 	    autoExpandColumn: 'comment',

@@ -21,6 +21,7 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.makeContextMenu();
 
 	Images.IndexGrid.superclass.constructor.call(this, {
+	    border: false,
 	    colModel: this.colModel,
 	    store: this.store,
 	    autoExpandColumn: 'comment',
