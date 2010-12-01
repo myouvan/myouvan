@@ -28,6 +28,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.destroyTagDelegate = this.destroyTag.createDelegate(this);
 	this.reloadServerDelegate = this.reloadServer.createDelegate(this);
 
+	this.loading = false;
 	this.filterValue = '';
     },
 
@@ -154,7 +155,15 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		'user_terminate',
 		'tags',
 		'paths'
-	    ]
+	    ],
+	    linsteners: {
+		beforeload: function() {
+		    this.loading = true;
+		},
+		load: function() {
+		    this.loading = false;
+		}
+	    }
 	});
     },
 
@@ -241,13 +250,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     setFilter: function(value) {
 	this.filterValue = value;
 	this.store.setBaseParam('filter_value', value);
-	this.store.load({
-	    callback: function() {
-		if (!this.getSelectionModel().hasSelection())
-		    this.fireEvent('unshowServer');
-	    },
-	    scope: this
-	});
+	this.reloadServer();
 
 	this.fireEvent('setFilter', value);
     },
@@ -314,7 +317,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	}
 	this.store.commitChanges();
 
-	if (addedIds.length > 0)
+	if (!this.loading && addedIds.length > 0)
 	    this.fireEvent('getServers', addedIds);
 
 	var deletedRecords = new Array();
@@ -368,7 +371,13 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     reloadServer: function() {
-	this.store.load();
+	this.store.load({
+	    callback: function() {
+		if (!this.getSelectionModel().hasSelection())
+		    this.fireEvent('unshowServer');
+	    },
+	    scope: this
+	});
     }
 
 });
