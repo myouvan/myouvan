@@ -28,7 +28,6 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.destroyTagDelegate = this.destroyTag.createDelegate(this);
 	this.reloadServerDelegate = this.reloadServer.createDelegate(this);
 
-	this.loading = false;
 	this.filterValue = '';
     },
 
@@ -155,15 +154,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		'user_terminate',
 		'tags',
 		'paths'
-	    ],
-	    linsteners: {
-		beforeload: function() {
-		    this.loading = true;
-		},
-		load: function() {
-		    this.loading = false;
-		}
-	    }
+	    ]
 	});
     },
 
@@ -278,10 +269,13 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     addRecord: function(item) {
-	if (this.filterValue == '' || item.tags.indexOf(this.filterValue) != -1) {
-	    var RecordType = this.store.recordType;
-	    var record = new RecordType(item);
-	    this.store.add(record);
+	var ri = this.store.findExact('id', item.id);
+	if (ri == -1) {
+	    if (this.filterValue == '' || item.tags.indexOf(this.filterValue) != -1) {
+		var RecordType = this.store.recordType;
+		var record = new RecordType(item);
+		this.store.add(record);
+	    }
 	}
     },
 
@@ -317,7 +311,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	}
 	this.store.commitChanges();
 
-	if (!this.loading && addedIds.length > 0)
+	if (addedIds.length > 0)
 	    this.fireEvent('getServers', addedIds);
 
 	var deletedRecords = new Array();
