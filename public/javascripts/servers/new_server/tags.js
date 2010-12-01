@@ -44,7 +44,7 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 	    layoutConfig: {
 		align: 'stretch'
 	    },
-	    height: 22,
+	    height: 23,
 	    border: false,
 	    margins: '5 0 0 0',
 	    items: [{

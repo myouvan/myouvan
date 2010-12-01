@@ -43,7 +43,7 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 	    layoutConfig: {
 		align: 'stretch'
 	    },
-	    height: 22,
+	    height: 23,
 	    border: false,
 	    margins: '5 0 0 0',
 	    items: [{
@@ -201,8 +201,8 @@ Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     removeEventHandlers: function() {
-	servers.on('addedTag', this.addRecordDelegate);
-	servers.on('destroyedTag', this.destroyRecordDelegate);
+	servers.un('addedTag', this.addRecordDelegate);
+	servers.un('destroyedTag', this.destroyRecordDelegate);
     },
 
     addRecord: function(item) {
