@@ -12,11 +12,11 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 	    title: 'Add Tags',
 	    itemId: 'tags',
 	    layout: 'hbox',
-	    padding: 10,
 	    layoutConfig: {
 		align: 'stretch',
-		pack: 'center',
+		pack: 'center'
 	    },
+	    padding: 10,
 	    border: false,
 	    items: {
 		width: 300,
@@ -25,46 +25,63 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 		    align: 'stretch'
 		},
 		border: false,
-		items: [{
-		    flex: 1,
-		    layout: 'fit',
-		    border: false,
-		    items: this.tagsGrid
-		}, {
-		    layout: 'hbox',
-		    height: 27,
-		    border: false,
-		    items: [
-			this.addCombo,
-			this.addButton
-		    ]
-		}]
+		items: [
+		    {
+			flex: 1,
+			layout: 'fit',
+			border: false,
+			items: this.tagsGrid
+		    },
+		    this.addComponents
+		]
 	    }
 	});
     },
 
     makeAddComponents: function() {
-	this.addCombo = new Ext.ux.EditableStoreComboBox({
-	    margins: '5 0 0 0',
-	    flex: 1,
-	    storeConfig: {
-		url: paths.tags.index
-	    }
-	});
-
-	this.addButton = new Ext.Button({
-	    text: 'Add Tag',
-	    margins: '5 0 0 5',
-	    width: 70,
-	    handler: function() {
-		var value = this.addCombo.getValue();
-		if (value == '')
-		    return;
-		this.tagsGrid.addTag(value);
-		this.addCombo.reset();
+	this.addComponents = {
+	    layout: 'hbox',
+	    layoutConfig: {
+		align: 'stretch'
 	    },
-	    scope: this
-	});
+	    height: 22,
+	    border: false,
+	    margins: '5 0 0 0',
+	    items: [{
+		flex: 1,
+		layout: 'absolute',
+		border: false,
+		items: {
+		    x: 0,
+		    y: Ext.isIE ? 1 : 0,
+		    anchor: '100%',
+		    xtype: 'editablestorecombobox',
+		    itemId: 'addCombo',
+		    storeConfig: {
+			url: paths.tags.index
+		    },
+		}
+	    }, {
+		width: 70,
+		margins: '0 0 0 5',
+		border: false,
+		layout: 'anchor',
+		items: {
+		    anchor: '100%',
+		    xtype: 'button',
+		    text: 'Add Tag',
+		    handler: function() {
+			var addCombo = this.find('itemId', 'addCombo')[0];
+			var value = addCombo.getValue();
+			if (value == '')
+			    return;
+			this.tagsGrid.addTag(value);
+			addCombo.reset();
+		    },
+		    scope: this
+		}
+	    }]
+	};
     },
 
     tags: function() {

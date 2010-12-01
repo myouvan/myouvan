@@ -21,52 +21,69 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 	    width: 300,
 	    height: 300,
 	    border: false,
-	    items: [{
-		flex: 1,
-		layout: 'fit',
-		itemId: 'container',
-		border: false
-	    }, {
-		layout: 'hbox',
-		height: 27,
-		border: false,
-		items: [
-		    this.addCombo,
-		    this.addButton
-		]
-	    }],
+	    items: [
+		{
+		    flex: 1,
+		    layout: 'fit',
+		    itemId: 'container',
+		    border: false
+		},
+		this.addComponents
+	    ],
 	    listeners: {
 		added: this.addEventHandlers.createDelegate(this),
 		beforedestroy: this.removeEventHandlers.createDelegate(this)
 	    }
 	});
-    },
+  },
 
     makeAddComponents: function() {
-	this.addCombo = new Ext.ux.EditableStoreComboBox({
-	    margins: '5 0 0 0',
-	    flex: 1,
-	    storeConfig: {
-		url: paths.tags.index
-	    }
-	});
-
-	this.addButton = new Ext.Button({
-	    text: 'Add Tag',
-	    width: 70,
-	    margins: '5 0 0 5',
-	    handler: function() {
-		var value = this.addCombo.getValue();
-		if (value == '')
-		    return;
-		this.fireEvent('addTag', {
-		    'tag[server_id]': this.currentItem.server.id,
-		    'tag[value]': value
-		});
-		this.addCombo.clearValue();
+	this.addComponents = {
+	    layout: 'hbox',
+	    layoutConfig: {
+		align: 'stretch'
 	    },
-	    scope: this
-	});
+	    height: 22,
+	    border: false,
+	    margins: '5 0 0 0',
+	    items: [{
+		flex: 1,
+		layout: 'absolute',
+		border: false,
+		items: {
+		    x: 0,
+		    y: Ext.isIE ? 1 : 0,
+		    anchor: '100%',
+		    xtype: 'editablestorecombobox',
+		    itemId: 'addCombo',
+		    storeConfig: {
+			url: paths.tags.index
+		    },
+		}
+	    }, {
+		width: 70,
+		margins: '0 0 0 5',
+		border: false,
+		layout: 'anchor',
+		items: {
+		    anchor: '100%',
+		    xtype: 'button',
+		    text: 'Add Tag',
+		    handler: function() {
+			var addCombo = this.find('itemId', 'addCombo')[0];
+			var value = addCombo.getValue();
+			if (value == '')
+			    return;
+			this.fireEvent('addTag', {
+			    'tag[server_id]': this.currentItem.server.id,
+			    'tag[value]': value
+			});
+			addCombo.clearValue();
+		    },
+		    scope: this
+		}
+	    }]
+	};
     },
 
     addEventHandlers: function() {
@@ -99,7 +116,8 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
     },
 
     updateTags: function() {
-	this.addCombo.getStore().load();
+	var addCombo = this.find('itemId', 'addCombo')[0];
+	addCombo.getStore().load();
     }
 
 });

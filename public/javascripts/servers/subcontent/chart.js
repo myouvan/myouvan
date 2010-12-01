@@ -4,7 +4,6 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
 	this.makeComponents();
 
 	this.showChartDelegate =  this.showChart.createDelegate(this);
-	this.updateChartDelegate =  this.updateChart.createDelegate(this);
     },
 
     makeComponents: function() {
@@ -32,12 +31,10 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
 
     addEventHandlers: function() {
 	servers.on('gotServer', this.showChartDelegate);
-	servers.on('monitorServer', this.updateChartDelegate);
     },
 
     removeEventHandlers: function() {
 	servers.un('gotServer', this.showChartDelegate);
-	servers.un('monitorServer', this.updateChartDelegate);
     },
 
     showChart: function(item) {
@@ -56,7 +53,7 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
     },
 
     updateChart: function() {
-	if (this.chart && this.chart.isVisible())
+	if (this.chart)
 	    this.chart.store.load();
     }
 
