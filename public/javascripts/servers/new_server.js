@@ -24,7 +24,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	this.makeCard();
 
 	Servers.NewServerWindow.superclass.constructor.call(this, {
-	    title: 'Create Server',
+	    title: (this.action == 'create' ? 'Create' : 'Import') + ' Server',
 	    modal: true,
 	    width: 650,
 	    height: 492,

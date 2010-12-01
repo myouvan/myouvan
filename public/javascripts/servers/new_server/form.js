@@ -2,6 +2,7 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 
     constructor: function(config) {
 	this.action = config.action;
+	this.loadMaskVisible = false;
 
 	this.makeComponents();
     },
@@ -20,7 +21,17 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    },
 	    border: false,
 	    padding: 5,
-	    items: this.form
+	    items: this.form,
+	    listeners: {
+		afterlayout: function() {
+		    this.loadMask = new Ext.LoadMask(this.getEl());
+		},
+		activate: function() {
+		    if (this.loadMaskVisible) {
+			this.loadMask.show();
+		    }
+		}
+	    }
 	});
     },
 
@@ -196,12 +207,12 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
     },
 
     showLoadMask: function() {
-	this.loadMask = new Ext.LoadMask(this.getEl());
-	this.loadMask.show();
+	this.loadMaskVisible = true;
     },
 
     hideLoadMask: function() {
 	this.loadMask.hide();
+	this.loadMaskVisible = false;
     },
 
     setValues: function(item) {
