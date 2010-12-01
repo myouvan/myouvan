@@ -80,6 +80,11 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
 	    bodyStyle: {
 		padding: '5px'
 	    },
+	    defaults: {
+		style: {
+		    marginBottom: Ext.isIE ? '2px' : '0px'
+		}
+	    },
 	    items: this.formItems
 	});
     },

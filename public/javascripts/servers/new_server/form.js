@@ -19,7 +19,7 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 		align: 'stretch',
 		pack: 'center'
 	    },
-	    border: false,
+            border: false,
 	    padding: 5,
 	    items: this.form,
 	    listeners: {
@@ -171,6 +171,9 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    itemId: 'auto_restart',
 	    fieldLabel: 'Auto Restart',
 	    boxLabel: 'Restart automatically on unintentional shutdown',
+	    style: {
+		marginBottom: '0px'
+	    },
 	    inputValue: 'true'
 	}, {
 	    xtype: 'hidden',
@@ -198,6 +201,11 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    labelAlign: 'right',
 	    border: false,
 	    autoScroll: true,
+	    defaults: {
+		style: {
+		    marginBottom: Ext.isIE ? '2px' : '0px'
+		}
+	    },
 	    items: this.formItems
 	});
     },
