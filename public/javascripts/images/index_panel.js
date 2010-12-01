@@ -11,6 +11,8 @@ Images.IndexPanel = Ext.extend(Ext.Panel, {
 
 	Images.IndexPanel.superclass.constructor.call(this, {
 	    layout: 'fit',
+	    title: 'Images',
+	    headerCssClass: 'ec2-panel-header',
 	    tbar: [{
 		xtype: 'button',
 		text: 'Create Image',

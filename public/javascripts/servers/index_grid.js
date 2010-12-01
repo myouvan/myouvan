@@ -37,16 +37,17 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    colModel: this.colModel,
 	    store: this.store,
 	    autoExpandColumn: 'comment',
+	    columnLines: true,
 	    stripeRows: true,
 	    loadMask: true,
 	    listeners: {
 		rowclick: function(grid, row, e) {
-		    this.operateServer('showServer');
+		    this.showServer();
 		},
 		rowcontextmenu: function(grid, row, e) {
 		    this.menuDisable(this.store.getAt(row));
 		    this.getSelectionModel().selectRow(row);
-		    this.operateServer('showServer');
+		    this.showServer();
 		    e.stopEvent();
 		    this.contextMenu.showAt(e.getXY());
 		},
@@ -61,7 +62,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    Starting: 'status_changing.gif',
 	    Running: 'status_running.gif',
 	    Suspending: 'status_changing.gif',
-	    Paused: 'status_terminated.gif',
+	    Paused: 'status_paused.gif',
 	    Resuming: 'status_changing.gif',
 	    Rebooting: 'status_changing.gif',
 	    Terminating: 'status_changing.gif',
@@ -216,6 +217,16 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.contextMenu.getComponent('terminate').setDisabled(status != 'Running');
 	this.contextMenu.getComponent('restart').setDisabled(status != 'Terminated' || userTerminate);
 	this.contextMenu.getComponent('migrate').setDisabled(status != 'Running');
+    },
+
+    showServer: function() {
+	var count = this.getSelectionModel().getCount();
+	if (count == 0) {
+	    this.fireEvent('unshowServer');
+	} else if (count == 1) {
+	    var record = this.getSelectionModel().getSelected();
+	    this.fireEvent('showServer', record.data);
+	}
     },
 
     operateServer: function(operation) {

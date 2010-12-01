@@ -17,6 +17,8 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 	Servers.IndexPanel.superclass.constructor.call(this, {
 	    layout: 'fit',
 	    border: false,
+	    title: 'Servers',
+	    headerCssClass: 'ec2-panel-header',
 	    tbar: [{
 		xtype: 'button',
 		text: 'Create Server',
@@ -55,6 +57,7 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 	    }, '|', {
 		xtype: 'button',
 		text: 'Reload',
+		icon: '/images/icon_reload.gif',
 		handler: function() {
 		    this.indexGrid.store.load();
 		},

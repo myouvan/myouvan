@@ -24,6 +24,7 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    colModel: this.colModel,
 	    store: this.store,
 	    autoExpandColumn: 'comment',
+	    columnLines: true,
 	    stripeRows: true,
 	    loadMask: true,
 	    listeners: {

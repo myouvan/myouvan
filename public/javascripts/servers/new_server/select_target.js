@@ -40,8 +40,12 @@ Servers.NewServerWindow.SelectTargetGrid = Ext.extend(Ext.grid.GridPanel, {
 	    colModel: this.colModel,
 	    store: this.store,
 	    autoExpandColumn: 'name',
+	    columnLines: true,
 	    stripeRows: true,
-	    loadMask: true
+	    loadMask: true,
+	    sm: new Ext.grid.RowSelectionModel({
+		singleSelect: true
+	    })
 	});
     },
 

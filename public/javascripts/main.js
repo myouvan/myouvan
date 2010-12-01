@@ -1,7 +1,32 @@
 var images = new Images();
 var servers = new Servers();
 
+var currentNav = null;
+
+var changeNavClass = function(elem) {
+    if (currentNav)
+	currentNav.removeClass('ec2-navigation-selected');
+    elem.addClass('ec2-navigation-selected');
+    currentNav = elem;
+};
+
+var showImages = function() {
+    images.show();
+    changeNavClass(Ext.get('nav-images'));
+};
+
+var showServers = function() {
+    servers.show();
+    changeNavClass(Ext.get('nav-servers'));
+};
+
 var showViewport = function() {
+    var navLink = function(id, text) {
+	return '<img src="/images/r_arrow.gif" />' +
+	    '<a id="' + id + '" class="ec2-navigation" href="#">' +
+	    text + '</a>';
+    };
+
     new Ext.Viewport({
 	layout: 'fit',
 	items: {
@@ -9,21 +34,19 @@ var showViewport = function() {
 	    layout: 'border',
 	    items: [{
 		region: 'west',
-		title: 'Navigation',
-		width: 150,
 		split: true,
+		title: 'Navigation',
+		headerCssClass: 'ec2-panel-header',
+		width: 150,
+		padding: 5,
+		defaults: {
+		    border: false,
+		    padding: 5
+		},
 		items: [{
-		    border: false,
-		    style: {
-			padding: '5px'
-		    },
-		    html: '<a id="nav-images" href="#">Images</a>'
+		    html: navLink('nav-images', 'Images')
 		}, {
-		    border: false,
-		    style: {
-			padding: '5px'
-		    },
-		    html: '<a id="nav-servers" href="#">Servers</a>'
+		    html: navLink('nav-servers', 'Servers')
 		}]
 	    }, {
 		id: 'content-container',
@@ -36,9 +59,9 @@ var showViewport = function() {
 		    layout: 'fit'
 		}, {
 		    id: 'subcontent',
+		    split: true,
 		    region: 'south',
 		    height: 200,
-		    split: true,
 		    layout: 'fit'
 		}]
 	    }]
@@ -46,12 +69,12 @@ var showViewport = function() {
     });
 
     Ext.get('nav-images').on('click', function(ev) {
-	images.show();
+	showImages();
 	ev.stopEvent();
     });
 
     Ext.get('nav-servers').on('click', function(ev) {
-	servers.show();
+	showServers();
 	ev.stopEvent();
     });
 };
