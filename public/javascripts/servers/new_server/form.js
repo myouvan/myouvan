@@ -19,6 +19,7 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 		pack: 'center'
 	    },
 	    border: false,
+	    padding: 5,
 	    items: this.form
 	});
     },
@@ -184,9 +185,6 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    width: 424,
 	    labelWidth: 100,
 	    labelAlign: 'right',
-	    bodyStyle: {
-		padding: '5px 0',
-	    },
 	    border: false,
 	    autoScroll: true,
 	    items: this.formItems

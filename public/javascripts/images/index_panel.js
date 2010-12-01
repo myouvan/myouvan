@@ -16,6 +16,7 @@ Images.IndexPanel = Ext.extend(Ext.Panel, {
 	    tbar: [{
 		xtype: 'button',
 		text: 'Create Image',
+		icon: '/images/icon_create_image.gif',
 		handler: function() {
 		    this.fireEvent('createImage');
 		},
@@ -23,6 +24,7 @@ Images.IndexPanel = Ext.extend(Ext.Panel, {
 	    }, '->', {
 		xtype: 'button',
 		text: 'Reload',
+		icon: '/images/icon_reload.gif',
 		handler: function() {
 		    this.indexGrid.store.load();
 		},

@@ -22,18 +22,26 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 	    tbar: [{
 		xtype: 'button',
 		text: 'Create Server',
+		icon: '/images/icon_create_server.gif',
 		handler: function() {
 		    this.fireEvent('createServer');
 		},
 		scope: this
-	    }, '|', {
+	    }, ' ', {
 		xtype: 'button',
 		text: 'Import Server',
+		icon: '/images/icon_import_server.gif',
 		handler: function() {
 		    this.fireEvent('importServer');
 		},
 		scope: this
-	    }, '->', 'Tag Filter:', {
+	    }, '->', {
+		xtype: 'tbtext',
+		text: 'Tag Filter:',
+		style: {
+		    fontWeight: 'bold'
+		}
+	    }, ' ', {
 		xtype: 'storecombobox',
 		itemId: 'tagFilterCombo',
 		storeConfig: {
@@ -45,7 +53,7 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 		    },
 		    scope: this
 		}
-	    }, {
+	    }, ' ', {
 		xtype: 'button',
 		text: 'Clear',
 		handler: function() {
@@ -54,7 +62,7 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 		    this.indexGrid.setFilter(tfCombo.getValue());
 		},
 		scope: this
-	    }, '|', {
+	    }, ' ', {
 		xtype: 'button',
 		text: 'Reload',
 		icon: '/images/icon_reload.gif',
