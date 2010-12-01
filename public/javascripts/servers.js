@@ -11,7 +11,8 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	    'destroyedMetaData',
 	    'addedTag',
 	    'destroyedTag',
-	    'updatedTags'
+	    'updatedTags',
+	    'reloadServer'
 	]);
 
 	this.tasks = {
@@ -281,6 +282,7 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	this.indexPanel.on('restartServer', this.restartServer.createDelegate(this));
 	this.indexPanel.on('migrateServer', this.migrateServer.createDelegate(this));
 	this.indexPanel.on('destroyMetaData', this.destroyMetaData.createDelegate(this));
+	this.indexPanel.on('reloadServer', this.reloadServer.createDelegate(this));
 
 	this.subcontentTab.on('addTag', this.addTag.createDelegate(this));
 	this.subcontentTab.on('destroyTag', this.destroyTag.createDelegate(this));
@@ -294,6 +296,11 @@ var Servers = Ext.extend(Ext.util.Observable, {
     stopTasks: function() {
 	for (var taskName in this.tasks)
 	    Ext.TaskMgr.stop(this.tasks[taskName]);
+    },
+
+    reloadServer: function() {
+	this.fireEvent('reloadServer');
+	this.fireEvent('updatedTags');
     }
 
 });

@@ -5,7 +5,8 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 
 	this.addEvents([
 	    'createServer',
-	    'importServer'
+	    'importServer',
+	    'reloadServer'
 	]);
 
 	this.updateTagsDelegate = this.updateTags.createDelegate(this);
@@ -67,7 +68,7 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 		text: 'Reload',
 		icon: '/images/icon_reload.gif',
 		handler: function() {
-		    this.indexGrid.store.load();
+		    this.fireEvent('reloadServer');
 		},
 		scope: this
 	    }],

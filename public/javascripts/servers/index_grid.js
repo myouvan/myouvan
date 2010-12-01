@@ -24,6 +24,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.updateRecordDelegate = this.updateRecord.createDelegate(this);
 	this.updateRecordsDelegate = this.updateRecords.createDelegate(this);
 	this.destroyRecordDelegate = this.destroyRecord.createDelegate(this);
+	this.reloadServerDelegate = this.reloadServer.createDelegate(this);
 
 	this.filterValue = '';
     },
@@ -255,6 +256,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	servers.on('updatedServer', this.updateRecordDelegate);
 	servers.on('updatedServers', this.updateRecordsDelegate);
 	servers.on('destroyedMetaData', this.destroyRecordDelegate);
+	servers.on('reloadServer', this.reloadServerDelegate);
     },
 
     removeEventHandlers: function() {
@@ -263,6 +265,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	servers.un('updatedServer', this.updateRecordDelegate);
 	servers.un('updatedServers', this.updateRecordsDelegate);
 	servers.un('destroyedMetaData', this.destroyRecordDelegate);
+	servers.un('reloadServer', this.reloadServerDelegate);
     },
 
     addRecord: function(item) {
@@ -329,6 +332,10 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
 	if (!this.getSelectionModel().hasSelection())
 	    this.fireEvent('unshowServer');
+    },
+
+    reloadServer: function() {
+	this.store.load();
     }
 
 });
