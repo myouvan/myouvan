@@ -10,7 +10,7 @@ Servers.NewServerWindow.Avatar = Ext.extend(Ext.Panel, {
     makeComponents: function() {
 	Servers.NewServerWindow.Avatar.superclass.constructor.call(this, {
 	    title: 'Create Avatar',
-	    itemId: 'flash',
+	    itemId: 'avatar',
 	    layout: 'fit',
 	    border: false,
 	    items: [{

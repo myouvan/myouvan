@@ -163,6 +163,12 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		scope: this
 	    },
 	    items: [{
+		text: 'Edit Server',
+		itemId: 'edit',
+		handler: function() {
+		    this.operateServer('update');
+		}
+	    }, '-', {
 		text: 'Suspend Server',
 		itemId: 'suspend',
 		handler: function() {

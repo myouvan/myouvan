@@ -7,8 +7,8 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	this.makeComponents(config);
     },
 
-    makeComponents: function() {
-	this.makeForm();
+    makeComponents: function(config) {
+	this.makeForm(config);
 
 	Servers.NewServerWindow.superclass.constructor.call(this, {
 	    title: (this.action == 'create' ? 'Create' : 'Import') + ' Server',
@@ -21,12 +21,12 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    items: this.form,
 	    buttonAlign: 'center',
 	    buttons: [{
-		text: 'Prev',
+		text: '< Prev',
 		disabled: true,
 		handler: this.prevCard.createDelegate(this),
 		scopt: this
 	    }, {
-		text: 'Next',
+		text: 'Next >',
 		handler: this.nextCard.createDelegate(this),
 		scopt: this
 	    }, {
@@ -42,31 +42,47 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	this.nextButton = this.buttons[1];
     },
 
-    makeForm: function() {
+    makeForm: function(config) {
 	if (this.action == 'import') {
 	    this.selectTarget = new Servers.NewServerWindow.SelectTarget();
 	    this.selectTarget.on('selectTarget', this.onSelectTarget.createDelegate(this));
 	}
 
-	this.selectImage = new Servers.NewServerWindow.SelectImage();
+	if (this.action != 'update')
+	    this.selectImage = new Servers.NewServerWindow.SelectImage();
+
 	this.input = new Servers.NewServerWindow.Input({
-	    action: this.action
+	    action: config.action,
+	    item: config.item
 	});
 
-	this.tags = new Servers.NewServerWindow.Tags();
+	if (this.action != 'update')
+	    this.tags = new Servers.NewServerWindow.Tags();
 
 	this.avatar = new Servers.NewServerWindow.Avatar();
 	this.avatar.on('setAvatar', this.onSetAvatar.createDelegate(this));
 
-	var cardItems = [
-	    this.selectImage,
-	    this.input,
-	    this.tags,
-	    this.avatar
-	];
-
-	if (this.action == 'import')
-	    cardItems.unshift(this.selectTarget);
+	var cardItems = null;
+	if (this.action == 'create')
+	    cardItems = [
+		this.selectImage,
+		this.input,
+		this.tags,
+		this.avatar
+	    ];
+	else if (this.action == 'import')
+	    cardItems = [
+		this.selectTarget,
+		this.selectImage,
+		this.input,
+		this.tags,
+		this.avatar
+	    ];
+	else
+	    cardItems = [
+		this.input,
+		this.avatar
+	    ];
 
 	this.form = new Ext.form.FormPanel({
 	    layout: 'fit',
@@ -85,20 +101,27 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
     prevCard: function() {
 	var cardId = this.card.layout.activeItem.getItemId();
 	if (cardId == 'selectImage') {
-	    if (this.action == 'import') {
+	    if (this.action != 'create') {
 		this.card.layout.setActiveItem('selectTarget');
 		this.prevButton.disable();
 	    }
 	} else if (cardId == 'input') {
-	    this.card.layout.setActiveItem('selectImage');
-	    if (this.action == 'create')
-		this.prevButton.disable();
+	    if (this.action != 'update') {
+		this.card.layout.setActiveItem('selectImage');
+		if (this.action == 'create')
+		    this.prevButton.disable();
+	    }
 	} else if (cardId == 'tags') {
 	    this.card.layout.setActiveItem('input');
-	} else if (cardId == 'flash') {
-	    this.card.layout.setActiveItem('tags');
+	} else if (cardId == 'avatar') {
+	    if (this.action != 'update') {
+		this.card.layout.setActiveItem('tags');
+	    } else {
+		this.card.layout.setActiveItem('input');
+		this.prevButton.disable();
+	    }
 	    this.nextButton.enable();
-	    this.nextButton.setText('Next');
+	    this.nextButton.setText('Next >');
 	}
     },
 
@@ -115,10 +138,16 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    this.card.layout.setActiveItem('input');
 	    this.prevButton.enable();
 	} else if (cardId == 'input') {
-	    this.card.layout.setActiveItem('tags');
+	    if (this.action != 'update') {
+		this.card.layout.setActiveItem('tags');
+	    } else {
+		this.card.layout.setActiveItem('avatar');
+		this.prevButton.enable();
+		this.nextButton.setText('Update');
+	    }
 	} else if (cardId == 'tags') {
 	    this.tags.onNext();
-	    this.card.layout.setActiveItem('flash');
+	    this.card.layout.setActiveItem('avatar');
 	    this.nextButton.disable();
 	    if (this.action == 'create')
 		this.nextButton.setText('Create');
@@ -137,6 +166,10 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 
     onSetAvatar: function() {
 	this.nextButton.enable();
+    },
+
+    setValues: function(item) {
+	this.input.setValues(item);
     }
 
 });

@@ -67,7 +67,7 @@ var Servers = Ext.extend(Ext.util.Observable, {
 		    newServerWindow.close();
 		},
 		failure: function(f, action) {
-		    Ext.MessageBox.alert('Error', 'Failed to create server');
+		    Ext.MessageBox.alert('Error', 'Failed to import server');
 		},
 		scope: this
 	    }
@@ -122,7 +122,9 @@ var Servers = Ext.extend(Ext.util.Observable, {
     },
 
     operateServer: function(item, operation) {
-	if (operation == 'migrate') {
+	if (operation == 'update') {
+	    this.updateServer(item);
+	} else if (operation == 'migrate') {
 	    this.migrateServer(item);
 	} else if (operation == 'destroyMetaData') {
 	    this.destroyMetaData(item);
@@ -140,6 +142,29 @@ var Servers = Ext.extend(Ext.util.Observable, {
 		scope: this
 	    });
 	}
+    },
+
+    updateServer: function(item) {
+	var newServerWindow = new Servers.NewServerWindow({
+	    action: 'update',
+	    item: item,
+	    submitConfig: {
+		url: item.paths.server,
+		method: 'PUT',
+		waitMsg: 'Updating...',
+		success: function(f, action) {
+		    var item = action.result.item;
+		    this.fireEvent('updatedServer', item);
+		    this.fireEvent('updatedTags');
+		    newServerWindow.close();
+		},
+		failure: function(f, action) {
+		    Ext.MessageBox.alert('Error', 'Failed to update server');
+		},
+		scope: this
+	    }
+	});
+	newServerWindow.show();
     },
 
     migrateServer: function(item) {

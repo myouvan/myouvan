@@ -38,11 +38,11 @@ Servers.Subcontent.Monitoring = Ext.extend(Ext.Panel, {
     },
 
     showChart: function(item) {
-	if (this.currentItem && this.currentItem.server.id == item.server.id)
+	if (this.currentItem && this.currentItem.id == item.id)
 	    return;
 
 	this.chart = new Servers.Subcontent.Chart({
-	    url: item.server.paths.monitor
+	    url: item.paths.monitor
 	});
 
 	var container = this.getComponent('container');

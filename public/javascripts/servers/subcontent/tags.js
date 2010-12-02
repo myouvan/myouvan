@@ -75,7 +75,7 @@ Servers.Subcontent.Tags = Ext.extend(Ext.Panel, {
 			if (value == '')
 			    return;
 			this.fireEvent('addTag', {
-			    'tag[server_id]': this.currentItem.server.id,
+			    'tag[server_id]': this.currentItem.id,
 			    'tag[value]': value
 			});
 			addCombo.clearValue();
@@ -101,11 +101,11 @@ Servers.Subcontent.Tags = Ext.extend(Ext.Panel, {
     },
 
     showTags: function(item) {
-	if (this.currentItem && this.currentItem.server.id == item.server.id)
+	if (this.currentItem && this.currentItem.id == item.id)
 	    return;
 
 	this.tagsGrid = new Servers.Subcontent.TagsGrid({
-	    url: item.server.paths.tags
+	    url: item.paths.tags
 	});
 
 	var container = this.getComponent('container');

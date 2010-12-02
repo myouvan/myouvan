@@ -14,30 +14,13 @@ Servers.NewServerWindow.SelectTarget = Ext.extend(Ext.Panel, {
 	    itemId: 'selectTarget',
 	    layout: 'fit',
 	    border: false,
-	    items: [this.grid, {
-		xtype: 'hidden',
-		name: 'server[storage_iqn]',
-		itemId: 'storage_iqn',
-	    }, {
-		xtype: 'hidden',
-		name: 'interface[0][mac_address]',
-		itemId: 'mac_address0'
-	    }, {
-		xtype: 'hidden',
-		name: 'interface[1][mac_address]',
-		itemId: 'mac_address1'
-	    }]
+	    items: this.grid
 	});
     },
 
     onNext: function() {
 	if (this.grid.getSelectionModel().hasSelection()) {
 	    var item = this.grid.getSelectionModel().getSelected().data;
-	    for (var field in item) {
-		var cmp = this.getComponent(field);
-		if (cmp)
-		    cmp.setValue(item[field])
-	    }
 	    this.fireEvent('selectTarget', item);
 	    return true;
 	} else {

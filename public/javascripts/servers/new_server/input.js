@@ -5,6 +5,8 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	this.loadMaskVisible = false;
 
 	this.makeComponents();
+	if (config.item)
+	    this.setServerValues(config.item);
     },
 
     makeComponents: function() {
@@ -58,7 +60,7 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    itemId: 'name',
 	    fieldLabel: 'Name',
 	    width: 100,
-	    readOnly: this.action == 'import',
+	    readOnly: this.action != 'create',
 	    msgTarget: 'qtip'
 	}, {
 	    xtype: 'textfield',
@@ -73,7 +75,7 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    itemId: 'zone',
 	    fieldLabel: 'Zone',
 	    width: 150,
-	    readOnly: this.action == 'import',
+	    readOnly: this.action != 'create',
 	    storeConfig: {
 		url: paths.servers.zones
 	    },
@@ -93,7 +95,7 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    itemId: 'physical_server',
 	    fieldLabel: 'Physical Server',
 	    width: 150,
-	    readOnly: this.action == 'import',
+	    readOnly: this.action != 'create',
 	    disabled: this.action == 'create',
 	    storeConfig: {
 		url: paths.servers.physical_servers
@@ -104,7 +106,7 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    itemId: 'pool',
 	    fieldLabel: 'Pool',
 	    width: 150,
-	    readOnly: this.action == 'import',
+	    readOnly: this.action != 'create',
 	    storeConfig: {
 		url: paths.servers.pools
 	    }
@@ -114,7 +116,7 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    itemId: 'virtualization',
 	    fieldLabel: 'Virtualization',
 	    width: 200,
-	    readOnly: this.action == 'import',
+	    readOnly: this.action != 'create',
 	    storeConfig: {
 		url: paths.servers.virtualizations
 	    }
@@ -179,7 +181,40 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 		marginBottom: '0px'
 	    },
 	    inputValue: 'true'
+	}, {
+	    xtype: 'hidden',
+	    name: 'server[storage_iqn]',
+	    itemId: 'storage_iqn',
+	}, {
+	    xtype: 'hidden',
+	    name: 'interface[0][mac_address]',
+	    itemId: 'mac_address0'
+	}, {
+	    xtype: 'hidden',
+	    name: 'interface[1][mac_address]',
+	    itemId: 'mac_address1'
 	}];
+    },
+
+    setServerValues: function(item) {
+	this.setValues(item);
+	this.loadMaskVisible = true;
+
+	Ext.Ajax.request({
+	    url: item.paths.server,
+	    method: 'GET',
+	    success: function(res, opts) {
+		var additionalItem = Ext.decode(res.responseText).item;
+		this.setValues(additionalItem);
+		if (this.loadMask)
+		    this.loadMask.hide();
+		this.loadMaskVisible = false;
+	    },
+	    failure: function(res, opts) {
+		Ext.MessageBox.alert('Error', 'Failed to get server');
+	    },
+	    scope: this
+	});
     },
 
     setTargetValues: function(item) {

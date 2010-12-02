@@ -111,27 +111,18 @@ Servers.Subcontent.Description = Ext.extend(Ext.Panel, {
     },
 
     showServer: function(item) {
-	for (var field in item.server) {
+	for (var field in item) {
 	    var cmp = this.getComponent(field);
 	    if (cmp)
-		cmp.setValue(item.server[field]);
+		cmp.setValue(item[field]);
 	}
 
-	for (var i = 0; i < item.interfaces.length; ++i) {
-	    var iface = item.interfaces[i];
-	    for (var field in iface) {
-		var cmp = this.getComponent(field + i);
-		if (cmp)
-		    cmp.setValue(iface[field]);
-	    }
-	}
-
-	avatarImg = '<img src="' + item.server.paths.avatarThumb + '"' +
+	avatarImg = '<img src="' + item.paths.avatarThumb + '"' +
 	            ' width="150" height="150" />';
 	var cmp = this.getComponent('avatar');
 	cmp.setValue(avatarImg);
 
-	this.currentItem = item.server;
+	this.currentItem = item;
     },
 
     updateServer: function(item) {
