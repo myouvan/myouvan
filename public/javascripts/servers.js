@@ -122,38 +122,24 @@ var Servers = Ext.extend(Ext.util.Observable, {
     },
 
     operateServer: function(item, operation) {
-	Ext.Ajax.request({
-	    url: item.paths[operation],
-	    method: 'POST',
-	    success: function(res, opts) {
-		var item = Ext.decode(res.responseText).item;
-		this.fireEvent('updatedServer', item);
-	    },
-	    failure: function(res, opts) {
-		Ext.MessageBox.alert('Error', 'Failed to ' + operation + ' server');
-	    },
-	    scope: this
-	});
-    },
-
-    suspendServer: function(item) {
-	this.operateServer(item, 'suspend');
-    },
-
-    resumeServer: function(item) {
-	this.operateServer(item, 'resume');
-    },
-
-    rebootServer: function(item) {
-	this.operateServer(item, 'reboot');
-    },
-
-    terminateServer: function(item) {
-	this.operateServer(item, 'terminate');
-    },
-
-    restartServer: function(item) {
-	this.operateServer(item, 'restart');
+	if (operation == 'migrate') {
+	    this.migrateServer(item);
+	} else if (operation == 'destroyMetaData') {
+	    this.destroyMetaData(item);
+	} else {
+	    Ext.Ajax.request({
+		url: item.paths[operation],
+		method: 'POST',
+		success: function(res, opts) {
+		    var item = Ext.decode(res.responseText).item;
+		    this.fireEvent('updatedServer', item);
+		},
+		failure: function(res, opts) {
+		    Ext.MessageBox.alert('Error', 'Failed to ' + operation + ' server');
+		},
+		scope: this
+	    });
+	}
     },
 
     migrateServer: function(item) {
@@ -275,13 +261,8 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	this.indexPanel.on('unshowServer', this.unshowServer.createDelegate(this));
 	this.indexPanel.on('getServers', this.getServers.createDelegate(this));
 	this.indexPanel.on('setFilter', this.setFilter.createDelegate(this));
-	this.indexPanel.on('suspendServer', this.suspendServer.createDelegate(this));
-	this.indexPanel.on('resumeServer', this.resumeServer.createDelegate(this));
-	this.indexPanel.on('rebootServer', this.rebootServer.createDelegate(this));
-	this.indexPanel.on('terminateServer', this.terminateServer.createDelegate(this));
-	this.indexPanel.on('restartServer', this.restartServer.createDelegate(this));
+	this.indexPanel.on('operateServer', this.operateServer.createDelegate(this));
 	this.indexPanel.on('migrateServer', this.migrateServer.createDelegate(this));
-	this.indexPanel.on('destroyMetaData', this.destroyMetaData.createDelegate(this));
 	this.indexPanel.on('reloadServer', this.reloadServer.createDelegate(this));
 
 	this.subcontent.on('addTag', this.addTag.createDelegate(this));

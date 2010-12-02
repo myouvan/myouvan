@@ -57,12 +57,14 @@ class ServerDaemon < SimpleDaemon::Base
                 ps.resume_server(server)
               when 'reboot_server'
                 ps.reboot_server(server)
-              when 'terminate_server'
-                ps.terminate_server(server)
+              when 'shutdown_server'
+                ps.shutdown_server(server)
               when 'restart_server'
                 ps.restart_server(server)
               when 'migrate_server'
                 ps.migrate_server(server, item[:new_physical_server])
+              when 'terminate_server'
+                ps.terminate_server(server)
               end
             rescue Exception => e
               server.status = 'Error'

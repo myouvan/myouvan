@@ -57,30 +57,24 @@ class PhysicalServer
   def reboot_server(server)
     virt_reboot_server(server)
 
+    virtual_server = Centos.new(@logger)
+    virtual_server.wait_for_started(server)
+
     server.status = 'Running'
     server.save
 
     @logger.info "finished rebooting server #{server.name}"
   end
 
-  def terminate_server(server)
-    @logger.info "start terminating server #{server.name}"
+  def shutdown_server(server)
+    @logger.info "start shutting server down #{server.name}"
 
-    virt_shutdown_server(server)
-    iscsi_logout(server.physical_server, server.storage_iqn)
-
-    el = Equallogic.new(@logger)
-    el.delete_volume(server)
+    virt_shutdown_server(server, false)
 
     server.status = 'Terminated'
     server.save
 
     @logger.info "finished terminating server #{server.name}"
-
-    sleep 60
-    server.destroy
-
-    @logger.info "destroyed server record"
   end
 
   def restart_server(server)
@@ -115,6 +109,26 @@ class PhysicalServer
     server.save
 
     @logger.info "finished migrated server #{server.name} to #{new_physical_server}"
+  end
+
+  def terminate_server(server)
+    @logger.info "start terminating server #{server.name}"
+
+    virt_shutdown_server(server, true)
+    iscsi_logout(server.physical_server, server.storage_iqn)
+
+    el = Equallogic.new(@logger)
+    el.delete_volume(server)
+
+    server.status = 'Terminated'
+    server.save
+
+    @logger.info "finished terminating server #{server.name}"
+
+    sleep 60
+    server.destroy
+
+    @logger.info "destroyed server record"
   end
   
   #------------------------------
@@ -188,9 +202,6 @@ class PhysicalServer
   end
 
   def virt_reboot_server(server)
-  end
-
-  def virt_shutdown_server(server)
     conn = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
     domain = conn.lookup_domain_by_name(server.name)
     domain.shutdown
@@ -201,7 +212,21 @@ class PhysicalServer
       @logger.debug err.message
     end
 
-    domain.undefine
+    domain.create
+  end
+
+  def virt_shutdown_server(server, undefine)
+    conn = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
+    domain = conn.lookup_domain_by_name(server.name)
+    domain.shutdown
+
+    begin
+      sleep 5 until domain.info.state == Libvirt::Domain::SHUTOFF
+    rescue Libvirt::Error => err
+      @logger.debug err.message
+    end
+
+    domain.undefine if undefine
 
     @logger.debug "shutdown server #{server.name}"
   end

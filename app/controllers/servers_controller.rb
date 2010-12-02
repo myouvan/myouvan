@@ -32,7 +32,7 @@ class ServersController < ApplicationController
       :success => true,
       :items => servers.collect {|server|
         server.attributes.reject {|key, value|
-          not %w(id status physical_server user_terminate).include?(key)
+          not %w(id status physical_server user_terminate allow_restart).include?(key)
         }
       }
     }
@@ -241,19 +241,25 @@ class ServersController < ApplicationController
     starling.set(Settings.starling.queue, item)
   end
 
-  def terminate
+  def shutdown
     server = Server.find(params[:id])
-    server.status = 'Terminating'
+    server.status = 'Shutting down'
     server.user_terminate = true
+    server.allow_restart = true
     server.save
 
     render :json => {
       :success => true,
-      :item => { :id => server.id, :status => server.status }
+      :item => {
+        :id => server.id,
+        :status => server.status,
+        :user_terminate => server.user_terminate,
+        :allow_restart => server.allow_restart
+      }
     }
 
     item = {
-      :command => 'terminate_server',
+      :command => 'shutdown_server',
       :server_id => server.id
     }
 
@@ -264,11 +270,18 @@ class ServersController < ApplicationController
   def restart
     server = Server.find(params[:id])
     server.status = 'Restarting'
+    server.user_terminate = false
+    server.allow_restart = false
     server.save
 
     render :json => {
       :success => true,
-      :item => { :id => server.id, :status => server.status }
+      :item => {
+        :id => server.id,
+        :status => server.status,
+        :user_terminate => server.user_terminate,
+        :allow_restart => server.allow_restart
+      }
     }
 
     item = {
@@ -312,6 +325,31 @@ class ServersController < ApplicationController
     starling.set(Settings.starling.queue, item)
   end
 
+  def terminate
+    server = Server.find(params[:id])
+    server.status = 'Terminating'
+    server.user_terminate = true
+    server.save
+
+    render :json => {
+      :success => true,
+      :item => {
+        :id => server.id,
+        :status => server.status,
+        :user_terminate => server.user_terminate,
+        :allow_restart => server.allow_restart
+      }
+    }
+
+    item = {
+      :command => 'terminate_server',
+      :server_id => server.id
+    }
+
+    starling = Starling.new(Settings.starling.server)
+    starling.set(Settings.starling.queue, item)
+  end
+
   def destroy
     server = Server.find(params[:id])
     attrs = server.attributes
@@ -329,9 +367,10 @@ class ServersController < ApplicationController
         :suspend => suspend_server_path(server),
         :resume => resume_server_path(server),
         :reboot => reboot_server_path(server),
-        :terminate => terminate_server_path(server),
+        :shutdown => shutdown_server_path(server),
         :restart => restart_server_path(server),
         :migrate => migrate_server_path(server),
+        :terminate => terminate_server_path(server),
         :avatarThumb => thumb_avatar_path(avatar.id),
         :avatarIcon => icon_avatar_path(avatar.id)
       }

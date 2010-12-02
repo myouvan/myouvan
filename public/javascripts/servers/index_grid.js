@@ -8,13 +8,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    'unshowServer',
 	    'getServers',
 	    'setFilter',
-	    'suspendServer',
-	    'resumeServer',
-	    'rebootServer',
-	    'terminateServer',
-	    'restartServer',
-	    'migrateServer',
-	    'destroyMetaData'
+	    'operateServer'
 	];
 	this.addEvents(events);
 	this.enableBubble(events);
@@ -49,7 +43,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		    this.showServer();
 		},
 		rowcontextmenu: function(grid, row, e) {
-		    this.menuDisable(this.store.getAt(row));
+		    this.menusDisable(this.store.getAt(row));
 		    this.getSelectionModel().selectRow(row);
 		    this.showServer();
 		    e.stopEvent();
@@ -70,6 +64,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    Resuming: 'status_changing.gif',
 	    Rebooting: 'status_changing.gif',
 	    Terminating: 'status_changing.gif',
+	    'Shutting down': 'status_changing.gif',
 	    Terminated: 'status_terminated.gif',
 	    Restarting: 'status_changing.gif',
 	    Migrating: 'status_changing.gif',
@@ -152,6 +147,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		'memory',
 		'comment',
 		'user_terminate',
+		'allow_restart',
 		'tags',
 		'paths'
 	    ]
@@ -170,57 +166,82 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		text: 'Suspend Server',
 		itemId: 'suspend',
 		handler: function() {
-		    this.operateServer('suspendServer')
+		    this.operateServer('suspend');
 		}
 	    }, {
 		text: 'Resume Server',
 		itemId: 'resume',
 		handler: function() {
-		    this.operateServer('resumeServer')
+		    this.operateServer('resume');
 		}
 	    }, '-',{
 		text: 'Reboot Server',
 		itemId: 'reboot',
 		handler: function() {
-		    this.operateServer('rebootServer')
+		    this.operateServer('reboot');
 		}
 	    }, {
-		text: 'Terminate Server',
-		itemId: 'terminate',
+		text: 'Shutdown Server',
+		itemId: 'shutdown',
 		handler: function() {
-		    this.operateServer('terminateServer')
+		    this.operateServer('shutdown');
 		}
 	    }, {
 		text: 'Restart Server',
 		itemId: 'restart',
 		handler: function() {
-		    this.operateServer('restartServer')
+		    this.operateServer('restart');
 		}
 	    }, '-', {
 		text: 'Migrate Server',
 		itemId: 'migrate',
 		handler: function() {
-		    this.operateServer('migrateServer')
+		    this.operateServer('migrate');
+		}
+	    }, '-', {
+		text: 'Terminate Server',
+		itemId: 'terminate',
+		handler: function() {
+		    Ext.Msg.confirm(
+			'Terminate Server',
+			'Terminating server. Are you sure?',
+			function(btn) {
+			    if (btn == 'yes')
+				this.operateServer('terminate');
+			}, this);
 		}
 	    }, '-', {
 		text: 'Destroy MetaData',
 		itemId: 'destroy',
 		handler: function() {
-		    this.operateServer('destroyMetaData')
+		    Ext.Msg.confirm(
+			'Destroy MetaData',
+			'Destroying meta data. Are you sure?',
+			function(btn) {
+			    if (btn == 'yes')
+				this.operateServer('destroyMetaData');
+			}, this);
 		}
 	    }]
 	});
     },
 
-    menuDisable: function(record) {
+    menusDisable: function(record) {
 	var status = record.get('status');
 	var userTerminate = record.get('user_terminate');
-	this.contextMenu.getComponent('suspend').setDisabled(status != 'Running');
-	this.contextMenu.getComponent('resume').setDisabled(status != 'Paused');
-	this.contextMenu.getComponent('reboot').setDisabled(status != 'Running');
-	this.contextMenu.getComponent('terminate').setDisabled(status != 'Running');
-	this.contextMenu.getComponent('restart').setDisabled(status != 'Terminated' || userTerminate);
-	this.contextMenu.getComponent('migrate').setDisabled(status != 'Running');
+	var allowRestart = record.get('allow_restart');
+
+	this.menuDisable('suspend', status != 'Running');
+	this.menuDisable('resume', status != 'Paused');
+	this.menuDisable('reboot', status != 'Running');
+	this.menuDisable('shutdown', status != 'Running');
+	this.menuDisable('restart', status != 'Terminated' || userTerminate && !allowRestart);
+	this.menuDisable('terminate', status != 'Running');
+	this.menuDisable('migrate', status != 'Running');
+    },
+
+    menuDisable: function(itemId, flag) {
+	this.contextMenu.getComponent(itemId).setDisabled(flag);
     },
 
     showServer: function() {
@@ -235,7 +256,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
     operateServer: function(operation) {
 	var record = this.getSelectionModel().getSelected();
-	this.fireEvent(operation, record.data);
+	this.fireEvent('operateServer', record.data, operation);
     },
 
     setFilter: function(value) {

@@ -23,6 +23,7 @@ class CreateServers < ActiveRecord::Migration
 
       t.boolean :auto_restart
       t.boolean :user_terminate
+      t.boolean :allow_restart
 
       t.timestamps
     end

@@ -54,6 +54,7 @@ ActiveRecord::Schema.define(:version => 20101122092815) do
     t.text     "comment"
     t.boolean  "auto_restart"
     t.boolean  "user_terminate"
+    t.boolean  "allow_restart"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

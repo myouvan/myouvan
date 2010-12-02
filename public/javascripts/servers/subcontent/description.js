@@ -35,7 +35,6 @@ Servers.Subcontent.Description = Ext.extend(Ext.Panel, {
 	    }, {
 		label: 'Status',
 		itemId: 'status',
-		colspan: 2
 	    }, {
 		label: 'Auto Restart',
 		itemId: 'auto_restart',
@@ -45,6 +44,12 @@ Servers.Subcontent.Description = Ext.extend(Ext.Panel, {
 	    }, {
 		label: 'User Terminate',
 		itemId: 'user_terminate',
+		renderer: function(value) {
+		    return value ? 'Yes' : 'No';
+		}
+	    }, {
+		label: 'Allow Restart',
+		itemId: 'allow_restart',
 		renderer: function(value) {
 		    return value ? 'Yes' : 'No';
 		}

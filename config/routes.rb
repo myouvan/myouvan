@@ -16,9 +16,10 @@ Provisioning::Application.routes.draw do
       post :suspend
       post :resume
       post :reboot
-      post :terminate
+      post :shutdown
       post :restart
       post :migrate
+      post :terminate
     end
 
     collection do

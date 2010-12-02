@@ -23,7 +23,7 @@ class Server < ActiveRecord::Base
   validates :cpus, :inclusion => { :in => 1..Settings.max_cpus }
   validates :memory, :inclusion => { :in => Settings.min_memory..Settings.max_memory }
 
-  before_validation :set_uuid, :set_auto_restart, :set_user_terminate
+  before_validation :set_uuid, :set_auto_restart, :set_user_terminate, :set_allow_restart
 
   def set_uuid
     if self.uuid.blank?
@@ -42,6 +42,11 @@ class Server < ActiveRecord::Base
 
   def set_user_terminate
     self.user_terminate = false if self.user_terminate.nil?
+    true
+  end
+
+  def set_allow_restart
+    self.allow_restart = false if self.allow_restart.nil?
     true
   end
 
