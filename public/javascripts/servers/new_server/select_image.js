@@ -12,16 +12,23 @@ Servers.NewServerWindow.SelectImage = Ext.extend(Ext.Panel, {
 	    itemId: 'selectImage',
 	    layout: 'fit',
 	    border: false,
-	    items: this.grid
+	    items: [this.grid, {
+		xtype: 'hidden',
+		name: 'server[image_id]',
+		itemId: 'image_id'
+	    }]
 	});
     },
 
-    isSelected: function() {
-	return this.grid.getSelectionModel().hasSelection();
-    },
-
-    selectedId: function() {
-	return this.grid.getSelectionModel().getSelected().get('id');
+    onNext: function() {
+	if (this.grid.getSelectionModel().hasSelection()) {
+	    var id = this.grid.getSelectionModel().getSelected().get('id');
+	    this.getComponent('image_id').setValue(id);
+	    return true;
+	} else {
+	    Ext.MessageBox.alert('Error', 'Select an image');
+	    return false;
+	}
     }
 
 });

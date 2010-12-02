@@ -8,20 +8,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
     },
 
     makeComponents: function() {
-	if (this.action == 'import')
-	    this.selectTarget = new Servers.NewServerWindow.SelectTarget();
-
-	this.selectImage = new Servers.NewServerWindow.SelectImage();
-	this.input = new Servers.NewServerWindow.Input({
-	    action: this.action
-	});
-
-	this.tags = new Servers.NewServerWindow.Tags();
-
-	this.avatar = new Servers.NewServerWindow.Avatar();
-	this.avatar.on('setAvatar', this.setAvatar.createDelegate(this));
-
-	this.makeCard();
+	this.makeForm();
 
 	Servers.NewServerWindow.superclass.constructor.call(this, {
 	    title: (this.action == 'create' ? 'Create' : 'Import') + ' Server',
@@ -31,7 +18,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    layout: 'fit',
 	    plain: true,
 	    closable: false,
-	    items: this.card,
+	    items: this.form,
 	    buttonAlign: 'center',
 	    buttons: [{
 		text: 'Prev',
@@ -55,8 +42,23 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	this.nextButton = this.buttons[1];
     },
 
-    makeCard: function() {
-	var items = [
+    makeForm: function() {
+	if (this.action == 'import') {
+	    this.selectTarget = new Servers.NewServerWindow.SelectTarget();
+	    this.selectTarget.on('selectTarget', this.onSelectTarget.createDelegate(this));
+	}
+
+	this.selectImage = new Servers.NewServerWindow.SelectImage();
+	this.input = new Servers.NewServerWindow.Input({
+	    action: this.action
+	});
+
+	this.tags = new Servers.NewServerWindow.Tags();
+
+	this.avatar = new Servers.NewServerWindow.Avatar();
+	this.avatar.on('setAvatar', this.onSetAvatar.createDelegate(this));
+
+	var cardItems = [
 	    this.selectImage,
 	    this.input,
 	    this.tags,
@@ -64,14 +66,20 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	];
 
 	if (this.action == 'import')
-	    items.unshift(this.selectTarget);
+	    cardItems.unshift(this.selectTarget);
 
-	this.card = new Ext.Container({
-	    layout: 'card',
-	    activeItem: 0,
-	    width: 400,
-	    items: items
+	this.form = new Ext.form.FormPanel({
+	    layout: 'fit',
+	    border: false,
+	    items: {
+		layout: 'card',
+		activeItem: 0,
+		border: false,
+		items: cardItems
+	    }
 	});
+
+	this.card = this.form.get(0);
     },
 
     prevCard: function() {
@@ -81,12 +89,12 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 		this.card.layout.setActiveItem('selectTarget');
 		this.prevButton.disable();
 	    }
-	} else if (cardId == 'form') {
+	} else if (cardId == 'input') {
 	    this.card.layout.setActiveItem('selectImage');
 	    if (this.action == 'create')
 		this.prevButton.disable();
 	} else if (cardId == 'tags') {
-	    this.card.layout.setActiveItem('form');
+	    this.card.layout.setActiveItem('input');
 	} else if (cardId == 'flash') {
 	    this.card.layout.setActiveItem('tags');
 	    this.nextButton.enable();
@@ -94,29 +102,19 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	}
     },
 
-    
-
     nextCard: function() {
 	var cardId = this.card.layout.activeItem.getItemId();
 	if (cardId == 'selectTarget') {
-	    if (!this.selectTarget.isSelected()) {
-		Ext.MessageBox.alert('Error', 'Select an target');
+	    if (!this.selectTarget.onNext())
 		return;
-	    }
-	    var item = this.selectTarget.selectedRecord().data;
-	    this.setValues(item);
 	    this.card.layout.setActiveItem('selectImage');
 	    this.prevButton.enable();
 	} else if (cardId == 'selectImage') {
-	    if (!this.selectImage.isSelected()) {
-		Ext.MessageBox.alert('Error', 'Select an image');
+	    if (!this.selectImage.onNext())
 		return;
-	    }
-	    var id = this.selectImage.selectedId();
-	    this.input.setImageId(id);
-	    this.card.layout.setActiveItem('form');
+	    this.card.layout.setActiveItem('input');
 	    this.prevButton.enable();
-	} else if (cardId == 'form') {
+	} else if (cardId == 'input') {
 	    this.card.layout.setActiveItem('tags');
 	} else if (cardId == 'tags') {
 	    this.input.setTags(this.tags.getTags());
@@ -129,34 +127,15 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	} else if (cardId == 'flash') {
 	    this.prevCard();
 	    this.prevCard();
-	    this.input.submit(this.submitConfig);
+	    this.form.getForm().submit(this.submitConfig);
 	}
     },
 
-    setValues: function(item) {
-	this.input.setValues(item);
-	this.input.showLoadMask();
-
-	Ext.Ajax.request({
-	    url: item.paths.target,
-	    method: 'GET',
-	    params: {
-		physical_server: item.physical_server
-	    },
-	    success: function(res, opts) {
-		var additionalItem = Ext.decode(res.responseText).item;
-		this.input.setValues(additionalItem);
-		this.input.hideLoadMask();
-	    },
-	    failure: function(res, opts) {
-		Ext.MessageBox.alert('Error', 'Failed to get target');
-	    },
-	    scope: this
-	});
+    onSelectTarget: function(item) {
+	this.input.setTargetValues(item);
     },
 
-    setAvatar: function(thumb, icon) {
-	this.input.setAvatar(thumb, icon);
+    onSetAvatar: function() {
 	this.nextButton.enable();
     }
 

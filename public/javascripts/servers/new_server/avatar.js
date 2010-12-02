@@ -13,15 +13,25 @@ Servers.NewServerWindow.Avatar = Ext.extend(Ext.Panel, {
 	    itemId: 'flash',
 	    layout: 'fit',
 	    border: false,
-	    items: {
+	    items: [{
 		xtype: 'flash',
 		url: '/ova.swf'
-	    }
+	    }, {
+		xtype: 'hidden',
+		itemId: 'thumb',
+		name: 'avatar[thumb]'
+	    }, {
+		xtype: 'hidden',
+		itemId: 'icon',
+		name: 'avatar[icon]'
+	    }]
 	});
     },
 
     setAvatar: function(thumb, icon) {
-	this.fireEvent('setAvatar', thumb, icon);
+	this.getComponent('thumb').setValue(thumb);
+	this.getComponent('icon').setValue(icon);
+	this.fireEvent('setAvatar');
     }
 
 });

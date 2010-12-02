@@ -12,7 +12,7 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 
 	Servers.NewServerWindow.Input.superclass.constructor.call(this, {
 	    title: 'Input Specifications',
-	    itemId: 'form',
+	    itemId: 'input',
 	    layout: 'hbox',
 	    layoutConfig: {
 		align: 'stretch',
@@ -21,7 +21,7 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    padding: 5,
 	    border: false,
 	    items: {
-		xtype: 'form',
+		layout: 'form',
 		width: 424,
 		labelWidth: 100,
 		labelAlign: 'right',
@@ -53,10 +53,6 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 
     makeFields: function() {
 	this.fields = [{
-	    xtype: 'hidden',
-	    name: 'server[image_id]',
-	    itemId: 'image_id',
-	}, {
 	    xtype: 'textfield',
 	    name: 'server[name]',
 	    itemId: 'name',
@@ -155,17 +151,9 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    msgTarget: 'qtip'
 	}, {
 	    xtype: 'hidden',
-	    name: 'interface[0][mac_address]',
-	    itemId: 'mac_address0'
-	}, {
-	    xtype: 'hidden',
 	    name: 'interface[1][number]',
 	    itemId: 'interface_number1',
 	    value: '1'
-	}, {
-	    xtype: 'hidden',
-	    name: 'interface[1][mac_address]',
-	    itemId: 'mac_address1'
 	}, {
 	    xtype: 'textfield',
 	    name: 'interface[1][ip_address]',
@@ -193,34 +181,33 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    inputValue: 'true'
 	}, {
 	    xtype: 'hidden',
-	    name: 'server[storage_iqn]',
-	    itemId: 'storage_iqn',
-	}, {
-	    xtype: 'hidden',
 	    name: 'tags',
 	    itemId: 'tags',
-	}, {
-	    xtype: 'hidden',
-	    itemId: 'avatar_thumb',
-	    name: 'avatar[thumb]'
-	}, {
-	    xtype: 'hidden',
-	    itemId: 'avatar_icon',
-	    name: 'avatar[icon]'
 	}];
     },
 
-    setImageId: function(id) {
-	this.getField('image_id').setValue(id);
-    },
-
-    showLoadMask: function() {
+    setTargetValues: function(item) {
+	this.setValues(item);
 	this.loadMaskVisible = true;
-    },
 
-    hideLoadMask: function() {
-	this.loadMask.hide();
-	this.loadMaskVisible = false;
+	Ext.Ajax.request({
+	    url: item.paths.target,
+	    method: 'GET',
+	    params: {
+		physical_server: item.physical_server
+	    },
+	    success: function(res, opts) {
+		var additionalItem = Ext.decode(res.responseText).item;
+		this.setValues(additionalItem);
+		if (this.loadMask)
+		    this.loadMask.hide();
+		this.loadMaskVisible = false;
+	    },
+	    failure: function(res, opts) {
+		Ext.MessageBox.alert('Error', 'Failed to get target');
+	    },
+	    scope: this
+	});
     },
 
     setValues: function(item) {
@@ -233,14 +220,6 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 
     setTags: function(tags) {
 	this.getField('tags').setValue(Ext.encode(tags));
-    },
-
-    setAvatar: function(thumb, icon) {
-	this.getField('avatar_thumb').setValue(thumb);
-	this.getField('avatar_icon').setValue(icon);
-    },
-
-    submit: function(submitConfig) {
-	this.get(0).getForm().submit(submitConfig);
     }
+
 });
