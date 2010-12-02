@@ -12,7 +12,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    this.selectTarget = new Servers.NewServerWindow.SelectTarget();
 
 	this.selectImage = new Servers.NewServerWindow.SelectImage();
-	this.form = new Servers.NewServerWindow.Form({
+	this.input = new Servers.NewServerWindow.Input({
 	    action: this.action
 	});
 
@@ -58,7 +58,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
     makeCard: function() {
 	var items = [
 	    this.selectImage,
-	    this.form,
+	    this.input,
 	    this.tags,
 	    this.avatar
 	];
@@ -113,13 +113,13 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 		return;
 	    }
 	    var id = this.selectImage.selectedId();
-	    this.form.setImageId(id);
+	    this.input.setImageId(id);
 	    this.card.layout.setActiveItem('form');
 	    this.prevButton.enable();
 	} else if (cardId == 'form') {
 	    this.card.layout.setActiveItem('tags');
 	} else if (cardId == 'tags') {
-	    this.form.setTags(this.tags.getTags());
+	    this.input.setTags(this.tags.getTags());
 	    this.card.layout.setActiveItem('flash');
 	    this.nextButton.disable();
 	    if (this.action == 'create')
@@ -129,13 +129,13 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	} else if (cardId == 'flash') {
 	    this.prevCard();
 	    this.prevCard();
-	    this.form.submit(this.submitConfig);
+	    this.input.submit(this.submitConfig);
 	}
     },
 
     setValues: function(item) {
-	this.form.setValues(item);
-	this.form.showLoadMask();
+	this.input.setValues(item);
+	this.input.showLoadMask();
 
 	Ext.Ajax.request({
 	    url: item.paths.target,
@@ -145,8 +145,8 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    },
 	    success: function(res, opts) {
 		var additionalItem = Ext.decode(res.responseText).item;
-		this.form.setValues(additionalItem);
-		this.form.hideLoadMask();
+		this.input.setValues(additionalItem);
+		this.input.hideLoadMask();
 	    },
 	    failure: function(res, opts) {
 		Ext.MessageBox.alert('Error', 'Failed to get target');
@@ -156,7 +156,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
     },
 
     setAvatar: function(thumb, icon) {
-	this.form.setAvatar(thumb, icon);
+	this.input.setAvatar(thumb, icon);
 	this.nextButton.enable();
     }
 

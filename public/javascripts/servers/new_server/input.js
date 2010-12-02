@@ -1,4 +1,4 @@
-Servers.NewServerWindow.Form = Ext.extend(Ext.Panel, {
+Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 
     constructor: function(config) {
 	this.action = config.action;
@@ -8,9 +8,9 @@ Servers.NewServerWindow.Form = Ext.extend(Ext.Panel, {
     },
 
     makeComponents: function() {
-	this.makeFormItems();
+	this.makeFields();
 
-	Servers.NewServerWindow.Form.superclass.constructor.call(this, {
+	Servers.NewServerWindow.Input.superclass.constructor.call(this, {
 	    title: 'Input Specifications',
 	    itemId: 'form',
 	    layout: 'hbox',
@@ -32,7 +32,7 @@ Servers.NewServerWindow.Form = Ext.extend(Ext.Panel, {
 			marginBottom: Ext.isIE ? '2px' : '0px'
 		    }
 		},
-		items: this.formItems
+		items: this.fields
 	    },
 	    listeners: {
 		afterlayout: function() {
@@ -45,12 +45,14 @@ Servers.NewServerWindow.Form = Ext.extend(Ext.Panel, {
 		}
 	    }
 	});
-
-	this.form = this.get(0);
     },
 
-    makeFormItems: function() {
-	this.formItems = [{
+    getField: function(itemId) {
+	return this.get(0).getComponent(itemId);
+    },
+
+    makeFields: function() {
+	this.fields = [{
 	    xtype: 'hidden',
 	    name: 'server[image_id]',
 	    itemId: 'image_id',
@@ -81,7 +83,7 @@ Servers.NewServerWindow.Form = Ext.extend(Ext.Panel, {
 	    },
 	    listeners: {
 		select: function(combo, record, index) {
-		    var psCombo = this.form.getComponent('physical_server');
+		    var psCombo = this.getField('physical_server');
 		    psCombo.getStore().baseParams['zone'] = record.get('value');
 		    psCombo.getStore().load();
 		    psCombo.reset();
@@ -209,7 +211,7 @@ Servers.NewServerWindow.Form = Ext.extend(Ext.Panel, {
     },
 
     setImageId: function(id) {
-	this.form.getComponent('image_id').setValue(id);
+	this.getField('image_id').setValue(id);
     },
 
     showLoadMask: function() {
@@ -223,22 +225,22 @@ Servers.NewServerWindow.Form = Ext.extend(Ext.Panel, {
 
     setValues: function(item) {
 	for (var field in item) {
-	    var cmp = this.form.getComponent(field);
+	    var cmp = this.getField(field);
 	    if (cmp)
 		cmp.setValue(item[field]);
 	}
     },
 
     setTags: function(tags) {
-	this.form.getComponent('tags').setValue(Ext.encode(tags));
+	this.getField('tags').setValue(Ext.encode(tags));
     },
 
     setAvatar: function(thumb, icon) {
-	this.form.getComponent('avatar_thumb').setValue(thumb);
-	this.form.getComponent('avatar_icon').setValue(icon);
+	this.getField('avatar_thumb').setValue(thumb);
+	this.getField('avatar_icon').setValue(icon);
     },
 
     submit: function(submitConfig) {
-	this.form.getForm().submit(submitConfig);
+	this.get(0).getForm().submit(submitConfig);
     }
 });
