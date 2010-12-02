@@ -16,7 +16,7 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
 	    title: actionStr + ' Image',
 	    modal: true,
 	    width: 625,
-	    height: 260,
+	    height: 254,
 	    layout: 'fit',
 	    plain: true,
 	    closable: false,
@@ -76,16 +76,25 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
 
     makeForm: function() {
 	this.form = new Ext.form.FormPanel({
-	    labelWidth: 70,
-	    bodyStyle: {
-		padding: '5px'
+	    layout: 'hbox',
+	    layoutConfig: {
+		align: 'stretch',
+		pack: 'center'
 	    },
-	    defaults: {
-		style: {
-		    marginBottom: Ext.isIE ? '2px' : '0px'
-		}
-	    },
-	    items: this.formItems
+	    padding: 5,
+	    border: false,
+	    items: {
+		layout: 'form',
+		labelWidth: 60,
+		labelAlign: 'right',
+		defaults: {
+		    style: {
+			marginTop: Ext.isIE ? '1px' : '0px'
+		    }
+		},
+		border: false,
+		items: this.formItems
+	    }
 	});
     },
 

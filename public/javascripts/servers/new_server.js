@@ -14,7 +14,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    title: (this.action == 'create' ? 'Create' : 'Import') + ' Server',
 	    modal: true,
 	    width: 650,
-	    height: 497,
+	    height: 490,
 	    layout: 'fit',
 	    plain: true,
 	    closable: false,

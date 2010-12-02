@@ -52,17 +52,13 @@ Servers.NewServerWindow.Tags = Ext.extend(Ext.Panel, {
 	    margins: '5 0 0 0',
 	    items: [{
 		flex: 1,
-		xtype: 'container',
-		layout: 'absolute',
-		items: {
-		    x: 0,
-		    y: Ext.isIE ? 1 : 0,
-		    anchor: '100%',
-		    xtype: 'editablestorecombobox',
-		    itemId: 'addCombo',
-		    storeConfig: {
-			url: paths.tags.index
-		    },
+		xtype: 'editablestorecombobox',
+		itemId: 'addCombo',
+		style: {
+		    marginTop: Ext.isIE ? '1px' : '0px'
+		},
+		storeConfig: {
+		    url: paths.tags.index
 		}
 	    }, {
 		width: 70,

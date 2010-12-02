@@ -253,7 +253,7 @@ class PhysicalServer
     conn_dst = Libvirt::open("qemu+ssh://root@#{new_physical_server}/system")
     begin
       domain_dst = conn_dst.lookup_domain_by_name(server.name)
-      domain_dst.destroy unless domain.info.state == Libvirt::Domain::SHUTOFF
+      domain_dst.destroy unless domain_dst.info.state == Libvirt::Domain::SHUTOFF
       domain_dst.undefine
     rescue Libvirt::RetrieveError
     end

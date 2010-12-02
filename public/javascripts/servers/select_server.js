@@ -15,7 +15,7 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 	    title: 'Migrate Server',
 	    modal: true,
 	    width: 291,
-	    height: 145,
+	    height: 128,
 	    layout: 'fit',
 	    plain: true,
 	    closable: false,
@@ -74,12 +74,26 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 
     makeForm: function() {
 	this.form = new Ext.form.FormPanel({
-	    labelWidth: 90,
-	    labelAlign: 'right',
-	    bodyStyle: { padding: '5px 10px' },
+	    layout: 'hbox',
+	    layoutConfig: {
+		align: 'stretch',
+		pack: 'center'
+	    },
+	    padding: 5,
 	    border: false,
-	    autoScroll: true,
-	    items: this.formItems
+	    items: {
+		layout: 'form',
+		labelWidth: 90,
+		labelAlign: 'right',
+		defaults: {
+		    style: {
+			marginTop: Ext.isIE ? '1px' : '0px'
+		    }
+		},
+		border: false,
+		autoScroll: true,
+		items: this.formItems
+	    }
 	});
     },
 

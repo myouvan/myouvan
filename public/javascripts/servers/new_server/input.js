@@ -29,7 +29,7 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 		autoScroll: true,
 		defaults: {
 		    style: {
-			marginBottom: Ext.isIE ? '2px' : '0px'
+			marginTop: Ext.isIE ? '1px' : '0px'
 		    }
 		},
 		items: this.fields
