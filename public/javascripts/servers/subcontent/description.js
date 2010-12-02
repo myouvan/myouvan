@@ -1,4 +1,4 @@
-Servers.SubcontentTab.DescriptionPanel = Ext.extend(Ext.Panel, {
+Servers.Subcontent.Description = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
@@ -9,7 +9,7 @@ Servers.SubcontentTab.DescriptionPanel = Ext.extend(Ext.Panel, {
     },
 
     makeComponents: function() {
-	Servers.SubcontentTab.DescriptionPanel.superclass.constructor.call(this, {
+	Servers.Subcontent.Description.superclass.constructor.call(this, {
 	    layout: 'table',
 	    defaults: {
 		padding: '3px',
@@ -152,7 +152,7 @@ Servers.SubcontentTab.DescriptionPanel = Ext.extend(Ext.Panel, {
 
 });
 
-Servers.SubcontentTab.PropPanel = Ext.extend(Ext.Panel, {
+Servers.Subcontent.PropPanel = Ext.extend(Ext.Panel, {
 
     constructor: function(config) {
 	Ext.applyIf(config, {
@@ -162,7 +162,7 @@ Servers.SubcontentTab.PropPanel = Ext.extend(Ext.Panel, {
 	if (config.renderer)
 	    this.renderer = config.renderer;
 
-	Servers.SubcontentTab.PropPanel.superclass.constructor.call(this, {
+	Servers.Subcontent.PropPanel.superclass.constructor.call(this, {
 	    layout: 'hbox',
 	    itemId: config.itemId,
 	    colspan: config.colspan,
@@ -170,8 +170,8 @@ Servers.SubcontentTab.PropPanel = Ext.extend(Ext.Panel, {
 	    border: false,
 	    padding: 3,
 	    items: [{
-		border: false,
 		width: 130,
+		border: false,
 		bodyStyle: {
 		    fontWeight: 'bold',
 		    textAlign: 'right'
@@ -179,8 +179,8 @@ Servers.SubcontentTab.PropPanel = Ext.extend(Ext.Panel, {
 		html: config.label + ':'
 	    }, {
 		itemId: 'valuePanel',
-		border: false,
-		padding: '0 0 0 10px'
+		padding: '0 0 0 10px',
+		border: false
 	    }]
 	});
     },
@@ -197,4 +197,4 @@ Servers.SubcontentTab.PropPanel = Ext.extend(Ext.Panel, {
 
 });
 
-Ext.reg('proppanel', Servers.SubcontentTab.PropPanel);
+Ext.reg('proppanel', Servers.Subcontent.PropPanel);

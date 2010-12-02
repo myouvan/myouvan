@@ -19,8 +19,8 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 		align: 'stretch',
 		pack: 'center'
 	    },
-            border: false,
 	    padding: 5,
+	    border: false,
 	    items: this.form,
 	    listeners: {
 		afterlayout: function() {

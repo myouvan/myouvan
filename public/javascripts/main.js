@@ -40,8 +40,8 @@ var showViewport = function() {
 		margins: '5 0 5 5',
 		padding: 5,
 		defaults: {
-		    border: false,
-		    padding: 5
+		    padding: 5,
+		    border: false
 		},
 		items: [{
 		    html: navLink('nav-images', 'Images')
@@ -49,10 +49,10 @@ var showViewport = function() {
 		    html: navLink('nav-servers', 'Servers')
 		}]
 	    }, {
+		xtype: 'container',
 		id: 'content-container',
 		layout: 'border',
 		region: 'center',
-		border: false,
 		margins: '5 5 5 0',
 		items: [{
 		    id: 'content',

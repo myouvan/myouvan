@@ -1,4 +1,4 @@
-Servers.SubcontentTab = Ext.extend(Ext.TabPanel, {
+Servers.Subcontent = Ext.extend(Ext.TabPanel, {
 
     constructor: function() {
 	this.makeComponents();
@@ -7,11 +7,11 @@ Servers.SubcontentTab = Ext.extend(Ext.TabPanel, {
     },
 
     makeComponents: function() {
-	this.descriptionPanel = new Servers.SubcontentTab.DescriptionPanel();
-	this.chartPanel = new  Servers.SubcontentTab.ChartPanel();
-	this.tagsPanel = new Servers.SubcontentTab.TagsPanel();
+	this.description = new Servers.Subcontent.Description();
+	this.monitoring = new  Servers.Subcontent.Monitoring();
+	this.tags = new Servers.Subcontent.Tags();
 
-	Servers.SubcontentTab.superclass.constructor.call(this, {
+	Servers.Subcontent.superclass.constructor.call(this, {
 	    activeTab: 0,
 	    layoutOnTabChange: true,
 	    border: false,
@@ -25,15 +25,15 @@ Servers.SubcontentTab = Ext.extend(Ext.TabPanel, {
 	    items: [{
 		title: 'Description',
 		itemId: 'description',
-		items: this.descriptionPanel
+		items: this.description
 	    }, {
 		title: 'Monitoring',
 		itemId: 'monitoring',
-		items: this.chartPanel
+		items: this.monitoring
 	    }, {
 		title: 'Tags',
 		itemId: 'tags',
-		items: this.tagsPanel
+		items: this.tags
 	    }],
 	    listeners: {
 		added: this.addEventHandlers.createDelegate(this),
@@ -53,7 +53,7 @@ Servers.SubcontentTab = Ext.extend(Ext.TabPanel, {
 
     updateChart: function() {
 	if (this.getActiveTab().itemId == 'monitoring')
-	    this.chartPanel.updateChart();
+	    this.monitoring.updateChart();
     }
 
 });

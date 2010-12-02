@@ -1,4 +1,4 @@
-Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
+Servers.Subcontent.Tags = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
@@ -13,7 +13,7 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
     makeComponents: function() {
 	this.makeAddComponents();
 
-	Servers.SubcontentTab.TagsPanel.superclass.constructor.call(this, {
+	Servers.Subcontent.Tags.superclass.constructor.call(this, {
 	    layout: 'vbox',
 	    layoutConfig: {
 		align: 'stretch'
@@ -24,9 +24,9 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 	    items: [
 		{
 		    flex: 1,
+		    xtype: 'container',
 		    layout: 'fit',
-		    itemId: 'container',
-		    border: false
+		    itemId: 'container'
 		},
 		this.addComponents
 	    ],
@@ -39,17 +39,17 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 
     makeAddComponents: function() {
 	this.addComponents = {
+	    xtype: 'container',
 	    layout: 'hbox',
 	    layoutConfig: {
 		align: 'stretch'
 	    },
 	    height: 23,
-	    border: false,
 	    margins: '5 0 0 0',
 	    items: [{
 		flex: 1,
+		xtype: 'container',
 		layout: 'absolute',
-		border: false,
 		items: {
 		    x: 0,
 		    y: Ext.isIE ? 1 : 0,
@@ -62,8 +62,8 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 		}
 	    }, {
 		width: 70,
+		xtype: 'container',
 		margins: '0 0 0 5',
-		border: false,
 		layout: 'anchor',
 		items: {
 		    anchor: '100%',
@@ -104,7 +104,7 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 	if (this.currentItem && this.currentItem.server.id == item.server.id)
 	    return;
 
-	this.tagsGrid = new Servers.SubcontentTab.TagsGrid({
+	this.tagsGrid = new Servers.Subcontent.TagsGrid({
 	    url: item.server.paths.tags
 	});
 
@@ -122,7 +122,7 @@ Servers.SubcontentTab.TagsPanel = Ext.extend(Ext.Panel, {
 
 });
 
-Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
+Servers.Subcontent.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 
     constructor: function(config) {
 	this.makeComponents(config);
@@ -139,7 +139,7 @@ Servers.SubcontentTab.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.makeStore(config);
 	this.makeContextMenu();
 
-	Servers.SubcontentTab.TagsGrid.superclass.constructor.call(this, {
+	Servers.Subcontent.TagsGrid.superclass.constructor.call(this, {
 	    colModel: this.colModel,
 	    store: this.store,
 	    autoExpandColumn: 'value',

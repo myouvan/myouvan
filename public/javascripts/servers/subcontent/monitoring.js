@@ -1,4 +1,4 @@
-Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
+Servers.Subcontent.Monitoring = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
@@ -7,18 +7,18 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
     },
 
     makeComponents: function() {
-	Servers.SubcontentTab.ChartPanel.superclass.constructor.call(this, {
+	Servers.Subcontent.Monitoring.superclass.constructor.call(this, {
 	    border: false,
 	    items: [{
+		xtype: 'container',
 		html: 'CPU use',
 		bodyStyle: {
 		    padding: '3px'
-		},
-		border: false
+		}
 	    }, {
-		layout: "fit",
+		xtype: 'container',
+		layout: 'fit',
 		itemId: 'container',
-		border: false,
 		width: 400,
 		height: 250
 	    }],
@@ -41,7 +41,7 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
 	if (this.currentItem && this.currentItem.server.id == item.server.id)
 	    return;
 
-	this.chart = new Servers.SubcontentTab.Chart({
+	this.chart = new Servers.Subcontent.Chart({
 	    url: item.server.paths.monitor
 	});
 
@@ -59,7 +59,7 @@ Servers.SubcontentTab.ChartPanel = Ext.extend(Ext.Panel, {
 
 });
 
-Servers.SubcontentTab.Chart = Ext.extend(Ext.chart.LineChart, {
+Servers.Subcontent.Chart = Ext.extend(Ext.chart.LineChart, {
 
     constructor: function(config) {
 	this.makeComponents(config);
@@ -68,7 +68,7 @@ Servers.SubcontentTab.Chart = Ext.extend(Ext.chart.LineChart, {
     makeComponents: function(config) {
 	this.makeStore(config);
 
-	Servers.SubcontentTab.Chart.superclass.constructor.call(this, {
+	Servers.Subcontent.Chart.superclass.constructor.call(this, {
 	    store: this.store,
 	    xField: 'index',
 	    series: [{

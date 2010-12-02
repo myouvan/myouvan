@@ -66,7 +66,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	if (this.action == 'import')
 	    items.unshift(this.selectTargetPanel);
 
-	this.card = new Ext.Panel({
+	this.card = new Ext.Container({
 	    layout: 'card',
 	    activeItem: 0,
 	    width: 400,

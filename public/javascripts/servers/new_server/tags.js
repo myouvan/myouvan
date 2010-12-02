@@ -17,19 +17,18 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 		pack: 'center'
 	    },
 	    padding: 10,
-	    border: false,
 	    items: {
+		xtype: 'container',
 		width: 300,
 		layout: 'vbox',
 		layoutConfig: {
 		    align: 'stretch'
 		},
-		border: false,
 		items: [
 		    {
+			xtype: 'container',
 			flex: 1,
 			layout: 'fit',
-			border: false,
 			items: this.tagsGrid
 		    },
 		    this.addComponents
@@ -40,17 +39,17 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 
     makeAddComponents: function() {
 	this.addComponents = {
+	    xtype: 'container',
 	    layout: 'hbox',
 	    layoutConfig: {
 		align: 'stretch'
 	    },
 	    height: 23,
-	    border: false,
 	    margins: '5 0 0 0',
 	    items: [{
 		flex: 1,
+		xtype: 'container',
 		layout: 'absolute',
-		border: false,
 		items: {
 		    x: 0,
 		    y: Ext.isIE ? 1 : 0,
@@ -63,8 +62,8 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 		}
 	    }, {
 		width: 70,
+		xtype: 'container',
 		margins: '0 0 0 5',
-		border: false,
 		layout: 'anchor',
 		items: {
 		    anchor: '100%',

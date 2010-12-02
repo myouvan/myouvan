@@ -82,7 +82,7 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	    success: function(res, opts) {
 		var item = Ext.decode(res.responseText).item;
 		this.fireEvent('gotServer', item);
-		this.subcontentTab.show();
+		this.subcontent.show();
 		Ext.getCmp('content-container').doLayout();
 	    },
 	    failure: function(res, opts) {
@@ -93,7 +93,7 @@ var Servers = Ext.extend(Ext.util.Observable, {
     },
 
     unshowServer: function() {
-	this.subcontentTab.hide();
+	this.subcontent.hide();
     },
 
     getServers: function(ids) {
@@ -246,14 +246,14 @@ var Servers = Ext.extend(Ext.util.Observable, {
 
     show: function() {
 	this.indexPanel = new Servers.IndexPanel();
-	this.subcontentTab = new Servers.SubcontentTab();
+	this.subcontent = new Servers.Subcontent();
 
 	this.initEventHandlers();
 
 	Ext.getCmp('subcontent').show();
 	Ext.getCmp('subcontent').removeAll();
-	Ext.getCmp('subcontent').add(this.subcontentTab);
-	this.subcontentTab.hide();
+	Ext.getCmp('subcontent').add(this.subcontent);
+	this.subcontent.hide();
 
 	Ext.getCmp('content').removeAll();
 	Ext.getCmp('content').add(this.indexPanel);
@@ -284,8 +284,8 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	this.indexPanel.on('destroyMetaData', this.destroyMetaData.createDelegate(this));
 	this.indexPanel.on('reloadServer', this.reloadServer.createDelegate(this));
 
-	this.subcontentTab.on('addTag', this.addTag.createDelegate(this));
-	this.subcontentTab.on('destroyTag', this.destroyTag.createDelegate(this));
+	this.subcontent.on('addTag', this.addTag.createDelegate(this));
+	this.subcontent.on('destroyTag', this.destroyTag.createDelegate(this));
     },
 
     startTasks: function() {
