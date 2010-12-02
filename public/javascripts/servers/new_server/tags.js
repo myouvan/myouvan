@@ -1,4 +1,4 @@
-Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
+Servers.NewServerWindow.Tags = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
@@ -8,7 +8,7 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 	this.tagsGrid = new Servers.NewServerWindow.TagsGrid();
 	this.makeAddComponents();
 
-	Servers.NewServerWindow.TagsPanel.superclass.constructor.call(this, {
+	Servers.NewServerWindow.Tags.superclass.constructor.call(this, {
 	    title: 'Add Tags',
 	    itemId: 'tags',
 	    layout: 'hbox',
@@ -83,8 +83,8 @@ Servers.NewServerWindow.TagsPanel = Ext.extend(Ext.Panel, {
 	};
     },
 
-    tags: function() {
-	return this.tagsGrid.tags();
+    getTags: function() {
+	return this.tagsGrid.getTags();
     }
 });
 
@@ -154,7 +154,7 @@ Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.store.add(record);
     },
 
-    tags: function() {
+    getTags: function() {
 	var tags = new Array();
 	this.store.each(function(record) {
 	    tags.push({ value: record.get('value') });

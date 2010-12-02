@@ -9,17 +9,17 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 
     makeComponents: function() {
 	if (this.action == 'import')
-	    this.selectTargetPanel = new Servers.NewServerWindow.SelectTargetPanel();
+	    this.selectTarget = new Servers.NewServerWindow.SelectTarget();
 
-	this.selectImagePanel = new Servers.NewServerWindow.SelectImagePanel();
-	this.formPanel = new Servers.NewServerWindow.FormPanel({
+	this.selectImage = new Servers.NewServerWindow.SelectImage();
+	this.form = new Servers.NewServerWindow.Form({
 	    action: this.action
 	});
 
-	this.tagsPanel = new Servers.NewServerWindow.TagsPanel();
+	this.tags = new Servers.NewServerWindow.Tags();
 
-	this.flashPanel = new Servers.NewServerWindow.FlashPanel();
-	this.flashPanel.on('setAvatar', this.setAvatar.createDelegate(this));
+	this.avatar = new Servers.NewServerWindow.Avatar();
+	this.avatar.on('setAvatar', this.setAvatar.createDelegate(this));
 
 	this.makeCard();
 
@@ -57,14 +57,14 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 
     makeCard: function() {
 	var items = [
-	    this.selectImagePanel,
-	    this.formPanel,
-	    this.tagsPanel,
-	    this.flashPanel
+	    this.selectImage,
+	    this.form,
+	    this.tags,
+	    this.avatar
 	];
 
 	if (this.action == 'import')
-	    items.unshift(this.selectTargetPanel);
+	    items.unshift(this.selectTarget);
 
 	this.card = new Ext.Container({
 	    layout: 'card',
@@ -99,27 +99,27 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
     nextCard: function() {
 	var cardId = this.card.layout.activeItem.getItemId();
 	if (cardId == 'selectTarget') {
-	    if (!this.selectTargetPanel.isSelected()) {
+	    if (!this.selectTarget.isSelected()) {
 		Ext.MessageBox.alert('Error', 'Select an target');
 		return;
 	    }
-	    var item = this.selectTargetPanel.selectedRecord().data;
+	    var item = this.selectTarget.selectedRecord().data;
 	    this.setValues(item);
 	    this.card.layout.setActiveItem('selectImage');
 	    this.prevButton.enable();
 	} else if (cardId == 'selectImage') {
-	    if (!this.selectImagePanel.isSelected()) {
+	    if (!this.selectImage.isSelected()) {
 		Ext.MessageBox.alert('Error', 'Select an image');
 		return;
 	    }
-	    var id = this.selectImagePanel.selectedId();
-	    this.formPanel.setImageId(id);
+	    var id = this.selectImage.selectedId();
+	    this.form.setImageId(id);
 	    this.card.layout.setActiveItem('form');
 	    this.prevButton.enable();
 	} else if (cardId == 'form') {
 	    this.card.layout.setActiveItem('tags');
 	} else if (cardId == 'tags') {
-	    this.formPanel.setTags(this.tagsPanel.tags());
+	    this.form.setTags(this.tags.getTags());
 	    this.card.layout.setActiveItem('flash');
 	    this.nextButton.disable();
 	    if (this.action == 'create')
@@ -129,13 +129,13 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	} else if (cardId == 'flash') {
 	    this.prevCard();
 	    this.prevCard();
-	    this.formPanel.submit(this.submitConfig);
+	    this.form.submit(this.submitConfig);
 	}
     },
 
     setValues: function(item) {
-	this.formPanel.setValues(item);
-	this.formPanel.showLoadMask();
+	this.form.setValues(item);
+	this.form.showLoadMask();
 
 	Ext.Ajax.request({
 	    url: item.paths.target,
@@ -145,8 +145,8 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    },
 	    success: function(res, opts) {
 		var additionalItem = Ext.decode(res.responseText).item;
-		this.formPanel.setValues(additionalItem);
-		this.formPanel.hideLoadMask();
+		this.form.setValues(additionalItem);
+		this.form.hideLoadMask();
 	    },
 	    failure: function(res, opts) {
 		Ext.MessageBox.alert('Error', 'Failed to get target');
@@ -156,7 +156,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
     },
 
     setAvatar: function(thumb, icon) {
-	this.formPanel.setAvatar(thumb, icon);
+	this.form.setAvatar(thumb, icon);
 	this.nextButton.enable();
     }
 

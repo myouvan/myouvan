@@ -1,4 +1,4 @@
-Servers.NewServerWindow.FlashPanel = Ext.extend(Ext.Panel, {
+Servers.NewServerWindow.Avatar = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
@@ -8,7 +8,7 @@ Servers.NewServerWindow.FlashPanel = Ext.extend(Ext.Panel, {
     },
 
     makeComponents: function() {
-	Servers.NewServerWindow.FlashPanel.superclass.constructor.call(this, {
+	Servers.NewServerWindow.Avatar.superclass.constructor.call(this, {
 	    title: 'Create Avatar',
 	    itemId: 'flash',
 	    layout: 'fit',

@@ -1,4 +1,4 @@
-Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
+Servers.NewServerWindow.Form = Ext.extend(Ext.Panel, {
 
     constructor: function(config) {
 	this.action = config.action;
@@ -9,9 +9,8 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 
     makeComponents: function() {
 	this.makeFormItems();
-	this.makeForm();
 
-	Servers.NewServerWindow.FormPanel.superclass.constructor.call(this, {
+	Servers.NewServerWindow.Form.superclass.constructor.call(this, {
 	    title: 'Input Specifications',
 	    itemId: 'form',
 	    layout: 'hbox',
@@ -21,7 +20,20 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    },
 	    padding: 5,
 	    border: false,
-	    items: this.form,
+	    items: {
+		xtype: 'form',
+		width: 424,
+		labelWidth: 100,
+		labelAlign: 'right',
+		border: false,
+		autoScroll: true,
+		defaults: {
+		    style: {
+			marginBottom: Ext.isIE ? '2px' : '0px'
+		    }
+		},
+		items: this.formItems
+	    },
 	    listeners: {
 		afterlayout: function() {
 		    this.loadMask = new Ext.LoadMask(this.getEl());
@@ -33,6 +45,8 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 		}
 	    }
 	});
+
+	this.form = this.get(0);
     },
 
     makeFormItems: function() {
@@ -192,22 +206,6 @@ Servers.NewServerWindow.FormPanel = Ext.extend(Ext.Panel, {
 	    itemId: 'avatar_icon',
 	    name: 'avatar[icon]'
 	}];
-    },
-
-    makeForm: function() {
-	this.form = new Ext.form.FormPanel({
-	    width: 424,
-	    labelWidth: 100,
-	    labelAlign: 'right',
-	    border: false,
-	    autoScroll: true,
-	    defaults: {
-		style: {
-		    marginBottom: Ext.isIE ? '2px' : '0px'
-		}
-	    },
-	    items: this.formItems
-	});
     },
 
     setImageId: function(id) {

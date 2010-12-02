@@ -1,4 +1,4 @@
-Servers.NewServerWindow.SelectTargetPanel = Ext.extend(Ext.Panel, {
+Servers.NewServerWindow.SelectTarget = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
@@ -7,7 +7,7 @@ Servers.NewServerWindow.SelectTargetPanel = Ext.extend(Ext.Panel, {
     makeComponents: function() {
 	this.grid = new Servers.NewServerWindow.SelectTargetGrid();
 
-	Servers.NewServerWindow.SelectTargetPanel.superclass.constructor.call(this, {
+	Servers.NewServerWindow.SelectTarget.superclass.constructor.call(this, {
 	    title: 'Select Target',
 	    itemId: 'selectTarget',
 	    layout: 'fit',
