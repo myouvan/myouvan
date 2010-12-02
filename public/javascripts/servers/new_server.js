@@ -117,7 +117,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	} else if (cardId == 'input') {
 	    this.card.layout.setActiveItem('tags');
 	} else if (cardId == 'tags') {
-	    this.input.setTags(this.tags.getTags());
+	    this.tags.onNext();
 	    this.card.layout.setActiveItem('flash');
 	    this.nextButton.disable();
 	    if (this.action == 'create')

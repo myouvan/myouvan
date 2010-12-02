@@ -17,7 +17,7 @@ Servers.NewServerWindow.Tags = Ext.extend(Ext.Panel, {
 		pack: 'center'
 	    },
 	    padding: 10,
-	    items: {
+	    items: [{
 		xtype: 'container',
 		width: 300,
 		layout: 'vbox',
@@ -33,7 +33,11 @@ Servers.NewServerWindow.Tags = Ext.extend(Ext.Panel, {
 		    },
 		    this.addComponents
 		]
-	    }
+	    }, {
+		xtype: 'container',
+		id: 'tagContainer',
+		itemId: 'container'
+	    }]
 	});
     },
 
@@ -83,8 +87,22 @@ Servers.NewServerWindow.Tags = Ext.extend(Ext.Panel, {
 	};
     },
 
-    getTags: function() {
-	return this.tagsGrid.getTags();
+    onNext: function() {
+	var container = this.getComponent('container');
+	container.removeAll();
+
+	var tags = this.tagsGrid.getTags();
+	for (var i = 0; i < tags.length; ++i) {
+	    var tag = tags[i];
+	    for (var field in tag)
+		container.add({
+		    xtype: 'hidden',
+		    name: 'tags[][' + field + ']',
+		    value: tag[field]
+		});
+	}
+
+	container.doLayout();
     }
 });
 
@@ -157,7 +175,7 @@ Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
     getTags: function() {
 	var tags = new Array();
 	this.store.each(function(record) {
-	    tags.push({ value: record.get('value') });
+	    tags.push(record.data);
 	});
 	return tags;
     }

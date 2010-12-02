@@ -125,8 +125,8 @@ class ServersController < ApplicationController
 
     server.avatar = Avatar.new(params[:avatar])
 
-    unless params[:tags].blank?
-      JSON.parse(params[:tags]).each do |params_tag|
+    if params[:tags]
+      params[:tags].each do |params_tag|
         server.tags << Tag.new(params_tag)
       end
     end
@@ -166,8 +166,8 @@ class ServersController < ApplicationController
 
     server.avatar = Avatar.new(params[:avatar])
 
-    unless params[:tags].blank?
-      JSON.parse(params[:tags]).each do |params_tag|
+    if params[:tags]
+      params[:tags].each do |params_tag|
         server.tags << Tag.new(params_tag)
       end
     end

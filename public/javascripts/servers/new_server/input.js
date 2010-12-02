@@ -179,10 +179,6 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 		marginBottom: '0px'
 	    },
 	    inputValue: 'true'
-	}, {
-	    xtype: 'hidden',
-	    name: 'tags',
-	    itemId: 'tags',
 	}];
     },
 
