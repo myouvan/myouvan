@@ -8,7 +8,10 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    'unshowServer',
 	    'getServers',
 	    'setFilter',
-	    'operateServer'
+	    'updateServer',
+	    'migrateServer',
+	    'operateServer',
+	    'destroyMetaData'
 	];
 	this.addEvents(events);
 	this.enableBubble(events);
@@ -166,7 +169,8 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		text: 'Edit Server',
 		itemId: 'edit',
 		handler: function() {
-		    this.operateServer('update');
+		    var record = this.getSelectionModel().getSelected();
+		    this.fireEvent('updateServer', record.data);
 		}
 	    }, '-', {
 		text: 'Suspend Server',
@@ -202,7 +206,8 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		text: 'Migrate Server',
 		itemId: 'migrate',
 		handler: function() {
-		    this.operateServer('migrate');
+		    var record = this.getSelectionModel().getSelected();
+		    this.fireEvent('migrateServer', record.data);
 		}
 	    }, '-', {
 		text: 'Terminate Server',
@@ -224,8 +229,10 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 			'Destroy MetaData',
 			'Destroying meta data. Are you sure?',
 			function(btn) {
-			    if (btn == 'yes')
-				this.operateServer('destroyMetaData');
+			    if (btn == 'yes') {
+				var record = this.getSelectionModel().getSelected();
+				this.fireEvent('destroyMetaData', record.data);
+			    }
 			}, this);
 		}
 	    }]
@@ -237,6 +244,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	var userTerminate = record.get('user_terminate');
 	var allowRestart = record.get('allow_restart');
 
+	this.menuDisable('edit', status != 'Running');
 	this.menuDisable('suspend', status != 'Running');
 	this.menuDisable('resume', status != 'Paused');
 	this.menuDisable('reboot', status != 'Running');

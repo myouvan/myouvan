@@ -122,26 +122,18 @@ var Servers = Ext.extend(Ext.util.Observable, {
     },
 
     operateServer: function(item, operation) {
-	if (operation == 'update') {
-	    this.updateServer(item);
-	} else if (operation == 'migrate') {
-	    this.migrateServer(item);
-	} else if (operation == 'destroyMetaData') {
-	    this.destroyMetaData(item);
-	} else {
-	    Ext.Ajax.request({
-		url: item.paths[operation],
-		method: 'POST',
-		success: function(res, opts) {
-		    var item = Ext.decode(res.responseText).item;
-		    this.fireEvent('updatedServer', item);
-		},
-		failure: function(res, opts) {
-		    Ext.MessageBox.alert('Error', 'Failed to ' + operation + ' server');
-		},
-		scope: this
-	    });
-	}
+	Ext.Ajax.request({
+	    url: item.paths[operation],
+	    method: 'POST',
+	    success: function(res, opts) {
+		var item = Ext.decode(res.responseText).item;
+		this.fireEvent('updatedServer', item);
+	    },
+	    failure: function(res, opts) {
+		Ext.MessageBox.alert('Error', 'Failed to ' + operation + ' server');
+	    },
+	    scope: this
+	});
     },
 
     updateServer: function(item) {
@@ -286,8 +278,10 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	this.indexPanel.on('unshowServer', this.unshowServer.createDelegate(this));
 	this.indexPanel.on('getServers', this.getServers.createDelegate(this));
 	this.indexPanel.on('setFilter', this.setFilter.createDelegate(this));
-	this.indexPanel.on('operateServer', this.operateServer.createDelegate(this));
+	this.indexPanel.on('updateServer', this.updateServer.createDelegate(this));
 	this.indexPanel.on('migrateServer', this.migrateServer.createDelegate(this));
+	this.indexPanel.on('operateServer', this.operateServer.createDelegate(this));
+	this.indexPanel.on('destroyMetaData', this.destroyMetaData.createDelegate(this));
 	this.indexPanel.on('reloadServer', this.reloadServer.createDelegate(this));
 
 	this.subcontent.on('addTag', this.addTag.createDelegate(this));

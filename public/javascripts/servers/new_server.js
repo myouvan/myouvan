@@ -153,7 +153,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 		this.nextButton.setText('Create');
 	    else if (this.action == 'import')
 		this.nextButton.setText('Import');
-	} else if (cardId == 'flash') {
+	} else if (cardId == 'avatar') {
 	    this.prevCard();
 	    this.prevCard();
 	    this.form.getForm().submit(this.submitConfig);

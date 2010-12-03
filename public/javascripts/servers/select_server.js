@@ -48,7 +48,7 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 	    },
 	    listeners: {
 		select: function(combo, record, index) {
-		    var psCombo = this.form.getComponent('physical_server');
+		    var psCombo = this.form.get(0).getComponent('physical_server');
 		    psCombo.getStore().baseParams.zone = record.get('value');
 		    psCombo.getStore().load();
 		    psCombo.reset();

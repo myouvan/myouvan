@@ -37,16 +37,17 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 		items: this.fields
 	    },
 	    listeners: {
-		activate: function() {
-		    if (this.loadMask && this.loadMaskVisible)
-			this.loadMask.show();
-		},
-		resize: function() {
-		    if (!this.loadMask) {
+		render: function() {
+		    var task = new Ext.util.DelayedTask(function() {
 			this.loadMask = new Ext.LoadMask(this.getEl());
 			if (this.loadMaskVisible)
 			    this.loadMask.show();
-		    }
+		    }, this);
+		    task.delay(10);
+		},
+		activate: function() {
+		    if (this.loadMask && this.loadMaskVisible)
+			this.loadMask.show();
 		}
 	    }
 	});
