@@ -85,10 +85,12 @@ class ServersController < ApplicationController
     server = Server.includes(:interfaces).find(params[:id])
     render :json => {
       :success => true,
-      :item => {
-        :server => attributes_with_paths(server),
-        :interfaces => server.interfaces.collect {|interface| interface.attributes }
-      }
+      :item => attributes_with_paths(server).merge({
+        :mac_address0 => server.interfaces[0].mac_address,
+        :ip_address0 => server.interfaces[0].ip_address,
+        :mac_address1 => server.interfaces[1].mac_address,
+        :ip_address1 => server.interfaces[1].ip_address
+      })
     }
   end
 
@@ -182,6 +184,9 @@ class ServersController < ApplicationController
       render :json => { :success => false, :errors => server.errors_for_ext }
       return
     end
+  end
+
+  def update
   end
 
   def suspend

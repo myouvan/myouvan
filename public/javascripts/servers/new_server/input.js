@@ -37,12 +37,15 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 		items: this.fields
 	    },
 	    listeners: {
-		afterlayout: function() {
-		    this.loadMask = new Ext.LoadMask(this.getEl());
-		},
 		activate: function() {
-		    if (this.loadMaskVisible) {
+		    if (this.loadMask && this.loadMaskVisible)
 			this.loadMask.show();
+		},
+		resize: function() {
+		    if (!this.loadMask) {
+			this.loadMask = new Ext.LoadMask(this.getEl());
+			if (this.loadMaskVisible)
+			    this.loadMask.show();
 		    }
 		}
 	    }
@@ -247,10 +250,6 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    if (cmp)
 		cmp.setValue(item[field]);
 	}
-    },
-
-    setTags: function(tags) {
-	this.getField('tags').setValue(Ext.encode(tags));
     }
 
 });

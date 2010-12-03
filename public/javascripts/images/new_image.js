@@ -3,8 +3,11 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
     constructor: function(config) {
 	this.action = config.action;
 	this.submitConfig = config.submitConfig;
+	this.loadMaskVisible = false;
 
 	this.makeComponents();
+	if (config.item)
+	    this.setValues(config.item);
     },
 
     makeComponents: function() {
@@ -100,7 +103,7 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
 
     setValues: function(image) {
 	for (var field in image) {
-	    var cmp = this.form.getComponent(field);
+	    var cmp = this.form.get(0).getComponent(field);
 	    if (cmp)
 		cmp.setValue(image[field]);
 	}

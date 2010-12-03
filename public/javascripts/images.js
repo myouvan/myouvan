@@ -32,6 +32,7 @@ var Images = Ext.extend(Ext.util.Observable, {
     updateImage: function(item) {
 	var newImageWindow = new Images.NewImageWindow({
 	    action: 'update',
+	    item: item,
 	    submitConfig: {
 		url: item.paths.image,
 		method: 'PUT',
@@ -47,19 +48,7 @@ var Images = Ext.extend(Ext.util.Observable, {
 		scope: this
 	    }
 	});
-	Ext.Ajax.request({
-	    url: item.paths.image,
-	    method: 'GET',
-	    success: function(res, opts) {
-		var item = Ext.decode(res.responseText).item;
-		newImageWindow.setValues(item);
-		newImageWindow.show();
-	    },
-	    failure: function(res, opts) {
-		alert('Error');
-	    },
-	    scope: this
-	});
+	newImageWindow.show();
     },
 
     destroyImage: function(item) {

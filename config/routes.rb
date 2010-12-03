@@ -9,7 +9,7 @@ Provisioning::Application.routes.draw do
     end
   end
 
-  resources :servers, :except => [:new, :edit, :update] do
+  resources :servers, :except => [:new, :edit] do
     member do
       get :monitor
       get :tags
