@@ -42,7 +42,7 @@ class ServerDaemon < SimpleDaemon::Base
         end
 
         if item
-          fork {
+          pid = Process.fork {
             server = Server.find(item[:server_id])
             begin
               @logger.info item.inspect
@@ -72,6 +72,8 @@ class ServerDaemon < SimpleDaemon::Base
               raise
             end
           }
+
+          Process.detach(pid)
         end
         
         # Optional. Sleep between tasks.

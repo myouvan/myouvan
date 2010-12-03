@@ -66,8 +66,9 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    Paused: 'status_paused.gif',
 	    Resuming: 'status_changing.gif',
 	    Rebooting: 'status_changing.gif',
-	    Terminating: 'status_changing.gif',
 	    'Shutting down': 'status_changing.gif',
+	    'Shut down': 'status_terminated.gif',
+	    Terminating: 'status_changing.gif',
 	    Terminated: 'status_terminated.gif',
 	    Restarting: 'status_changing.gif',
 	    Migrating: 'status_changing.gif',
@@ -249,7 +250,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.menuDisable('resume', status != 'Paused');
 	this.menuDisable('reboot', status != 'Running');
 	this.menuDisable('shutdown', status != 'Running');
-	this.menuDisable('restart', status != 'Terminated' || userTerminate && !allowRestart);
+	this.menuDisable('restart', status != 'Shut down' || userTerminate && !allowRestart);
 	this.menuDisable('terminate', status != 'Running');
 	this.menuDisable('migrate', status != 'Running');
     },

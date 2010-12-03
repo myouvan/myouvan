@@ -67,7 +67,7 @@ class Equallogic
       }
     }
 
-    @logger.debug "added volume #{server.name}"
+    @logger.info "added volume #{server.name}"
 
     dst_iqn
   end
@@ -87,7 +87,7 @@ class Equallogic
       }
     }
 
-    @logger.debug "deleted volume #{server.name}"
+    @logger.info "deleted volume #{server.name}"
   end
 
   def get_pool(name)

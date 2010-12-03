@@ -71,7 +71,7 @@ class PhysicalServer
 
     virt_shutdown_server(server, false)
 
-    server.status = 'Terminated'
+    server.status = 'Shut down'
     server.save
 
     @logger.info "finished terminating server #{server.name}"
@@ -160,7 +160,7 @@ class PhysicalServer
       conn.run "/sbin/iscsiadm -m node -T #{iqn} --login"
     }
 
-    @logger.debug "logged in iscsi #{iqn} on #{physical_server}"
+    @logger.info "logged in iscsi #{iqn} on #{physical_server}"
   end
 
   def iscsi_logout(physical_server, iqn)
@@ -169,7 +169,7 @@ class PhysicalServer
       conn.run "/sbin/iscsiadm -m node -o delete -T #{iqn}"
     }
 
-    @logger.debug "logged out iscsi #{iqn} on #{physical_server}"
+    @logger.info "logged out iscsi #{iqn} on #{physical_server}"
   end
 
   #------------------------------
@@ -186,19 +186,23 @@ class PhysicalServer
       conn.close
     end
 
-    @logger.debug "virt created server #{server.name}"
+    @logger.info "virt created server #{server.name}"
   end
 
   def virt_suspend_server(server)
     conn = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
     domain = conn.lookup_domain_by_name(server.name)
     domain.suspend
+
+    @logger.info "virt suspended server #{server.name}"
   end
 
   def virt_resume_server(server)
     conn = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
     domain = conn.lookup_domain_by_name(server.name)
     domain.resume
+
+    @logger.info "virt resumed server #{server.name}"
   end
 
   def virt_reboot_server(server)
@@ -213,6 +217,8 @@ class PhysicalServer
     end
 
     domain.create
+
+    @logger.info "virt rebooted server #{server.name}"
   end
 
   def virt_shutdown_server(server, undefine)
@@ -228,13 +234,15 @@ class PhysicalServer
 
     domain.undefine if undefine
 
-    @logger.debug "shutdown server #{server.name}"
+    @logger.info "virt shutdown server #{server.name}"
   end
 
   def virt_restart_server(server)
     conn = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
     domain = conn.lookup_domain_by_name(server.name)
     domain.create
+
+    @logger.info "virt restart server #{server.name}"
   end
 
   def virt_migrate_server(server, new_physical_server)
@@ -246,7 +254,8 @@ class PhysicalServer
     domain.migrate(conn_dst, Libvirt::Domain::MIGRATE_LIVE)
 
     domain.undefine
-    @logger.debug "migrated server #{server.name} to #{new_physical_server}"
+
+    @logger.info "virt migrated server #{server.name} to #{new_physical_server}"
   end
 
   def virt_rollback_migrate_server(server, new_physical_server)

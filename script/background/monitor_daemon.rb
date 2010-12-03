@@ -93,11 +93,15 @@ class MonitorDaemon < SimpleDaemon::Base
   STATES = {
     Libvirt::Domain::RUNNING => 'Running',
     Libvirt::Domain::PAUSED => 'Paused',
-    Libvirt::Domain::SHUTOFF => 'Terminated'
+    Libvirt::Domain::SHUTOFF => 'Shut down'
   }
 
   def self.set_status(server, domain)
-    state = domain.info.state
+    begin
+      state = domain.info.state
+    rescue Libvirt::RetrieveError
+      return
+    end
 
     if state == Libvirt::Domain::SHUTOFF and
         server.status == 'Running' and
@@ -114,7 +118,7 @@ class MonitorDaemon < SimpleDaemon::Base
       @starling.set(Settings.starling.queue, item)
     end
 
-    if %(Running Paused Terminated).include?(server.status) and
+    if %(Running Paused Shut\ down).include?(server.status) and
         STATES[state] != server.status
       server.status = STATES[state]
       server.save
