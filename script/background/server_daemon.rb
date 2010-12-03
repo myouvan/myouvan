@@ -51,6 +51,8 @@ class ServerDaemon < SimpleDaemon::Base
               case item[:command]
               when 'create_server'
                 ps.create_server(server, item[:domain_xml])
+              when 'update_server'
+                ps.update_server(server, item[:cpus_or_memory_changed], item[:ip_address_changed])
               when 'suspend_server'
                 ps.suspend_server(server)
               when 'resume_server'

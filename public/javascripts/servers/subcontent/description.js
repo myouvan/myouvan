@@ -117,7 +117,9 @@ Servers.Subcontent.Description = Ext.extend(Ext.Panel, {
 		cmp.setValue(item[field]);
 	}
 
-	avatarImg = '<img src="' + item.paths.avatarThumb + '"' +
+	var url = item.paths.avatarThumb;
+	avatarImg = '<img src="' + url + '"' +
+	            ' id="avatar-thumb-' + item.id + '"' +
 	            ' width="150" height="150" />';
 	var cmp = this.getComponent('avatar');
 	cmp.setValue(avatarImg);
@@ -126,13 +128,16 @@ Servers.Subcontent.Description = Ext.extend(Ext.Panel, {
     },
 
     updateServer: function(item) {
-	if (this.currentItem)
+	if (this.currentItem) {
 	    if (item.id == this.currentItem.id)
 		for (var field in item) {
 		    var cmp = this.getComponent(field);
 		    if (cmp)
 			cmp.setValue(item[field]);
 		}
+	    if (item.avatar_changed)
+		Ext.ux.reloadImg('avatar-thumb-' + item.id);
+	}
     },
 
     updateServers: function(items) {

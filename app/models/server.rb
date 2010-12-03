@@ -1,7 +1,7 @@
 class Server < ActiveRecord::Base
 
   belongs_to :image
-  has_many :interfaces, :dependent => :destroy
+  has_many :interfaces, :dependent => :destroy, :order => 'interfaces.number'
   has_one :avatar, :dependent => :destroy
   has_many :tags, :dependent => :destroy
 

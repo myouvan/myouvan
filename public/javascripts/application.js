@@ -1,4 +1,17 @@
 //------------------------------
+//   reload image
+//------------------------------
+
+Ext.ux.reloadImg = function(id) {
+    var elem = Ext.get(id);
+    var src = elem.getAttribute('src');
+    src = src.replace(/\?.*$/,"");
+    elem.set({
+	src: src + '?' + (new Date()).getTime()
+    });
+};
+
+//------------------------------
 //   extended JsonStore
 //------------------------------
 

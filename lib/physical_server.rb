@@ -28,7 +28,9 @@ class PhysicalServer
     virt_create_server(server, domain_xml)
 
     virtual_server = Centos.new(@logger)
-    virtual_server.config_server(server)
+    virtual_server.set_network(server)
+    virt_reboot_server(server)
+    virtual_server.wait_login_prompt(server)
 
     server.status = 'Running'
     server.save
@@ -36,7 +38,29 @@ class PhysicalServer
     @logger.info "finished creating server #{server.name}"
   end
 
+  def update_server(server, cpus_or_memory_changed, ip_address_changed)
+    @logger.info "start updating server #{server.name}"
+
+    if cpus_or_memory_changed
+      virt_update_server(server) 
+      virtual_server = Centos.new(@logger)
+      virtual_server.wait_login_prompt(server)
+    end
+
+    if ip_address_changed
+      virtual_server ||= Centos.new(@logger)
+      virtual_server.set_ip_addresses(server)
+    end
+
+    server.status = 'Running'
+    server.save
+
+    @logger.info "finished updating server #{server.name}"
+  end
+
   def suspend_server(server)
+    @logger.info "start suspending server #{server.name}"
+
     virt_suspend_server(server)
 
     server.status = 'Paused'
@@ -46,6 +70,8 @@ class PhysicalServer
   end
 
   def resume_server(server)
+    @logger.info "start resuming server #{server.name}"
+
     virt_resume_server(server)
 
     server.status = 'Running'
@@ -55,10 +81,12 @@ class PhysicalServer
   end
 
   def reboot_server(server)
+    @logger.info "start rebooting server #{server.name}"
+
     virt_reboot_server(server)
 
     virtual_server = Centos.new(@logger)
-    virtual_server.wait_for_started(server)
+    virtual_server.wait_login_prompt(server)
 
     server.status = 'Running'
     server.save
@@ -78,10 +106,12 @@ class PhysicalServer
   end
 
   def restart_server(server)
+    @logger.info "start restarting server #{server.name}"
+
     virt_restart_server(server)
 
     virtual_server = Centos.new(@logger)
-    virtual_server.wait_for_started(server)
+    virtual_server.wait_login_prompt(server)
 
     server.status = 'Running'
     server.save
@@ -98,7 +128,7 @@ class PhysicalServer
       virt_migrate_server(server, new_physical_server)
     rescue Libvirt::Error
       virt_rollback_migrate_server(server, new_physical_server)
-      iscsi_logout(new_physical_server, server.storage>iqn)
+      iscsi_logout(new_physical_server, server.storage_iqn)
       raise
     end
 
@@ -173,102 +203,111 @@ class PhysicalServer
   end
 
   #------------------------------
-  #   virt
+  #   virt base
+  #------------------------------
+
+  def _virt_get_conn(physical_server)
+    Libvirt::open("qemu+ssh://root@#{physical_server}/system")
+  end
+
+  def _virt_get_domain(name, physical_server)
+    conn = _virt_get_conn(physical_server)
+    conn.lookup_domain_by_name(name)
+  end
+
+  def _virt_shutdown(domain)
+    domain.shutdown
+
+    begin
+      sleep 5 until domain.info.state == Libvirt::Domain::SHUTOFF
+    rescue Libvirt::Error => err
+      @logger.debug err.message
+    end
+  end
+
+  #------------------------------
+  #   virt methods
   #------------------------------
 
   def virt_create_server(server, domain_xml)
-    conn = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
-    begin
-      conn.define_domain_xml(domain_xml)
-      domain = conn.lookup_domain_by_name(server.name)
-      domain.create
-    ensure
-      conn.close
-    end
+    conn = _virt_get_conn(server.physical_server)
+    conn.define_domain_xml(domain_xml)
+    domain = conn.lookup_domain_by_name(server.name)
+    domain.create
 
     @logger.info "virt created server #{server.name}"
   end
 
-  def virt_suspend_server(server)
-    conn = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
-    domain = conn.lookup_domain_by_name(server.name)
-    domain.suspend
+  def virt_update_server(server)
+    domain = _virt_get_domain(server.name, server.physical_server)
+    _virt_shutdown(domain)
 
+    domain.vcpus = server.cpus
+
+    info = domain.info
+    if info.memory > server.memory * 1024
+      domain.memory = server.memory * 1024
+      domain.max_memory = server.memory * 1024
+    else
+      domain.max_memory = server.memory * 1024
+      domain.memory = server.memory * 1024
+    end
+
+    domain.create
+
+    @logger.info "virt updated server #{server.name}"
+  end
+
+  def virt_suspend_server(server)
+    domain = _virt_get_domain(server.name, server.physical_server)
+    domain.suspend
     @logger.info "virt suspended server #{server.name}"
   end
 
   def virt_resume_server(server)
-    conn = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
-    domain = conn.lookup_domain_by_name(server.name)
+    domain = _virt_get_domain(server.name, server.physical_server)
     domain.resume
-
     @logger.info "virt resumed server #{server.name}"
   end
 
   def virt_reboot_server(server)
-    conn = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
-    domain = conn.lookup_domain_by_name(server.name)
-    domain.shutdown
-
-    begin
-      sleep 5 until domain.info.state == Libvirt::Domain::SHUTOFF
-    rescue Libvirt::Error => err
-      @logger.debug err.message
-    end
-
+    domain = _virt_get_domain(server.name, server.physical_server)
+    _virt_shutdown(domain)
     domain.create
-
     @logger.info "virt rebooted server #{server.name}"
   end
 
   def virt_shutdown_server(server, undefine)
-    conn = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
-    domain = conn.lookup_domain_by_name(server.name)
-    domain.shutdown
-
-    begin
-      sleep 5 until domain.info.state == Libvirt::Domain::SHUTOFF
-    rescue Libvirt::Error => err
-      @logger.debug err.message
-    end
-
+    domain = _virt_get_domain(server.name, server.physical_server)
+    _virt_shutdown(domain)
     domain.undefine if undefine
-
     @logger.info "virt shutdown server #{server.name}"
   end
 
   def virt_restart_server(server)
-    conn = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
-    domain = conn.lookup_domain_by_name(server.name)
+    domain = _virt_get_domain(server.name, server.physical_server)
     domain.create
-
     @logger.info "virt restart server #{server.name}"
   end
 
   def virt_migrate_server(server, new_physical_server)
-    conn_src = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
-    domain = conn_src.lookup_domain_by_name(server.name)
-    conn_dst = Libvirt::open("qemu+ssh://root@#{new_physical_server}/system")
+    domain = _virt_get_domain(server.name, server.physical_server)
+    conn_dst = _virt_get_conn(new_physical_server)
     conn_dst.define_domain_xml(domain.xml_desc)
-
     domain.migrate(conn_dst, Libvirt::Domain::MIGRATE_LIVE)
-
     domain.undefine
-
     @logger.info "virt migrated server #{server.name} to #{new_physical_server}"
   end
 
   def virt_rollback_migrate_server(server, new_physical_server)
-    conn_dst = Libvirt::open("qemu+ssh://root@#{new_physical_server}/system")
     begin
-      domain_dst = conn_dst.lookup_domain_by_name(server.name)
+      domain_dst = _virt_get_domain(server.name, new_physical_server)
       domain_dst.destroy unless domain_dst.info.state == Libvirt::Domain::SHUTOFF
       domain_dst.undefine
     rescue Libvirt::RetrieveError
     end
 
-    conn_src = Libvirt::open("qemu+ssh://root@#{server.physical_server}/system")
-    domain_src = conn_src.lookup_domain_by_name(server.name)
+    domain_src = _virt_get_domain(server.name, server.physical_server)
     domain_src.create if domain_src.info.state == Libvirt::Domain::SHUTOFF
   end
 

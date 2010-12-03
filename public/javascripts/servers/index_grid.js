@@ -60,8 +60,9 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
     makeColModel: function() {
 	var imagePaths = {
-	    Starting: 'status_changing.gif',
+	    Creating: 'status_changing.gif',
 	    Running: 'status_running.gif',
+	    Updating: 'status_changing.gif',
 	    Suspending: 'status_changing.gif',
 	    Paused: 'status_paused.gif',
 	    Resuming: 'status_changing.gif',
@@ -75,8 +76,9 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    Error: 'status_error.gif',
 	};
 
-	var img = function(src, w, h) {
+	var img = function(src, id, w, h) {
 	    return '<img src="' + src + '"' +
+		   ' id="avatar-icon-' + id + '"' +
 		   ' width="' + w + '" height="' + h + '"' +
 		   ' style="vertical-align: top" />';
 	};
@@ -98,7 +100,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    sortable: true,
 	    renderer: function(value, metadata, record) {
 		var url = record.get('paths').avatarIcon;
-		return img(url, 32, 32) + ' ' + value;
+		return img(url, record.get('id'), 32, 32) + ' ' + value;
 	    }
 	}, {
 	    header: 'Title',
@@ -326,8 +328,11 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    var record = this.store.getAt(ri);
 	    for (var field in item)
 		record.set(field, item[field]);
+	    this.store.commitChanges();
+
+	    if (item.avatar_changed)
+		Ext.ux.reloadImg('avatar-icon-' + item.id);
 	}
-	this.store.commitChanges();
     },
 
     updateRecords: function(items) {

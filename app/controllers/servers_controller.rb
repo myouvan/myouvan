@@ -76,7 +76,7 @@ class ServersController < ApplicationController
     render :json => {
       :success => true,
       :items => server.tags.collect {|tag|
-        tag.attributes.merge({ :paths => { :tag => tag_path(tag) } })
+        tag.attributes.merge(:paths => { :tag => tag_path(tag) })
       }
     }
   end
@@ -85,12 +85,12 @@ class ServersController < ApplicationController
     server = Server.includes(:interfaces).find(params[:id])
     render :json => {
       :success => true,
-      :item => attributes_with_paths(server).merge({
+      :item => attributes_with_paths(server).merge(
         :mac_address0 => server.interfaces[0].mac_address,
         :ip_address0 => server.interfaces[0].ip_address,
         :mac_address1 => server.interfaces[1].mac_address,
         :ip_address1 => server.interfaces[1].ip_address
-      })
+      )
     }
   end
 
@@ -118,49 +118,24 @@ class ServersController < ApplicationController
   end
 
   def create
-    server = Server.new(params[:server])
-    server.status = 'Starting'
-
-    params[:interface].keys.sort.each do |i|
-      server.interfaces << Interface.new(params[:interface][i])
-    end
-
-    server.avatar = Avatar.new(params[:avatar])
-
-    if params[:tags]
-      params[:tags].each do |params_tag|
-        server.tags << Tag.new(params_tag)
-      end
-    end
-
-    if server.save
-      tags = server.tags.collect {|tag| tag.value }
-      render :json => {
-        :success => true,
-        :item => attributes_with_paths(server).merge(:tags => tags)
-      }
-    else
-      render :json => { :success => false, :errors => server.errors_for_ext }
-      return
-    end
+    server = create_record('Creating') or return
 
     @server = server
     domain_xml = '' # because render_to_string returns ActionView::Buffer
     domain_xml << (render_to_string :template => 'servers/domain.xml.builder', :layout => false)
 
-    item = {
-      :command => 'create_server',
-      :server_id => server.id,
-      :domain_xml => domain_xml
-    }
-
-    starling = Starling.new(Settings.starling.server)
-    starling.set(Settings.starling.queue, item)
+    set_starling(:command => 'create_server',
+                 :server_id => server.id,
+                 :domain_xml => domain_xml)
   end
 
   def import
+    create_record('Running')
+  end
+
+  def create_record(status)
     server = Server.new(params[:server])
-    server.status = 'Running'
+    server.status = status
 
     params[:interface].keys.sort.each do |i|
       server.interfaces << Interface.new(params[:interface][i])
@@ -180,13 +155,67 @@ class ServersController < ApplicationController
         :success => true,
         :item => attributes_with_paths(server).merge(:tags => tags)
       }
+      server
     else
       render :json => { :success => false, :errors => server.errors_for_ext }
-      return
+      nil
     end
   end
 
   def update
+    valid = true
+
+    server = Server.includes(:interfaces).find(params[:id])
+    server.attributes = params[:server]
+    valid &&= server.valid?
+    cpus_or_memory_changed = server.cpus_changed? || server.memory_changed?
+
+    params[:interface].keys.sort.zip(server.interfaces) do |i, interface|
+      interface.attributes = params[:interface][i]
+      valid &&= interface.valid?
+    end
+    ip_address_changed = server.interfaces.any? {|interface|
+      interface.ip_address_changed?
+    }
+
+    unless valid
+      render :json => { :success => false, :errors => server.errors_for_ext }
+      return
+    end
+
+    avatar_changed = !params[:avatar][:thumb].blank?
+
+    Server.transaction {
+      server.status = 'Updating' if cpus_or_memory_changed or ip_address_changed
+
+      server.save
+      server.interfaces.each do |interface|
+        interface.save
+      end
+
+      unless params[:avatar][:thumb].blank?
+        server.avatar.attributes = params[:avatar]
+        server.avatar.save
+      end
+    }
+
+    render :json => {
+      :success => true,
+      :item => attributes_with_paths(server).merge(
+        :mac_address0 => server.interfaces[0].mac_address,
+        :ip_address0 => server.interfaces[0].ip_address,
+        :mac_address1 => server.interfaces[1].mac_address,
+        :ip_address1 => server.interfaces[1].ip_address,
+        :avatar_changed => avatar_changed                                           
+      )
+    }
+
+    if cpus_or_memory_changed or ip_address_changed
+      set_starling(:command => 'update_server',
+                   :server_id => server.id,
+                   :cpus_or_memory_changed => cpus_or_memory_changed,
+                   :ip_address_changed => ip_address_changed)
+    end
   end
 
   def suspend
@@ -199,13 +228,8 @@ class ServersController < ApplicationController
       :item => { :id => server.id, :status => server.status }
     }
 
-    item = {
-      :command => 'suspend_server',
-      :server_id => server.id
-    }
-
-    starling = Starling.new(Settings.starling.server)
-    starling.set(Settings.starling.queue, item)
+    set_starling(:command => 'suspend_server',
+                 :server_id => server.id)
   end
 
   def resume
@@ -218,13 +242,8 @@ class ServersController < ApplicationController
       :item => { :id => server.id, :status => server.status }
     }
 
-    item = {
-      :command => 'resume_server',
-      :server_id => server.id
-    }
-
-    starling = Starling.new(Settings.starling.server)
-    starling.set(Settings.starling.queue, item)
+    set_starling(:command => 'resume_server',
+                 :server_id => server.id)
   end
 
   def reboot
@@ -237,13 +256,8 @@ class ServersController < ApplicationController
       :item => { :id => server.id, :status => server.status }
     }
 
-    item = {
-      :command => 'reboot_server',
-      :server_id => server.id
-    }
-
-    starling = Starling.new(Settings.starling.server)
-    starling.set(Settings.starling.queue, item)
+    set_starling(:command => 'reboot_server',
+                 :server_id => server.id)
   end
 
   def shutdown
@@ -263,13 +277,8 @@ class ServersController < ApplicationController
       }
     }
 
-    item = {
-      :command => 'shutdown_server',
-      :server_id => server.id
-    }
-
-    starling = Starling.new(Settings.starling.server)
-    starling.set(Settings.starling.queue, item)
+    set_starling(:command => 'shutdown_server',
+                 :server_id => server.id)
   end
 
   def restart
@@ -289,13 +298,8 @@ class ServersController < ApplicationController
       }
     }
 
-    item = {
-      :command => 'restart_server',
-      :server_id => server.id
-    }
-
-    starling = Starling.new(Settings.starling.server)
-    starling.set(Settings.starling.queue, item)
+    set_starling(:command => 'restart_server',
+                 :server_id => server.id)
   end
 
   def migrate
@@ -320,14 +324,9 @@ class ServersController < ApplicationController
       :item => { :id => server.id, :status => server.status }
     }
 
-    item = {
-      :command => 'migrate_server',
-      :server_id => server.id,
-      :new_physical_server => params[:server][:physical_server]
-    }
-
-    starling = Starling.new(Settings.starling.server)
-    starling.set(Settings.starling.queue, item)
+    set_starling(:command => 'migrate_server',
+                 :server_id => server.id,
+                 :new_physical_server => params[:server][:physical_server])
   end
 
   def terminate
@@ -346,13 +345,8 @@ class ServersController < ApplicationController
       }
     }
 
-    item = {
-      :command => 'terminate_server',
-      :server_id => server.id
-    }
-
-    starling = Starling.new(Settings.starling.server)
-    starling.set(Settings.starling.queue, item)
+    set_starling(:command => 'terminate_server',
+                 :server_id => server.id)
   end
 
   def destroy
@@ -364,7 +358,7 @@ class ServersController < ApplicationController
 
   def attributes_with_paths(server)
     avatar = Avatar.select(:id).where(:server_id => server.id).first
-    server.attributes.merge({
+    server.attributes.merge(
       :paths => {
         :server => server_path(server),
         :monitor => monitor_server_path(server),
@@ -379,7 +373,12 @@ class ServersController < ApplicationController
         :avatarThumb => thumb_avatar_path(avatar.id),
         :avatarIcon => icon_avatar_path(avatar.id)
       }
-    })
+    )
+  end
+
+  def set_starling(item)
+    starling = Starling.new(Settings.starling.server)
+    starling.set(Settings.starling.queue, item)
   end
 
 end

@@ -82,6 +82,9 @@ var showViewport = function() {
 
 Ext.onReady(function() {
     Ext.Ajax.diableCaching = true;
+    Ext.Ajax.defaultHeaders = {
+	Accept: 'application/json'
+    };
     Ext.BLANK_IMAGE_URL = '/stylesheets/images/gray/s.gif';
     Ext.chart.Chart.CHART_URL = '/javascripts/ext-3.3.0/resources/charts.swf';
     Ext.QuickTips.init();
