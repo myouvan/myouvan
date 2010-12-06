@@ -103,6 +103,7 @@ Servers.Subcontent.FailoverTargets = Ext.extend(Ext.Panel, {
 	    url: item.paths.failover_targets
 	});
 	this.failoverTargetsGrid.on('destroyFailoverTarget', this.destroyFailoverTarget.createDelegate(this));
+	this.failoverTargetsGrid.on('changePriority', this.changePriority.createDelegate(this));
 
 	var container = this.getComponent('container');
 	container.removeAll();
@@ -111,11 +112,11 @@ Servers.Subcontent.FailoverTargets = Ext.extend(Ext.Panel, {
 	this.currentItem = item;
     },
 
-    addFailoverTarget: function(failoverTarget) {
+    addFailoverTarget: function(item) {
 	Ext.Ajax.request({
 	    url: paths.failover_targets.index,
 	    method: 'POST',
-	    params: failoverTarget,
+	    params: item,
 	    success: function(res, opts) {
 		var item = Ext.decode(res.responseText).item;
 		this.failoverTargetsGrid.addRecord(item);
@@ -140,6 +141,23 @@ Servers.Subcontent.FailoverTargets = Ext.extend(Ext.Panel, {
 	    },
 	    scope: this
 	});
+    },
+
+    changePriority: function(item) {
+	item.server_id = this.currentItem.id;
+	Ext.Ajax.request({
+	    url: paths.failover_targets.change_priority,
+	    method: 'POST',
+	    params: item,
+	    success: function(res, opts) {
+		var items = Ext.decode(res.responseText).items;
+		this.failoverTargetsGrid.updateRecords(items);
+	    },
+	    failure: function(res, opts) {
+		Ext.MessageBox.alert('Error', 'Failed to change priority');
+	    },
+	    scope: this
+	});
     }
 
 });
@@ -149,7 +167,10 @@ Servers.Subcontent.FailoverTargetsGrid = Ext.extend(Ext.grid.GridPanel, {
     constructor: function(config) {
 	this.makeComponents(config);
 
-	this.addEvents('destroyFailoverTarget');
+	this.addEvents([
+	    'destroyFailoverTarget',
+	    'changePriority'
+	]);
     },
 
     makeComponents: function(config) {
@@ -163,7 +184,17 @@ Servers.Subcontent.FailoverTargetsGrid = Ext.extend(Ext.grid.GridPanel, {
 	    autoExpandColumn: 'physical_server',
 	    stripeRows: true,
 	    loadMask: true,
-	    plugins: [new Ext.ux.dd.GridDragDropRowOrder()],
+	    plugins: [new Ext.ux.dd.GridDragDropRowOrder({
+		listeners: {
+		    beforerowmove: function(gt, ri, i, sels) {
+			this.fireEvent('changePriority', {
+			    src_id: this.store.getAt(ri).get('id'),
+			    dst_id: this.store.getAt(i).get('id')
+			});
+		    },
+		    scope: this
+		}
+	    })],
 	    sm: new Ext.grid.RowSelectionModel({
 		singleSelect: true,
 		listeners: {
@@ -231,6 +262,18 @@ Servers.Subcontent.FailoverTargetsGrid = Ext.extend(Ext.grid.GridPanel, {
 	var ri = this.store.findExact('id', item.id);
 	if (ri != -1)
 	    this.store.removeAt(ri);
+    },
+
+    updateRecords: function(items) {
+	for (var i = 0; i < items.length; ++i) {
+	    var item = items[i];
+	    var ri = this.store.findExact('id', item.id);
+	    if (ri != -1) {
+		var record = this.store.getAt(ri);
+		for (var field in item)
+		    record.set(field, item[field]);
+	    }
+	}
     }
 
 });

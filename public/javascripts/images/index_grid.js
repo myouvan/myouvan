@@ -92,13 +92,13 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		scope: this
 	    },
 	    items: [{
-		text: 'Edit',
+		text: 'Edit Image',
 		handler: function() {
 		    var record = this.getSelectionModel().getSelected();
 		    this.fireEvent('updateImage', record.data);
 		}
 	    }, {
-		text: 'Destroy',
+		text: 'Destroy MetaData',
 		handler: function() {
 		    var record = this.getSelectionModel().getSelected();
 		    this.fireEvent('destroyImage', record.data);

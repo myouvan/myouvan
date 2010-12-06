@@ -42,7 +42,11 @@ Provisioning::Application.routes.draw do
 
   resources :tags, :only => [:index, :create, :destroy]
 
-  resources :failover_targets, :only => [:create, :destroy]
+  resources :failover_targets, :only => [:create, :destroy] do
+    collection do
+      post :change_priority
+    end
+  end
 
   resources :import_targets, :only => [:index, :show]
 

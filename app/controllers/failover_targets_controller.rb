@@ -18,6 +18,26 @@ class FailoverTargetsController < ApplicationController
     render :json => { :success => true, :item => attrs }
   end
 
+  def change_priority
+    server_id = params[:server_id]
+    src_id = params[:src_id]
+    dst_id = params[:dst_id]
+    update_records = FailoverTarget.change_priority(server_id, src_id, dst_id)
+
+    FailoverTarget.transaction {
+      update_records.each do |update_record|
+        update_record.save
+      end
+    }
+
+    render :json => {
+      :success => true,
+      :items => update_records.collect {|update_record|
+        update_record.attributes
+      }
+    }
+  end
+
   def attributes_with_paths(failover_target)
     failover_target.attributes.merge({
       :paths => {
