@@ -1,17 +1,17 @@
-Servers.NewServerWindow.SelectTarget = Ext.extend(Ext.Panel, {
+Servers.NewServerWindow.SelectImportTarget = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
 
-	this.addEvents('selectTarget');
+	this.addEvents('selectImportTarget');
     },
 
     makeComponents: function() {
-	this.grid = new Servers.NewServerWindow.SelectTargetGrid();
+	this.grid = new Servers.NewServerWindow.SelectImportTargetGrid();
 
-	Servers.NewServerWindow.SelectTarget.superclass.constructor.call(this, {
-	    title: 'Select Target',
-	    itemId: 'selectTarget',
+	Servers.NewServerWindow.SelectImportTarget.superclass.constructor.call(this, {
+	    title: 'Select Import Target',
+	    itemId: 'selectImportTarget',
 	    layout: 'fit',
 	    border: false,
 	    items: this.grid
@@ -21,17 +21,17 @@ Servers.NewServerWindow.SelectTarget = Ext.extend(Ext.Panel, {
     onNext: function() {
 	if (this.grid.getSelectionModel().hasSelection()) {
 	    var item = this.grid.getSelectionModel().getSelected().data;
-	    this.fireEvent('selectTarget', item);
+	    this.fireEvent('selectImportTarget', item);
 	    return true;
 	} else {
-	    Ext.MessageBox.alert('Error', 'Select an target');
+	    Ext.MessageBox.alert('Error', 'Select an import target');
 	    return false;
 	}
     }
 
 });
 
-Servers.NewServerWindow.SelectTargetGrid = Ext.extend(Ext.grid.GridPanel, {
+Servers.NewServerWindow.SelectImportTargetGrid = Ext.extend(Ext.grid.GridPanel, {
 
     constructor: function() {
 	this.makeComponents();
@@ -41,7 +41,7 @@ Servers.NewServerWindow.SelectTargetGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.makeColModel();
 	this.makeStore();
 
-	Servers.NewServerWindow.SelectTargetGrid.superclass.constructor.call(this, {
+	Servers.NewServerWindow.SelectImportTargetGrid.superclass.constructor.call(this, {
 	    border: false,
 	    colModel: this.colModel,
 	    store: this.store,
@@ -86,7 +86,7 @@ Servers.NewServerWindow.SelectTargetGrid = Ext.extend(Ext.grid.GridPanel, {
 
     makeStore: function() {
 	this.store = new Ext.ux.ItemsStore({
-	    url: paths.targets.index,
+	    url: paths.import_targets.index,
 	    autoLoad: true,
 	    fields: [
 		'zone',

@@ -20,7 +20,7 @@ ActiveRecord::Schema.define(:version => 20101206030421) do
     t.datetime "updated_at"
   end
 
-  create_table "failover_servers", :force => true do |t|
+  create_table "failover_targets", :force => true do |t|
     t.integer  "server_id"
     t.integer  "priority"
     t.string   "physical_server"

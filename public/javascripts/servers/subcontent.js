@@ -10,7 +10,7 @@ Servers.Subcontent = Ext.extend(Ext.TabPanel, {
 	this.description = new Servers.Subcontent.Description();
 	this.monitoring = new  Servers.Subcontent.Monitoring();
 	this.tags = new Servers.Subcontent.Tags();
-	this.failoverServers = new Servers.Subcontent.FailoverServers();
+	this.failoverTargets = new Servers.Subcontent.FailoverTargets();
 
 	Servers.Subcontent.superclass.constructor.call(this, {
 	    activeTab: 0,
@@ -36,9 +36,9 @@ Servers.Subcontent = Ext.extend(Ext.TabPanel, {
 		itemId: 'tags',
 		items: this.tags
 	    }, {
-		title: 'Failover Servers',
-		itemId: 'failoverServers',
-		items: this.failoverServers
+		title: 'Failover Targets',
+		itemId: 'failoverTargets',
+		items: this.failoverTargets
 	    }],
 	    listeners: {
 		added: this.addEventHandlers.createDelegate(this),

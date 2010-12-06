@@ -4,7 +4,7 @@ class Server < ActiveRecord::Base
   has_many :interfaces, :dependent => :destroy, :order => 'interfaces.number'
   has_one :avatar, :dependent => :destroy
   has_many :tags, :dependent => :destroy
-  has_many :failover_servers, :dependent => :destroy, :order => 'failover_servers.priority'
+  has_many :failover_targets, :dependent => :destroy, :order => 'failover_targets.priority'
 
   scope :filtered, lambda {|value|
     if value.blank?

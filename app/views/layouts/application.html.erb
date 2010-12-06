@@ -19,13 +19,13 @@
   <%= javascript_include_tag 'servers/subcontent/description' %>
   <%= javascript_include_tag 'servers/subcontent/monitoring' %>
   <%= javascript_include_tag 'servers/subcontent/tags' %>
-  <%= javascript_include_tag 'servers/subcontent/failover_servers' %>
+  <%= javascript_include_tag 'servers/subcontent/failover_targets' %>
   <%= javascript_include_tag 'servers/new_server' %>
-  <%= javascript_include_tag 'servers/new_server/select_target' %>
+  <%= javascript_include_tag 'servers/new_server/select_import_target' %>
   <%= javascript_include_tag 'servers/new_server/select_image' %>
   <%= javascript_include_tag 'servers/new_server/input' %>
   <%= javascript_include_tag 'servers/new_server/tags' %>
-  <%= javascript_include_tag 'servers/new_server/failover_servers' %>
+  <%= javascript_include_tag 'servers/new_server/failover_targets' %>
   <%= javascript_include_tag 'servers/new_server/avatar' %>
   <%= javascript_include_tag 'servers/select_server' %>
   <%= javascript_include_tag 'main' %>
@@ -49,8 +49,8 @@
         tags: {
            index: '<%= tags_path %>'
         },
-        targets: {
-           index: '<%= targets_path %>'
+        import_targets: {
+           index: '<%= import_targets_path %>'
         }
     };
   </script>

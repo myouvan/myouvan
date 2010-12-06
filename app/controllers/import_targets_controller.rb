@@ -1,12 +1,12 @@
 require 'rexml/rexml'
 require 'rexml/document'
 
-class TargetsController < ApplicationController
+class ImportTargetsController < ApplicationController
 
   def index
     server_names = Server.all.collect {|server| server.name }
 
-    targets = Array.new
+    import_targets = Array.new
     Settings.physical_server.each do |ps|
       ps['physical_servers'].each do |physical_server|
         conn = Libvirt.open("qemu+ssh://root@#{physical_server}/system")
@@ -21,17 +21,17 @@ class TargetsController < ApplicationController
           }
 
           domains.each do |domain|
-            target = {
+            import_target = {
               :zone => ps['zone'],
               :physical_server => physical_server,
             }
-            target.merge!(parse_xml_desc(domain.xml_desc))
-            target.merge!({
+            import_target.merge!(parse_xml_desc(domain.xml_desc))
+            import_target.merge!({
               :paths => {
-                :target => target_path(target[:name])
+                :import_target => import_target_path(import_target[:name])
               }
             })
-            targets << target
+            import_targets << import_target
           end
         ensure
           conn.close
@@ -39,7 +39,7 @@ class TargetsController < ApplicationController
       end
     end
 
-    render :json => { :success => true, :items => targets }
+    render :json => { :success => true, :items => import_targets }
   end
 
   def parse_xml_desc(xml)

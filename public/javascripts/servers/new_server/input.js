@@ -223,12 +223,12 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	});
     },
 
-    setTargetValues: function(item) {
+    setImportTargetValues: function(item) {
 	this.setValues(item);
 	this.loadMaskVisible = true;
 
 	Ext.Ajax.request({
-	    url: item.paths.target,
+	    url: item.paths.import_target,
 	    method: 'GET',
 	    params: {
 		physical_server: item.physical_server
@@ -241,7 +241,7 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 		this.loadMaskVisible = false;
 	    },
 	    failure: function(res, opts) {
-		Ext.MessageBox.alert('Error', 'Failed to get target');
+		Ext.MessageBox.alert('Error', 'Failed to get import target');
 	    },
 	    scope: this
 	});

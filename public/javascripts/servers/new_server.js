@@ -44,8 +44,8 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 
     makeForm: function(config) {
 	if (this.action == 'import') {
-	    this.selectTarget = new Servers.NewServerWindow.SelectTarget();
-	    this.selectTarget.on('selectTarget', this.onSelectTarget.createDelegate(this));
+	    this.selectImportTarget = new Servers.NewServerWindow.SelectImportTarget();
+	    this.selectImportTarget.on('selectImportTarget', this.onSelectImportTarget.createDelegate(this));
 	}
 
 	if (this.action != 'update')
@@ -59,7 +59,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 
 	if (this.action != 'update') {
 	    this.tags = new Servers.NewServerWindow.Tags();
-	    this.failoverServers = new Servers.NewServerWindow.FailoverServers();
+	    this.failoverTargets = new Servers.NewServerWindow.FailoverTargets();
 	}
 
 	this.avatar = new Servers.NewServerWindow.Avatar();
@@ -71,16 +71,16 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 		this.selectImage,
 		this.input,
 		this.tags,
-		this.failoverServers,
+		this.failoverTargets,
 		this.avatar
 	    ];
 	else if (this.action == 'import')
 	    cardItems = [
-		this.selectTarget,
+		this.selectImportTarget,
 		this.selectImage,
 		this.input,
 		this.tags,
-		this.failoverServers,
+		this.failoverTargets,
 		this.avatar
 	    ];
 	else
@@ -107,7 +107,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	var cardId = this.card.layout.activeItem.getItemId();
 	if (cardId == 'selectImage') {
 	    if (this.action != 'create') {
-		this.card.layout.setActiveItem('selectTarget');
+		this.card.layout.setActiveItem('selectImportTarget');
 		this.prevButton.disable();
 	    }
 	} else if (cardId == 'input') {
@@ -118,11 +118,11 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    }
 	} else if (cardId == 'tags') {
 	    this.card.layout.setActiveItem('input');
-	} else if (cardId == 'failoverServers') {
+	} else if (cardId == 'failoverTargets') {
 	    this.card.layout.setActiveItem('tags');
 	} else if (cardId == 'avatar') {
 	    if (this.action != 'update') {
-		this.card.layout.setActiveItem('failoverServers');
+		this.card.layout.setActiveItem('failoverTargets');
 	    } else {
 		this.card.layout.setActiveItem('input');
 		this.prevButton.disable();
@@ -134,8 +134,8 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 
     nextCard: function() {
 	var cardId = this.card.layout.activeItem.getItemId();
-	if (cardId == 'selectTarget') {
-	    if (!this.selectTarget.onNext())
+	if (cardId == 'selectImportTarget') {
+	    if (!this.selectImportTarget.onNext())
 		return;
 	    this.card.layout.setActiveItem('selectImage');
 	    this.prevButton.enable();
@@ -156,9 +156,9 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    }
 	} else if (cardId == 'tags') {
 	    this.tags.onNext();
-	    this.card.layout.setActiveItem('failoverServers');
-	} else if (cardId == 'failoverServers') {
-	    this.failoverServers.onNext();
+	    this.card.layout.setActiveItem('failoverTargets');
+	} else if (cardId == 'failoverTargets') {
+	    this.failoverTargets.onNext();
 	    this.card.layout.setActiveItem('avatar');
 	    this.nextButton.disable();
 	    if (this.action == 'create')
@@ -172,13 +172,13 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	}
     },
 
-    onSelectTarget: function(item) {
-	this.input.setTargetValues(item);
+    onSelectImportTarget: function(item) {
+	this.input.setImportTargetValues(item);
     },
 
     onSetPhysicalServer: function(config) {
 	if (this.action != 'update')
-	    this.failoverServers.setPhysicalServer(config);
+	    this.failoverTargets.setPhysicalServer(config);
     },
 
     onSetAvatar: function() {

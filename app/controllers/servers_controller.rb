@@ -85,14 +85,14 @@ class ServersController < ApplicationController
     }
   end
 
-  def failover_servers
+  def failover_targets
     server = Server.find(params[:id])
     render :json => {
       :success => true,
-      :items => server.failover_servers.collect {|failover_server|
-        failover_server.attributes.merge(
+      :items => server.failover_targets.collect {|failover_target|
+        failover_target.attributes.merge(
           :paths => {
-            :failover_server => failover_server_path(failover_server)
+            :failover_target => failover_target_path(failover_target)
           }
         )
       }
@@ -167,9 +167,9 @@ class ServersController < ApplicationController
       end
     end
 
-    if params[:failover_servers]
-      params[:failover_servers].each do |params_failover_server|
-        server.failover_servers << FailoverServer.new(params_failover_server)
+    if params[:failover_targets]
+      params[:failover_targets].each do |params_failover_target|
+        server.failover_targets << FailoverTarget.new(params_failover_target)
       end
     end
 
@@ -389,7 +389,7 @@ class ServersController < ApplicationController
         :server => server_path(server),
         :monitor => monitor_server_path(server),
         :tags => tags_server_path(server),
-        :failover_servers => failover_servers_server_path(server),
+        :failover_targets => failover_targets_server_path(server),
         :suspend => suspend_server_path(server),
         :resume => resume_server_path(server),
         :reboot => reboot_server_path(server),

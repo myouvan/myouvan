@@ -1,6 +1,6 @@
-class CreateFailoverServers < ActiveRecord::Migration
+class CreateFailoverTargets < ActiveRecord::Migration
   def self.up
-    create_table :failover_servers do |t|
+    create_table :failover_targets do |t|
       t.integer :server_id
       t.integer :priority
       t.string :physical_server
@@ -10,6 +10,6 @@ class CreateFailoverServers < ActiveRecord::Migration
   end
 
   def self.down
-    drop_table :failover_servers
+    drop_table :failover_targets
   end
 end

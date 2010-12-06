@@ -1,16 +1,16 @@
-Servers.NewServerWindow.FailoverServers = Ext.extend(Ext.Panel, {
+Servers.NewServerWindow.FailoverTargets = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
     },
 
     makeComponents: function() {
-	this.failoverServersGrid = new Servers.NewServerWindow.FailoverServersGrid();
+	this.failoverTargetsGrid = new Servers.NewServerWindow.FailoverTargetsGrid();
 	this.makeAddComponents();
 
-	Servers.NewServerWindow.FailoverServers.superclass.constructor.call(this, {
-	    title: 'Add Failover Servers',
-	    itemId: 'failoverServers',
+	Servers.NewServerWindow.FailoverTargets.superclass.constructor.call(this, {
+	    title: 'Add Failover Targets',
+	    itemId: 'failoverTargets',
 	    layout: 'hbox',
 	    layoutConfig: {
 		align: 'stretch',
@@ -29,7 +29,7 @@ Servers.NewServerWindow.FailoverServers = Ext.extend(Ext.Panel, {
 			xtype: 'container',
 			flex: 1,
 			layout: 'fit',
-			items: this.failoverServersGrid
+			items: this.failoverTargetsGrid
 		    },
 		    this.addComponents
 		]
@@ -67,13 +67,13 @@ Servers.NewServerWindow.FailoverServers = Ext.extend(Ext.Panel, {
 		items: {
 		    anchor: '100%',
 		    xtype: 'button',
-		    text: 'Add Failover Server',
+		    text: 'Add Failover Target',
 		    handler: function() {
 			var addCombo = this.find('itemId', 'addCombo')[0];
 			var physicalServer = addCombo.getValue();
 			if (physicalServer == '')
 			    return;
-			this.failoverServersGrid.addFailoverServer(physicalServer);
+			this.failoverTargetsGrid.addFailoverTarget(physicalServer);
 			addCombo.reset();
 		    },
 		    scope: this
@@ -84,7 +84,7 @@ Servers.NewServerWindow.FailoverServers = Ext.extend(Ext.Panel, {
 
     setPhysicalServer: function(config) {
 	if (this.zone != config.zone)
-	    this.failoverServersGrid.removeAll();
+	    this.failoverTargetsGrid.removeAll();
 
 	this.zone = config.zone;
 	this.physicalServer = config.physicalServer;
@@ -99,18 +99,18 @@ Servers.NewServerWindow.FailoverServers = Ext.extend(Ext.Panel, {
 	var container = this.getComponent('container');
 	container.removeAll();
 
-	var failoverServers = this.failoverServersGrid.getFailoverServers();
-	for (var i = 0; i < failoverServers.length; ++i) {
-	    var tag = failoverServers[i];
+	var failoverTargets = this.failoverTargetsGrid.getFailoverTargets();
+	for (var i = 0; i < failoverTargets.length; ++i) {
+	    var tag = failoverTargets[i];
 	    for (var field in tag)
 		container.add({
 		    xtype: 'hidden',
-		    name: 'failover_servers[][priority]',
+		    name: 'failover_targets[][priority]',
 		    value: i
 		});
 		container.add({
 		    xtype: 'hidden',
-		    name: 'failover_servers[][' + field + ']',
+		    name: 'failover_targets[][' + field + ']',
 		    value: tag[field]
 		});
 	}
@@ -120,7 +120,7 @@ Servers.NewServerWindow.FailoverServers = Ext.extend(Ext.Panel, {
 
 });
 
-Servers.NewServerWindow.FailoverServersGrid = Ext.extend(Ext.grid.GridPanel, {
+Servers.NewServerWindow.FailoverTargetsGrid = Ext.extend(Ext.grid.GridPanel, {
 
     constructor: function() {
 	this.makeComponents();
@@ -131,7 +131,7 @@ Servers.NewServerWindow.FailoverServersGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.makeStore();
 	this.makeContextMenu();
 
-	Servers.NewServerWindow.FailoverServersGrid.superclass.constructor.call(this, {
+	Servers.NewServerWindow.FailoverTargetsGrid.superclass.constructor.call(this, {
 	    colModel: this.colModel,
 	    store: this.store,
 	    autoExpandColumn: 'physical_server',
@@ -148,7 +148,7 @@ Servers.NewServerWindow.FailoverServersGrid = Ext.extend(Ext.grid.GridPanel, {
 
     makeColModel: function() {
 	this.colModel = new Ext.grid.ColumnModel([{
-	    header: 'Failover Servers',
+	    header: 'Failover Targets',
 	    dataIndex: 'physical_server',
 	    id: 'physical_server'
 	}]);
@@ -181,7 +181,7 @@ Servers.NewServerWindow.FailoverServersGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.store.removeAll();
     },
 
-    addFailoverServer: function(physicalServer) {
+    addFailoverTarget: function(physicalServer) {
 	var RecordType = this.store.recordType;
 	var record = new RecordType({
 	    physical_server: physicalServer
@@ -189,12 +189,12 @@ Servers.NewServerWindow.FailoverServersGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.store.add(record);
     },
 
-    getFailoverServers: function() {
-	var failoverServers = new Array();
+    getFailoverTargets: function() {
+	var failoverTargets = new Array();
 	this.store.each(function(record) {
-	    failoverServers.push(record.data);
+	    failoverTargets.push(record.data);
 	});
-	return failoverServers;
+	return failoverTargets;
     }
 
 });

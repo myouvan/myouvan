@@ -1,15 +1,15 @@
-Servers.Subcontent.FailoverServers = Ext.extend(Ext.Panel, {
+Servers.Subcontent.FailoverTargets = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
 
-	this.showFailoverServersDelegate = this.showFailoverServers.createDelegate(this);
+	this.showFailoverTargetsDelegate = this.showFailoverTargets.createDelegate(this);
     },
 
     makeComponents: function() {
 	this.makeAddComponents();
 
-	Servers.Subcontent.FailoverServers.superclass.constructor.call(this, {
+	Servers.Subcontent.FailoverTargets.superclass.constructor.call(this, {
 	    layout: 'vbox',
 	    layoutConfig: {
 		align: 'stretch'
@@ -70,10 +70,6 @@ Servers.Subcontent.FailoverServers = Ext.extend(Ext.Panel, {
 			var physicalServer = addCombo.getValue();
 			if (physicalServer == '')
 			    return;
-			this.fireEvent('addFailoverServer', {
-			    'tag[server_id]': this.currentItem.id,
-			    'tag[physical_server]': physicalServer
-			});
 			addCombo.clearValue();
 		    },
 		    scope: this
@@ -83,14 +79,14 @@ Servers.Subcontent.FailoverServers = Ext.extend(Ext.Panel, {
     },
 
     addEventHandlers: function() {
-	servers.on('gotServer', this.showFailoverServersDelegate);
+	servers.on('gotServer', this.showFailoverTargetsDelegate);
     },
 
     removeEventHandlers: function() {
-	servers.un('gotServer', this.showFailoverServersDelegate);
+	servers.un('gotServer', this.showFailoverTargetsDelegate);
     },
 
-    showFailoverServers: function(item) {
+    showFailoverTargets: function(item) {
 	if (this.currentItem && this.currentItem.id == item.id)
 	    return;
 
@@ -99,20 +95,20 @@ Servers.Subcontent.FailoverServers = Ext.extend(Ext.Panel, {
 	addCombo.getStore().baseParams.except = item.physical_server;
 	addCombo.getStore().load();
 
-	this.failoverServerGrid = new Servers.Subcontent.FailoverServersGrid({
-	    url: item.paths.failover_servers
+	this.failoverTargetsGrid = new Servers.Subcontent.FailoverTargetsGrid({
+	    url: item.paths.failover_targets
 	});
 
 	var container = this.getComponent('container');
 	container.removeAll();
-	container.add(this.failoverServerGrid);
+	container.add(this.failoverTargetsGrid);
 
 	this.currentItem = item;
     }
 
 });
 
-Servers.Subcontent.FailoverServersGrid = Ext.extend(Ext.grid.GridPanel, {
+Servers.Subcontent.FailoverTargetsGrid = Ext.extend(Ext.grid.GridPanel, {
 
     constructor: function(config) {
 	this.makeComponents(config);
@@ -126,7 +122,7 @@ Servers.Subcontent.FailoverServersGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.makeStore(config);
 	this.makeContextMenu();
 
-	Servers.Subcontent.FailoverServersGrid.superclass.constructor.call(this, {
+	Servers.Subcontent.FailoverTargetsGrid.superclass.constructor.call(this, {
 	    colModel: this.colModel,
 	    store: this.store,
 	    autoExpandColumn: 'physical_server',
@@ -144,9 +140,8 @@ Servers.Subcontent.FailoverServersGrid = Ext.extend(Ext.grid.GridPanel, {
 
     makeColModel: function() {
 	this.colModel = new Ext.grid.ColumnModel([{
-	    header: 'Failover Servers',
+	    header: 'Failover Targets',
 	    dataIndex: 'physical_server',
-	    sortable: true,
 	    id: 'physical_server'
 	}]);
     },
