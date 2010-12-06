@@ -55,9 +55,12 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    action: config.action,
 	    item: config.item
 	});
+	this.input.on('setPhysicalServer', this.onSetPhysicalServer.createDelegate(this));
 
-	if (this.action != 'update')
+	if (this.action != 'update') {
 	    this.tags = new Servers.NewServerWindow.Tags();
+	    this.failoverServers = new Servers.NewServerWindow.FailoverServers();
+	}
 
 	this.avatar = new Servers.NewServerWindow.Avatar();
 	this.avatar.on('setAvatar', this.onSetAvatar.createDelegate(this));
@@ -68,6 +71,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 		this.selectImage,
 		this.input,
 		this.tags,
+		this.failoverServers,
 		this.avatar
 	    ];
 	else if (this.action == 'import')
@@ -76,6 +80,7 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 		this.selectImage,
 		this.input,
 		this.tags,
+		this.failoverServers,
 		this.avatar
 	    ];
 	else
@@ -113,9 +118,11 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    }
 	} else if (cardId == 'tags') {
 	    this.card.layout.setActiveItem('input');
+	} else if (cardId == 'failoverServers') {
+	    this.card.layout.setActiveItem('tags');
 	} else if (cardId == 'avatar') {
 	    if (this.action != 'update') {
-		this.card.layout.setActiveItem('tags');
+		this.card.layout.setActiveItem('failoverServers');
 	    } else {
 		this.card.layout.setActiveItem('input');
 		this.prevButton.disable();
@@ -138,6 +145,8 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    this.card.layout.setActiveItem('input');
 	    this.prevButton.enable();
 	} else if (cardId == 'input') {
+	    if (!this.input.onNext())
+		return;
 	    if (this.action != 'update') {
 		this.card.layout.setActiveItem('tags');
 	    } else {
@@ -147,6 +156,9 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    }
 	} else if (cardId == 'tags') {
 	    this.tags.onNext();
+	    this.card.layout.setActiveItem('failoverServers');
+	} else if (cardId == 'failoverServers') {
+	    this.failoverServers.onNext();
 	    this.card.layout.setActiveItem('avatar');
 	    this.nextButton.disable();
 	    if (this.action == 'create')
@@ -162,6 +174,11 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 
     onSelectTarget: function(item) {
 	this.input.setTargetValues(item);
+    },
+
+    onSetPhysicalServer: function(config) {
+	if (this.action != 'update')
+	    this.failoverServers.setPhysicalServer(config);
     },
 
     onSetAvatar: function() {

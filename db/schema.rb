@@ -10,12 +10,20 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20101122092815) do
+ActiveRecord::Schema.define(:version => 20101206030421) do
 
   create_table "avatars", :force => true do |t|
     t.integer  "server_id"
     t.binary   "thumb"
     t.binary   "icon"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "failover_servers", :force => true do |t|
+    t.integer  "server_id"
+    t.integer  "priority"
+    t.string   "physical_server"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

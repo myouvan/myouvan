@@ -1,16 +1,16 @@
-Servers.NewServerWindow.Tags = Ext.extend(Ext.Panel, {
+Servers.NewServerWindow.FailoverServers = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
     },
 
     makeComponents: function() {
-	this.tagsGrid = new Servers.NewServerWindow.TagsGrid();
+	this.failoverServersGrid = new Servers.NewServerWindow.FailoverServersGrid();
 	this.makeAddComponents();
 
-	Servers.NewServerWindow.Tags.superclass.constructor.call(this, {
-	    title: 'Add Tags',
-	    itemId: 'tags',
+	Servers.NewServerWindow.FailoverServers.superclass.constructor.call(this, {
+	    title: 'Add Failover Servers',
+	    itemId: 'failoverServers',
 	    layout: 'hbox',
 	    layoutConfig: {
 		align: 'stretch',
@@ -29,7 +29,7 @@ Servers.NewServerWindow.Tags = Ext.extend(Ext.Panel, {
 			xtype: 'container',
 			flex: 1,
 			layout: 'fit',
-			items: this.tagsGrid
+			items: this.failoverServersGrid
 		    },
 		    this.addComponents
 		]
@@ -51,29 +51,29 @@ Servers.NewServerWindow.Tags = Ext.extend(Ext.Panel, {
 	    margins: '5 0 0 0',
 	    items: [{
 		flex: 1,
-		xtype: 'editablestorecombobox',
+		xtype: 'storecombobox',
 		itemId: 'addCombo',
 		style: {
 		    marginTop: Ext.isIE ? '1px' : '0px'
 		},
 		storeConfig: {
-		    url: paths.tags.index
+		    url: paths.servers.physical_servers
 		}
 	    }, {
-		width: 70,
+		width: 120,
 		xtype: 'container',
 		margins: '0 0 0 5',
 		layout: 'anchor',
 		items: {
 		    anchor: '100%',
 		    xtype: 'button',
-		    text: 'Add Tag',
+		    text: 'Add Failover Server',
 		    handler: function() {
 			var addCombo = this.find('itemId', 'addCombo')[0];
-			var value = addCombo.getValue();
-			if (value == '')
+			var physicalServer = addCombo.getValue();
+			if (physicalServer == '')
 			    return;
-			this.tagsGrid.addTag(value);
+			this.failoverServersGrid.addFailoverServer(physicalServer);
 			addCombo.reset();
 		    },
 		    scope: this
@@ -82,26 +82,45 @@ Servers.NewServerWindow.Tags = Ext.extend(Ext.Panel, {
 	};
     },
 
+    setPhysicalServer: function(config) {
+	if (this.zone != config.zone)
+	    this.failoverServersGrid.removeAll();
+
+	this.zone = config.zone;
+	this.physicalServer = config.physicalServer;
+
+	var addCombo = this.find('itemId', 'addCombo')[0];
+	addCombo.getStore().baseParams.zone = this.zone;
+	addCombo.getStore().baseParams.except = this.physicalServer;
+	addCombo.getStore().load();
+    },
+
     onNext: function() {
 	var container = this.getComponent('container');
 	container.removeAll();
 
-	var tags = this.tagsGrid.getTags();
-	for (var i = 0; i < tags.length; ++i) {
-	    var tag = tags[i];
+	var failoverServers = this.failoverServersGrid.getFailoverServers();
+	for (var i = 0; i < failoverServers.length; ++i) {
+	    var tag = failoverServers[i];
 	    for (var field in tag)
 		container.add({
 		    xtype: 'hidden',
-		    name: 'tags[][' + field + ']',
+		    name: 'failover_servers[][priority]',
+		    value: i
+		});
+		container.add({
+		    xtype: 'hidden',
+		    name: 'failover_servers[][' + field + ']',
 		    value: tag[field]
 		});
 	}
 
 	container.doLayout();
     }
+
 });
 
-Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
+Servers.NewServerWindow.FailoverServersGrid = Ext.extend(Ext.grid.GridPanel, {
 
     constructor: function() {
 	this.makeComponents();
@@ -112,10 +131,10 @@ Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.makeStore();
 	this.makeContextMenu();
 
-	Servers.NewServerWindow.TagsGrid.superclass.constructor.call(this, {
+	Servers.NewServerWindow.FailoverServersGrid.superclass.constructor.call(this, {
 	    colModel: this.colModel,
 	    store: this.store,
-	    autoExpandColumn: 'value',
+	    autoExpandColumn: 'physical_server',
 	    stripeRows: true,
 	    listeners: {
 		rowcontextmenu: function(grid, row, e) {
@@ -129,16 +148,15 @@ Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 
     makeColModel: function() {
 	this.colModel = new Ext.grid.ColumnModel([{
-	    header: 'Tags',
-	    dataIndex: 'value',
-	    sortable: true,
-	    id: 'value'
+	    header: 'Failover Servers',
+	    dataIndex: 'physical_server',
+	    id: 'physical_server'
 	}]);
     },
 
     makeStore: function() {
 	this.store = new Ext.data.ArrayStore({
-	    fields: ['value']
+	    fields: ['physical_server']
 	});
     },
 
@@ -159,20 +177,24 @@ Servers.NewServerWindow.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 	});
     },
 
-    addTag: function(value) {
+    removeAll: function() {
+	this.store.removeAll();
+    },
+
+    addFailoverServer: function(physicalServer) {
 	var RecordType = this.store.recordType;
 	var record = new RecordType({
-	    value: value
+	    physical_server: physicalServer
 	});
 	this.store.add(record);
     },
 
-    getTags: function() {
-	var tags = new Array();
+    getFailoverServers: function() {
+	var failoverServers = new Array();
 	this.store.each(function(record) {
-	    tags.push(record.data);
+	    failoverServers.push(record.data);
 	});
-	return tags;
+	return failoverServers;
     }
 
 });

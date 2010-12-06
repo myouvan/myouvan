@@ -142,14 +142,14 @@ class Centos
       r.expect(@prompt, 20) {|m|
         w.cmd 'cat /etc/sysconfig/network-scripts/ifcfg-eth0'
       }
-      r.expect(/IPADDR=(.*)\r?\n/, 20) {|m|
+      r.expect(/IPADDR=(.*?)\r?\n/, 20) {|m|
         ip_address0 = m[1]
       }
 
       r.expect(@prompt, 20) {|m|
         w.cmd 'cat /etc/sysconfig/network-scripts/ifcfg-eth1'
       }
-      r.expect(/IPADDR=(.*)\r?\n/, 20) {|m|
+      r.expect(/IPADDR=(.*?)\r?\n/, 20) {|m|
         ip_address1 = m[1]
       }
     }

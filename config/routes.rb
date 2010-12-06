@@ -13,6 +13,7 @@ Provisioning::Application.routes.draw do
     member do
       get :monitor
       get :tags
+      get :failover_servers
       post :suspend
       post :resume
       post :reboot
@@ -40,6 +41,9 @@ Provisioning::Application.routes.draw do
   end
 
   resources :tags, :only => [:index, :create, :destroy]
+
+  resources :failover_servers, :only => [:create, :destroy]
+
   resources :targets, :only => [:index, :show]
 
   # The priority is based upon order of creation:

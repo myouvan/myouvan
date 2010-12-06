@@ -76,7 +76,25 @@ class ServersController < ApplicationController
     render :json => {
       :success => true,
       :items => server.tags.collect {|tag|
-        tag.attributes.merge(:paths => { :tag => tag_path(tag) })
+        tag.attributes.merge(
+          :paths => {
+            :tag => tag_path(tag)
+          }
+        )
+      }
+    }
+  end
+
+  def failover_servers
+    server = Server.find(params[:id])
+    render :json => {
+      :success => true,
+      :items => server.failover_servers.collect {|failover_server|
+        failover_server.attributes.merge(
+          :paths => {
+            :failover_server => failover_server_path(failover_server)
+          }
+        )
       }
     }
   end
@@ -149,6 +167,12 @@ class ServersController < ApplicationController
       end
     end
 
+    if params[:failover_servers]
+      params[:failover_servers].each do |params_failover_server|
+        server.failover_servers << FailoverServer.new(params_failover_server)
+      end
+    end
+
     if server.save
       tags = server.tags.collect {|tag| tag.value }
       render :json => {
@@ -166,13 +190,15 @@ class ServersController < ApplicationController
     valid = true
 
     server = Server.includes(:interfaces).find(params[:id])
+
+    params[:server][:auto_restart] ||= false
     server.attributes = params[:server]
-    valid &&= server.valid?
+    valid = server.valid? && valid
     cpus_or_memory_changed = server.cpus_changed? || server.memory_changed?
 
     params[:interface].keys.sort.zip(server.interfaces) do |i, interface|
       interface.attributes = params[:interface][i]
-      valid &&= interface.valid?
+      valid = interface.valid? && valid
     end
     ip_address_changed = server.interfaces.any? {|interface|
       interface.ip_address_changed?
@@ -363,6 +389,7 @@ class ServersController < ApplicationController
         :server => server_path(server),
         :monitor => monitor_server_path(server),
         :tags => tags_server_path(server),
+        :failover_servers => failover_servers_server_path(server),
         :suspend => suspend_server_path(server),
         :resume => resume_server_path(server),
         :reboot => reboot_server_path(server),

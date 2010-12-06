@@ -7,6 +7,8 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	this.makeComponents();
 	if (config.item)
 	    this.setServerValues(config.item);
+
+	this.addEvents('setPhysicalServer');
     },
 
     makeComponents: function() {
@@ -86,7 +88,7 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    listeners: {
 		select: function(combo, record, index) {
 		    var psCombo = this.getField('physical_server');
-		    psCombo.getStore().baseParams['zone'] = record.get('value');
+		    psCombo.getStore().baseParams.zone = record.get('value');
 		    psCombo.getStore().load();
 		    psCombo.reset();
 		    psCombo.enable();
@@ -250,6 +252,22 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    var cmp = this.getField(field);
 	    if (cmp)
 		cmp.setValue(item[field]);
+	}
+    },
+
+    onNext: function() {
+	var zoneCombo = this.getField('zone');
+	var psCombo = this.getField('physical_server');
+
+	if (zoneCombo.getValue() && psCombo.getValue()) {
+	    this.fireEvent('setPhysicalServer', {
+		zone: zoneCombo.getValue(),
+		physicalServer: psCombo.getValue()
+	    });
+	    return true;
+	} else {
+	    Ext.MessageBox.alert('Error', 'Select a zone and a physical server');
+	    return false;
 	}
     }
 

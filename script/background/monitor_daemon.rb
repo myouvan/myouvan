@@ -84,7 +84,11 @@ class MonitorDaemon < SimpleDaemon::Base
     end
 
     time = Time.now
-    monitors << { :time => time.to_i, :usec => time.usec, :cpu_time => domain.info.cpu_time }
+    begin
+      monitors << { :time => time.to_i, :usec => time.usec, :cpu_time => domain.info.cpu_time }
+    rescue Libvirt::RetrieveError
+      return
+    end
 
     monitors.shift if monitors.size > Settings.monitor_caches
     @memcache.set("#{Settings.memcached.key.monitor}:#{server.id}", monitors)
