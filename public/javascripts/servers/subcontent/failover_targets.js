@@ -64,12 +64,16 @@ Servers.Subcontent.FailoverTargets = Ext.extend(Ext.Panel, {
 		items: {
 		    anchor: '100%',
 		    xtype: 'button',
-		    text: 'Add Tag',
+		    text: 'Add Failover Target',
 		    handler: function() {
 			var addCombo = this.find('itemId', 'addCombo')[0];
 			var physicalServer = addCombo.getValue();
 			if (physicalServer == '')
 			    return;
+			this.addFailoverTarget({
+			    'failover_target[server_id]': this.currentItem.id,
+			    'failover_target[physical_server]': physicalServer
+			});
 			addCombo.clearValue();
 		    },
 		    scope: this
@@ -98,12 +102,44 @@ Servers.Subcontent.FailoverTargets = Ext.extend(Ext.Panel, {
 	this.failoverTargetsGrid = new Servers.Subcontent.FailoverTargetsGrid({
 	    url: item.paths.failover_targets
 	});
+	this.failoverTargetsGrid.on('destroyFailoverTarget', this.destroyFailoverTarget.createDelegate(this));
 
 	var container = this.getComponent('container');
 	container.removeAll();
 	container.add(this.failoverTargetsGrid);
 
 	this.currentItem = item;
+    },
+
+    addFailoverTarget: function(failoverTarget) {
+	Ext.Ajax.request({
+	    url: paths.failover_targets.index,
+	    method: 'POST',
+	    params: failoverTarget,
+	    success: function(res, opts) {
+		var item = Ext.decode(res.responseText).item;
+		this.failoverTargetsGrid.addRecord(item);
+	    },
+	    failure: function(res, opts) {
+		Ext.MessageBox.alert('Error', 'Failed to add failover target');
+	    },
+	    scope: this
+	});
+    },
+
+    destroyFailoverTarget: function(item) {
+	Ext.Ajax.request({
+	    url: item.paths.failover_target,
+	    method: 'DELETE',
+	    success: function(res, opts) {
+		var item = Ext.decode(res.responseText).item;
+		this.failoverTargetsGrid.destroyRecord(item);
+	    },
+	    failure: function(res, opts) {
+		Ext.MessageBox.alert('Error', 'Failed to destroy failover target');
+	    },
+	    scope: this
+	});
     }
 
 });
@@ -113,8 +149,7 @@ Servers.Subcontent.FailoverTargetsGrid = Ext.extend(Ext.grid.GridPanel, {
     constructor: function(config) {
 	this.makeComponents(config);
 
-	this.addEvents('destroyTag');
-	this.enableBubble('destroyTag');
+	this.addEvents('destroyFailoverTarget');
     },
 
     makeComponents: function(config) {
@@ -169,7 +204,7 @@ Servers.Subcontent.FailoverTargetsGrid = Ext.extend(Ext.grid.GridPanel, {
 		text: 'Delete',
 		handler: function() {
 		    var record = this.getSelectionModel().getSelected();
-		    this.fireEvent('destroyTag', record.data);
+		    this.fireEvent('destroyFailoverTarget', record.data);
 		},
 		scope: this
 	    }]

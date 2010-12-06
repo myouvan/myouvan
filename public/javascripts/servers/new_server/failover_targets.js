@@ -168,7 +168,7 @@ Servers.NewServerWindow.FailoverTargetsGrid = Ext.extend(Ext.grid.GridPanel, {
 	    items: {
 		text: 'Delete',
 		handler: function() {
-		    var record = grid.getSelectionModel().getSelected();
+		    var record = this.getSelectionModel().getSelected();
 		    this.store.remove(record);
 		},
 		scope: this
