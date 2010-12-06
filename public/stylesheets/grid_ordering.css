@@ -1,0 +1,7 @@
+.grid-row-insert-below {
+    border-bottom: solid 1px #3366cc !important;
+}
+
+.grid-row-insert-above {    
+    border-top: solid 1px #3366cc !important;
+}

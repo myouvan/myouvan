@@ -163,6 +163,16 @@ Servers.Subcontent.FailoverTargetsGrid = Ext.extend(Ext.grid.GridPanel, {
 	    autoExpandColumn: 'physical_server',
 	    stripeRows: true,
 	    loadMask: true,
+	    plugins: [new Ext.ux.dd.GridDragDropRowOrder()],
+	    sm: new Ext.grid.RowSelectionModel({
+		singleSelect: true,
+		listeners: {
+		    beforerowselect: function(sm, i, ke, record) {
+			this.ddText = record.get('physical_server');
+		    },
+		    scope: this
+		}
+	    }),
 	    listeners: {
 		rowcontextmenu: function(grid, row, e) {
 		    grid.getSelectionModel().selectRow(row);

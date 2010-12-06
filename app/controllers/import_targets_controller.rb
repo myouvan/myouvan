@@ -9,6 +9,7 @@ class ImportTargetsController < ApplicationController
     import_targets = Array.new
     Settings.physical_server.each do |ps|
       ps['physical_servers'].each do |physical_server|
+        next unless %w(pmiw-kvm018 pmiw-kvm019).include?(physical_server)
         conn = Libvirt.open("qemu+ssh://root@#{physical_server}/system")
         begin
           domains = conn.list_domains.collect {|domain_id|
