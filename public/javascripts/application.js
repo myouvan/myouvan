@@ -1,6 +1,21 @@
 //------------------------------
-//   reload image
+//   image
 //------------------------------
+
+Ext.ux.imgTemplate = new Ext.XTemplate(
+    '<img src="{src}" ',
+    '<tpl if="id">id="{id}" </tpl>',
+    '<tpl if="style">style="{style}" </tpl>',
+    'width="{size}" height="{size}" />'
+);
+
+Ext.ux.createImg = function(config) {
+    Ext.applyIf(config, {
+	id: null,
+	style: null
+    });
+    return Ext.ux.imgTemplate.apply(config);
+};
 
 Ext.ux.reloadImg = function(id) {
     var elem = Ext.get(id);

@@ -76,13 +76,6 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    Error: 'status_error.gif',
 	};
 
-	var img = function(src, id, w, h) {
-	    return '<img src="' + src + '"' +
-		   ' id="avatar-icon-' + id + '"' +
-		   ' width="' + w + '" height="' + h + '"' +
-		   ' style="vertical-align: top" />';
-	};
-
 	this.colModel = new Ext.grid.ColumnModel([{
 	    header: 'ID',
 	    dataIndex: 'id',
@@ -99,8 +92,12 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    width: 180,
 	    sortable: true,
 	    renderer: function(value, metadata, record) {
-		var url = record.get('paths').avatarIcon;
-		return img(url, record.get('id'), 32, 32) + ' ' + value;
+		return Ext.ux.createImg({
+		    src: record.get('paths').avatarIcon,
+		    id: 'avatar-icon-' + record.get('id'),
+		    size: 32,
+		    style: "vertical-align: top"
+		}) + ' ' + value;
 	    }
 	}, {
 	    header: 'Title',
@@ -113,8 +110,11 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    width: 100,
 	    sortable: true,
 	    renderer: function(value, metadata, record) {
-		var url = '/images/' + imagePaths[value];
-		return img(url, 16, 16) + value;
+		return Ext.ux.createImg({
+		    src: '/images/' + imagePaths[value],
+		    size: 16,
+		    style: "vertical-align: top"
+		}) + ' ' + value;
 	    }
 	}, {
 	    header: 'Physical Server',

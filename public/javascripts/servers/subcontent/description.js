@@ -117,12 +117,12 @@ Servers.Subcontent.Description = Ext.extend(Ext.Panel, {
 		cmp.setValue(item[field]);
 	}
 
-	var url = item.paths.avatarThumb;
-	avatarImg = '<img src="' + url + '"' +
-	            ' id="avatar-thumb-' + item.id + '"' +
-	            ' width="150" height="150" />';
 	var cmp = this.getComponent('avatar');
-	cmp.setValue(avatarImg);
+	cmp.setValue(Ext.ux.createImg({
+	    src: item.paths.avatarThumb,
+	    id: 'avatar-thumb-' + item.id,
+	    size: 150
+	}));
 
 	this.currentItem = item;
     },
