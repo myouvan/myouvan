@@ -2,8 +2,7 @@ Servers.Subcontent = Ext.extend(Ext.TabPanel, {
 
     constructor: function() {
 	this.makeComponents();
-
-	this.updateChartDelegate =  this.updateChart.createDelegate(this);
+	this.initHandlers();
     },
 
     makeComponents: function() {
@@ -41,19 +40,19 @@ Servers.Subcontent = Ext.extend(Ext.TabPanel, {
 		items: this.failoverTargets
 	    }],
 	    listeners: {
-		added: this.addEventHandlers.createDelegate(this),
-		beforedestroy: this.removeEventHandlers.createDelegate(this),
 		tabchange: this.updateChart.createDelegate(this)
 	    }
 	});
     },
 
-    addEventHandlers: function() {
-	servers.on('monitorServer', this.updateChartDelegate);
-    },
-
-    removeEventHandlers: function() {
-	servers.un('monitorServer', this.updateChartDelegate);
+    initHandlers: function() {
+	this.setDynamicHandlers({
+	    target: servers,
+	    handlers: {
+		event: 'monitorServer',
+		fn: this.updateChart
+	    }
+	});
     },
 
     updateChart: function() {

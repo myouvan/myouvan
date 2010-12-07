@@ -166,8 +166,8 @@ Servers.NewServerWindow = Ext.extend(Ext.Window, {
 	    else if (this.action == 'import')
 		this.nextButton.setText('Import');
 	} else if (cardId == 'avatar') {
-	    this.prevCard();
-	    this.prevCard();
+	    for (var i = 0; i < 3; ++i)
+		this.prevCard();
 	    this.form.getForm().submit(this.submitConfig);
 	}
     },

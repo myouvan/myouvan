@@ -14,15 +14,19 @@ class Server < ActiveRecord::Base
     end
   }
 
-  validates :name, :presence => true, :uniqueness => true
+  validates :name, :presence => true, :uniqueness => true,
+                   :format => { :with => /^[0-9A-Za-z-]+$/,
+                                :message => 'can be used only alphabet, number and dash' }
   validates :uuid, :presence => true
   validates :title, :presence => true
   validates :zone, :presence => true
   validates :physical_server, :presence => true
   validates :pool, :presence => true
   validates :virtualization, :presence => true
-  validates :cpus, :inclusion => { :in => 1..Settings.max_cpus }
-  validates :memory, :inclusion => { :in => Settings.min_memory..Settings.max_memory }
+  validates :cpus, :inclusion => { :in => 1..Settings.max_cpus,
+                                   :message => "must be between 1 and #{Settings.max_cpus}" }
+  validates :memory, :inclusion => { :in => Settings.min_memory..Settings.max_memory,
+                                     :message => "must be between #{Settings.min_memory} and #{Settings.max_memory}" }
 
   before_validation :set_uuid, :set_auto_restart, :set_user_terminate, :set_allow_restart
 
