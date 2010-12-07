@@ -53,7 +53,7 @@ Servers.Subcontent.FailoverTargets = Ext.extend(Ext.Panel, {
 		    xtype: 'storecombobox',
 		    itemId: 'addCombo',
 		    storeConfig: {
-			url: paths.servers.physical_servers
+			url: paths.physical_servers
 		    },
 		}
 	    }, {

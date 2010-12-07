@@ -57,7 +57,7 @@ Servers.NewServerWindow.FailoverTargets = Ext.extend(Ext.Panel, {
 		    marginTop: Ext.isIE ? '1px' : '0px'
 		},
 		storeConfig: {
-		    url: paths.servers.physical_servers
+		    url: paths.physical_servers
 		}
 	    }, {
 		width: 120,

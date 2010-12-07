@@ -84,6 +84,7 @@ Servers.NewServerWindow.SelectImageGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.store = new Ext.ux.ItemsStore({
 	    url: paths.images.index,
 	    autoLoad: true,
+	    root: 'images',
 	    fields: [
 		'id',
 		'title',

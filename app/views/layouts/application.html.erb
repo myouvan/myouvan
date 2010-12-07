@@ -33,30 +33,37 @@
   <%= csrf_meta_tag %>
   <script type="text/javascript">
     var paths = {
+
         images: {
             index: '<%= images_path %>',
             oss: '<%= oss_images_path %>',
             iqns: '<%= iqns_images_path %>'
         },
+
         servers: {
            index: '<%= servers_path %>',
            import_: '<%= import_servers_path %>',
            status: '<%= status_servers_path %>',
-           zones: '<%= zones_servers_path %>',
-           physical_servers: '<%= physical_servers_servers_path %>',
            pools: '<%= pools_servers_path %>',
            virtualizations: '<%= virtualizations_servers_path %>'
         },
+
         tags: {
            index: '<%= tags_path %>'
         },
+
         failover_targets: {
            index: '<%= failover_targets_path %>',
            change_priority: '<%= change_priority_failover_targets_path %>'
         },
+
         import_targets: {
            index: '<%= import_targets_path %>'
-        }
+        },
+
+        zones: '<%= zones_path %>',
+        physical_servers: '<%= physical_servers_path %>'
+
     };
   </script>
 </head>

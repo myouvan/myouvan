@@ -50,7 +50,7 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 	    allowBlank: false,
 	    blankText: "can't be blank",
 	    storeConfig: {
-		url:paths.servers.zones
+		url:paths.zones
 	    },
 	    listeners: {
 		select: function(combo, record, index) {
@@ -72,7 +72,7 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 	    allowBlank: false,
 	    blankText: "can't be blank",
 	    storeConfig: {
-		url: paths.servers.physical_servers,
+		url: paths.physical_servers,
 		baseParams: {
 		    except: this.except
 		}

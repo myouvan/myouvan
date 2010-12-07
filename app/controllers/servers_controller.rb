@@ -6,36 +6,22 @@ class ServersController < ApplicationController
     respond_to do |format|
       format.html
       format.json {
-        filtered_server = Server.filtered(params[:filter_value])
+        servers = Server.filtered(params[:filter_value]).includes(:tags)
 
         if params[:ids].blank?
-          servers = filtered_server.all
+          servers = servers.all
         else
-          servers = filtered_server.find(JSON.parse(params[:ids]))
+          servers = servers.find(JSON.parse(params[:ids]))
         end
 
-        render :json => {
-          :success => true,
-          :items => servers.collect {|server|
-            tags = server.tags.collect {|tag| tag.value }
-            attributes_with_paths(server).merge(:tags => tags)
-          }
-        }
+        render_json :servers, servers, :methods => [:paths, :tags]
       }
     end
   end
 
   def status
     servers = Server.filtered(params[:filter_value])
-
-    render :json => {
-      :success => true,
-      :items => servers.collect {|server|
-        server.attributes.reject {|key, value|
-          not %w(id status physical_server user_terminate allow_restart).include?(key)
-        }
-      }
-    }
+    render :json => { :success => true, :servers => servers.as_json(:only => :id) }
   end
 
   def monitor
@@ -101,15 +87,7 @@ class ServersController < ApplicationController
 
   def show
     server = Server.includes(:interfaces).find(params[:id])
-    render :json => {
-      :success => true,
-      :item => attributes_with_paths(server).merge(
-        :mac_address0 => server.interfaces[0].mac_address,
-        :ip_address0 => server.interfaces[0].ip_address,
-        :mac_address1 => server.interfaces[1].mac_address,
-        :ip_address1 => server.interfaces[1].ip_address
-      )
-    }
+    render_json :server, server, :methods => [:paths, :interfaces]
   end
 
   def zones

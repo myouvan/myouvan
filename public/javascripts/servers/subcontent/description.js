@@ -77,16 +77,16 @@ Servers.Subcontent.Description = Ext.extend(Ext.Panel, {
 		itemId: 'memory'
 	    }, {
 		label: 'IP Address(1)',
-		itemId: 'ip_address0'
+		itemId: 'interfaces-0-ip_address'
 	    }, {
 		label: 'Mac Address(1)',
-		itemId: 'mac_address0'
+		itemId: 'interfaces-0-mac_address'
 	    }, {
 		label: 'IP Address(2)',
-		itemId: 'ip_address1'
+		itemId: 'interfaces-1-ip_address'
 	    }, {
 		label: 'Mac Address(2)',
-		itemId: 'mac_address1'
+		itemId: 'interfaces-1-mac_address'
 	    }, {
 		label: 'Avatar',
 		itemId: 'avatar'
@@ -110,21 +110,33 @@ Servers.Subcontent.Description = Ext.extend(Ext.Panel, {
 	servers.un('updatedServers', this.updateServersDelegate);
     },
 
-    showServer: function(item) {
-	for (var field in item) {
-	    var cmp = this.getComponent(field);
-	    if (cmp)
-		cmp.setValue(item[field]);
-	}
+    showServer: function(server) {
+	this.setValues(server);
 
 	var cmp = this.getComponent('avatar');
 	cmp.setValue(Ext.ux.createImg({
-	    src: item.paths.avatarThumb,
-	    id: 'avatar-thumb-' + item.id,
+	    src: server.paths.avatarThumb,
+	    id: 'avatar-thumb-' + server.id,
 	    size: 150
 	}));
 
-	this.currentItem = item;
+	this.currentServer = server;
+    },
+
+    setValues: function(item, prefix) {
+	if (!Ext.isDefined(prefix))
+	    prefix = '';
+
+	for (var field in item) {
+	    var value = item[field];
+	    if (Ext.isArray(value) || Ext.isObject(value)) {
+		this.setValues(value, prefix + field + '.');
+	    } else {
+		var cmp = this.getComponent(prefix + field);
+		if (cmp)
+		    cmp.setValue(item[field]);
+	    }
+	}
     },
 
     updateServer: function(item) {

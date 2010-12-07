@@ -75,13 +75,13 @@ var Servers = Ext.extend(Ext.util.Observable, {
 	newServerWindow.show();
     },
 
-    showServer: function(item) {
+    showServer: function(server) {
 	Ext.Ajax.request({
-	    url: item.paths.server,
+	    url: server.paths.server,
 	    method: 'GET',
 	    success: function(res, opts) {
-		var item = Ext.decode(res.responseText).item;
-		this.fireEvent('gotServer', item);
+		var server = Ext.decode(res.responseText).server;
+		this.fireEvent('gotServer', server);
 		this.subcontent.show();
 		Ext.getCmp('content-container').doLayout();
 	    },
@@ -234,8 +234,8 @@ var Servers = Ext.extend(Ext.util.Observable, {
 		filter_value: this.filterValue
 	    },
             success: function(res, opts) {
-		var items = Ext.decode(res.responseText).items;
-		this.fireEvent('updatedServers', items);
+		var servers = Ext.decode(res.responseText).servers;
+		this.fireEvent('updatedServers', servers);
             },
             failure: function(res, opts) {
             },
