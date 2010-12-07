@@ -16,8 +16,8 @@ var Images = Ext.extend(Ext.util.Observable, {
 		method: 'POST',
 		waitMsg: 'Creating...',
 		success: function(f, action) {
-		    var item = action.result.item;
-		    this.fireEvent('createdImage', item);
+		    var image = action.result.image;
+		    this.fireEvent('createdImage', image);
 		    newImageWindow.close();
 		},
 		failure: function(f, action) {
@@ -29,17 +29,17 @@ var Images = Ext.extend(Ext.util.Observable, {
 	newImageWindow.show();
     },
 
-    updateImage: function(item) {
+    updateImage: function(image) {
 	var newImageWindow = new Images.NewImageWindow({
 	    action: 'update',
-	    item: item,
+	    item: image,
 	    submitConfig: {
-		url: item.paths.image,
+		url: image.paths.image,
 		method: 'PUT',
 		waitMsg: 'Updating...',
 		success: function(f, action) {
-		    var item = action.result.item;
-		    this.fireEvent('updatedImage', item);
+		    var image = action.result.image;
+		    this.fireEvent('updatedImage', image);
 		    newImageWindow.close();
 		},
 		failure: function(form, action) {
@@ -51,13 +51,13 @@ var Images = Ext.extend(Ext.util.Observable, {
 	newImageWindow.show();
     },
 
-    destroyImage: function(item) {
+    destroyImage: function(image) {
 	Ext.Ajax.request({
-	    url: item.paths.image,
+	    url: image.paths.image,
 	    method: 'DELETE',
 	    success: function(res, opts) {
-		var item = Ext.decode(res.responseText).item;
-		this.fireEvent('destroyedImage', item);
+		var image = Ext.decode(res.responseText).image;
+		this.fireEvent('destroyedImage', image);
 	    },
 	    failure: function(res, opts) {
 		alert('Error');

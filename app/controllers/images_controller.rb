@@ -6,36 +6,28 @@ class ImagesController < ApplicationController
     respond_to do |format|
       format.html
       format.json {
-        images = Image.all.collect {|image|
-          attributes_with_paths(image)
-        }
-        render :json => { :success => true, :items => images }
+        render_json :images, Image.all, :methods => 'paths'
       }
     end
   end
 
-  def show
-    image = Image.find(params[:id])
-    render :json => { :success => true, :item => image.attributes }
-  end
-
   def oss
     oss = ['CentOS']
-    render :json => { :success => true }.merge(combo_items(oss))
+    render_combo_items_json oss
   end
 
   def iqns
     lines = `sudo /sbin/iscsiadm -m discovery -t sendtargets -p #{Settings.storage.server}`
     iqns = lines.split(/\r?\n/).collect {|line| line.split(/\s+/)[1] }
-    render :json => { :success => true }.merge(combo_items(iqns))
+    render_combo_items_json iqns
   end
 
   def create
     image = Image.new(params[:image])
     if image.save
-      render :json => { :success => true, :item => attributes_with_paths(image) }
+      render_json :image, image, :methods => 'paths'
     else
-      render :json => { :success => false, :errors => image.errors_for_ext }
+      render_json_failure :errors, image.errors_for_ext
     end
   end
 
@@ -43,25 +35,16 @@ class ImagesController < ApplicationController
     image = Image.find(params[:id])
     image.attributes = params[:image]
     if image.save
-      render :json => { :success => true, :item => image.attributes }
+      render_json :image, image
     else
-      render :json => { :success => false, :errors => image.errors_for_ext }
+      render_json_failure :errors, image.errors_for_ext
     end
   end
 
   def destroy
     image = Image.find(params[:id])
-    attrs = image.attributes
     image.delete
-    render :json => { :success => true, :item => attrs }
-  end
-
-  def attributes_with_paths(image)
-    image.attributes.merge({
-      :paths => {
-        :image => image_path(image)
-      }
-    })
+    render_json :image, image
   end
 
 end

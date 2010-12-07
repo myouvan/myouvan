@@ -17,7 +17,7 @@ defaults: &defaults
 
   storage:
     server: stoiw-grp02
-    confirm_on_logout: true
+    confirm_on_operation: true
     account: shigitani
     password: 69H96Cb5
     chap_user: vmconnector
