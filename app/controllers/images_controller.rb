@@ -6,7 +6,7 @@ class ImagesController < ApplicationController
     respond_to do |format|
       format.html
       format.json {
-        render_json :images, Image.all, :methods => :paths
+        render_json :images, Image.all, :methods => 'paths'
       }
     end
   end
@@ -25,9 +25,9 @@ class ImagesController < ApplicationController
   def create
     image = Image.new(params[:image])
     if image.save
-      render_json :image, image, :methods => :paths
+      render_json :image, image, :methods => 'paths'
     else
-      render_failure_json :errors, image.errors
+      render_json_failure :errors, image.errors_for_ext
     end
   end
 
@@ -37,7 +37,7 @@ class ImagesController < ApplicationController
     if image.save
       render_json :image, image
     else
-      render_failure_json :errors, image.errors
+      render_json_failure :errors, image.errors_for_ext
     end
   end
 

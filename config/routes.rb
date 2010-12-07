@@ -26,6 +26,8 @@ Provisioning::Application.routes.draw do
     collection do
       post :import
       get :status
+      get :zones
+      get :physical_servers
       get :pools
       get :virtualizations
     end
@@ -47,9 +49,6 @@ Provisioning::Application.routes.draw do
   end
 
   resources :import_targets, :only => [:index, :show]
-
-  resources :zones, :only => [:index]
-  resources :physical_servers, :only => [:index]
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
