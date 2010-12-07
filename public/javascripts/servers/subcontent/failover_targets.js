@@ -100,7 +100,7 @@ Servers.Subcontent.FailoverTargets = Ext.extend(Ext.Panel, {
 	addCombo.getStore().load();
 
 	this.failoverTargetsGrid = new Servers.Subcontent.FailoverTargetsGrid({
-	    url: item.paths.failover_targets
+	    item: item
 	});
 	this.failoverTargetsGrid.on('destroyFailoverTarget', this.destroyFailoverTarget.createDelegate(this));
 	this.failoverTargetsGrid.on('changePriority', this.changePriority.createDelegate(this));
@@ -224,7 +224,10 @@ Servers.Subcontent.FailoverTargetsGrid = Ext.extend(Ext.grid.GridPanel, {
 
     makeStore: function(config) {
 	this.store = new Ext.ux.ItemsStore({
-	    url: config.url,
+	    url: paths.failover_targets.index,
+	    baseParams: {
+		server_id: config.item.id
+	    },
 	    autoLoad: true,
 	    fields: [
 		'id',

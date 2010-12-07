@@ -46,7 +46,7 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 		xtype: 'storecombobox',
 		itemId: 'tagFilterCombo',
 		storeConfig: {
-		    url: paths.tags.index
+		    url: paths.tags.combo_items
 		},
 		listeners: {
 		    select: function(combo, record, index) {

@@ -57,7 +57,7 @@ Servers.Subcontent.Tags = Ext.extend(Ext.Panel, {
 		    xtype: 'editablestorecombobox',
 		    itemId: 'addCombo',
 		    storeConfig: {
-			url: paths.tags.index
+			url: paths.tags.combo_items
 		    },
 		}
 	    }, {
@@ -105,7 +105,7 @@ Servers.Subcontent.Tags = Ext.extend(Ext.Panel, {
 	    return;
 
 	this.tagsGrid = new Servers.Subcontent.TagsGrid({
-	    url: item.paths.tags
+	    item: item
 	});
 
 	var container = this.getComponent('container');
@@ -168,7 +168,10 @@ Servers.Subcontent.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 
     makeStore: function(config) {
 	this.store = new Ext.ux.ItemsStore({
-	    url: config.url,
+	    url: paths.tags.index,
+	    baseParams: {
+		server_id: config.item.id
+	    },
 	    autoLoad: true,
 	    fields: [
 		'id',

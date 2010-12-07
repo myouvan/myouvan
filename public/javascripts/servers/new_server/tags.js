@@ -57,7 +57,7 @@ Servers.NewServerWindow.Tags = Ext.extend(Ext.Panel, {
 		    marginTop: Ext.isIE ? '1px' : '0px'
 		},
 		storeConfig: {
-		    url: paths.tags.index
+		    url: paths.tags.combo_items
 		}
 	    }, {
 		width: 70,

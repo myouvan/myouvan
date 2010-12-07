@@ -72,8 +72,6 @@ class Server < ActiveRecord::Base
     {
       :server => server_path(self),
       :monitor => monitor_server_path(self),
-      :tags => tags_server_path(self),
-      :failover_targets => failover_targets_server_path(self),
       :suspend => suspend_server_path(self),
       :resume => resume_server_path(self),
       :reboot => reboot_server_path(self),

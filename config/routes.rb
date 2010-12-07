@@ -12,8 +12,6 @@ Provisioning::Application.routes.draw do
   resources :servers, :except => [:new, :edit] do
     member do
       get :monitor
-      get :tags
-      get :failover_targets
       post :suspend
       post :resume
       post :reboot
@@ -40,9 +38,13 @@ Provisioning::Application.routes.draw do
     end
   end
 
-  resources :tags, :only => [:index, :create, :destroy]
+  resources :tags, :only => [:index, :create, :destroy] do
+    collection do
+      get :combo_items
+    end
+  end
 
-  resources :failover_targets, :only => [:create, :destroy] do
+  resources :failover_targets, :only => [:index, :create, :destroy] do
     collection do
       post :change_priority
     end

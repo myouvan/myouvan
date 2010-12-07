@@ -71,34 +71,6 @@ class ServersController < ApplicationController
     render_json :items, items
   end
 
-  def tags
-    server = Server.find(params[:id])
-    render :json => {
-      :success => true,
-      :items => server.tags.collect {|tag|
-        tag.attributes.merge(
-          :paths => {
-            :tag => tag_path(tag)
-          }
-        )
-      }
-    }
-  end
-
-  def failover_targets
-    server = Server.find(params[:id])
-    render :json => {
-      :success => true,
-      :items => server.failover_targets.collect {|failover_target|
-        failover_target.attributes.merge(
-          :paths => {
-            :failover_target => failover_target_path(failover_target)
-          }
-        )
-      }
-    }
-  end
-
   def show
     server = Server.includes(:interfaces).find(params[:id])
     render :json => {
