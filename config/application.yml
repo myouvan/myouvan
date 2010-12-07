@@ -17,6 +17,7 @@ defaults: &defaults
 
   storage:
     server: stoiw-grp02
+    confirm_on_operation: true
     account: shigitani
     password: 69H96Cb5
     chap_user: vmconnector
@@ -31,7 +32,6 @@ defaults: &defaults
         - pmiw-kvm017
         - pmiw-kvm018
         - pmiw-kvm019
-        - pmiw-kvm020
 
   virtual_server:
     centos:
