@@ -24,11 +24,7 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 	    buttons: [{
 		text: 'Migrate',
 		handler: function() {
-		    if (this.form.getForm().isValid()) {
-			this.form.getForm().submit(this.submitConfig);
-		    } else {
-			Ext.Msg.alert('Error', 'Some of fields are invalid');
-		    }
+		    this.form.getForm().submit(this.submitConfig);
 		},
 		scope: this
 	    }, {
@@ -47,8 +43,6 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 	    name: 'server[zone]',
 	    fieldLabel: 'Zone',
 	    width: 150,
-	    allowBlank: false,
-	    blankText: "can't be blank",
 	    storeConfig: {
 		url:paths.servers.zones
 	    },
@@ -69,8 +63,6 @@ Servers.SelectServerWindow = Ext.extend(Ext.Window, {
 	    fieldLabel: 'Physical Server',
 	    width: 150,
 	    disabled: true,
-	    allowBlank: false,
-	    blankText: "can't be blank",
 	    storeConfig: {
 		url: paths.servers.physical_servers,
 		baseParams: {

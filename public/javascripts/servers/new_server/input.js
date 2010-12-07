@@ -67,8 +67,6 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    fieldLabel: 'Name',
 	    width: 100,
 	    readOnly: this.action != 'create',
-	    allowBlank: false,
-	    blankText: "can't be blank",
 	    msgTarget: 'qtip'
 	}, {
 	    xtype: 'textfield',
@@ -76,8 +74,6 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    itemId: 'title',
 	    fieldLabel: 'Title',
 	    width: 200,
-	    allowBlank: false,
-	    blankText: "can't be blank",
 	    msgTarget: 'qtip'
 	}, {
 	    xtype: 'storecombobox',
@@ -86,8 +82,6 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    fieldLabel: 'Zone',
 	    width: 150,
 	    readOnly: this.action != 'create',
-	    allowBlank: false,
-	    blankText: "can't be blank",
 	    storeConfig: {
 		url: paths.servers.zones
 	    },
@@ -109,8 +103,6 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    width: 150,
 	    readOnly: this.action != 'create',
 	    disabled: this.action == 'create',
-	    allowBlank: false,
-	    blankText: "can't be blank",
 	    storeConfig: {
 		url: paths.servers.physical_servers
 	    }
@@ -121,8 +113,6 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    fieldLabel: 'Pool',
 	    width: 150,
 	    readOnly: this.action != 'create',
-	    allowBlank: false,
-	    blankText: "can't be blank",
 	    storeConfig: {
 		url: paths.servers.pools
 	    }
@@ -133,8 +123,6 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    fieldLabel: 'Virtualization',
 	    width: 200,
 	    readOnly: this.action != 'create',
-	    allowBlank: false,
-	    blankText: "can't be blank",
 	    storeConfig: {
 		url: paths.servers.virtualizations
 	    }
@@ -146,8 +134,6 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    width: 100,
 	    readOnly: this.action == 'import',
 	    allowDecimals: false,
-	    allowBlank: false,
-	    blankText: "can't be blank",
 	    msgTarget: 'qtip'
 	}, {
 	    xtype: 'numberfield',
@@ -157,8 +143,6 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    width: 100,
 	    readOnly: this.action == 'import',
 	    allowDecimals: false,
-	    allowBlank: false,
-	    blankText: "can't be blank",
 	    msgTarget: 'qtip'
 	}, {
 	    xtype: 'hidden',
@@ -172,8 +156,6 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    fieldLabel: 'IP Address(1)',
 	    width: 150,
 	    readOnly: this.action == 'import',
-	    allowBlank: false,
-	    blankText: "can't be blank",
 	    msgTarget: 'qtip'
 	}, {
 	    xtype: 'hidden',
@@ -187,8 +169,6 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	    fieldLabel: 'IP Address(2)',
 	    width: 150,
 	    readOnly: this.action == 'import',
-	    allowBlank: false,
-	    blankText: "can't be blank",
 	    msgTarget: 'qtip'
 	}, {
 	    xtype: 'textarea',
@@ -279,14 +259,14 @@ Servers.NewServerWindow.Input = Ext.extend(Ext.Panel, {
 	var zoneCombo = this.getField('zone');
 	var psCombo = this.getField('physical_server');
 
-	if (this.findParentByType(Ext.form.FormPanel).getForm().isValid()) {
+	if (zoneCombo.getValue() && psCombo.getValue()) {
 	    this.fireEvent('setPhysicalServer', {
 		zone: zoneCombo.getValue(),
 		physicalServer: psCombo.getValue()
 	    });
 	    return true;
 	} else {
-	    Ext.Msg.alert('Error', 'Some of fields are invalid');
+	    Ext.MessageBox.alert('Error', 'Select a zone and a physical server');
 	    return false;
 	}
     }

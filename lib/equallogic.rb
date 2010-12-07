@@ -32,11 +32,9 @@ class Equallogic
         r.expect(@prompt, 20) {|m|
           w.cmd "logout"
         }
-        if s.confirm_on_logout
-          r.expect(/^Do you really want to logout\? \(y\/n\) \[n\]/, 20) {|m|
-            w.cmd "y"
-          }
-        end
+        r.expect(/^Do you really want to logout\? \(y\/n\) \[n\]/, 20) {|m|
+          w.cmd "y"
+        }
       ensure
         Process.kill(:KILL, pid)
       end
