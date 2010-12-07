@@ -2,10 +2,7 @@ Servers.Subcontent.Description = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
-
-	this.showServerDelegate = this.showServer.createDelegate(this);
-	this.updateServerDelegate = this.updateServer.createDelegate(this);
-	this.updateServersDelegate = this.updateServers.createDelegate(this);
+	this.initHandlers();
     },
 
     makeComponents: function() {
@@ -90,24 +87,24 @@ Servers.Subcontent.Description = Ext.extend(Ext.Panel, {
 	    }, {
 		label: 'Avatar',
 		itemId: 'avatar'
-	    }],
-	    listeners: {
-		added: this.addEventHandlers.createDelegate(this),
-		beforedestroy: this.removeEventHandlers.createDelegate(this)
-	    }
+	    }]
 	});
     },
 
-    addEventHandlers: function() {
-	servers.on('gotServer', this.showServerDelegate);
-	servers.on('updatedServer', this.updateServerDelegate);
-	servers.on('updatedServers', this.updateServersDelegate);
-    },
-
-    removeEventHandlers: function() {
-	servers.un('gotServer', this.showServerDelegate);
-	servers.un('updatedServer', this.updateServerDelegate);
-	servers.un('updatedServers', this.updateServersDelegate);
+    initHandlers: function() {
+	this.setDynamicHandlers({
+	    target: servers,
+	    handlers: [{
+		event: 'gotServer',
+		fn: this.showServer
+	    }, {
+		event: 'updatedServer',
+		fn: this.updateServer
+	    }, {
+		event: 'updatedServers',
+		fn: this.updateServers
+	    }]
+	});
     },
 
     showServer: function(item) {

@@ -2,12 +2,10 @@ Servers.Subcontent.Tags = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
+	this.initHandlers();
 
 	this.addEvents('addTag');
 	this.enableBubble('addTag');
-
-	this.showTagsDelegate = this.showTags.createDelegate(this);
-	this.updateTagsDelegate = this.updateTags.createDelegate(this);
     },
 
     makeComponents: function() {
@@ -29,11 +27,7 @@ Servers.Subcontent.Tags = Ext.extend(Ext.Panel, {
 		    itemId: 'container'
 		},
 		this.addComponents
-	    ],
-	    listeners: {
-		added: this.addEventHandlers.createDelegate(this),
-		beforedestroy: this.removeEventHandlers.createDelegate(this)
-	    }
+	    ]
 	});
   },
 
@@ -86,18 +80,23 @@ Servers.Subcontent.Tags = Ext.extend(Ext.Panel, {
 	};
     },
 
-    addEventHandlers: function() {
-	servers.on('gotServer', this.showTagsDelegate);
-	servers.on('addedTag', this.updateTagsDelegate);
-	servers.on('destroyedTag', this.updateTagsDelegate);
-	servers.on('updatedTags', this.updateTagsDelegate);
-    },
-
-    removeEventHandlers: function() {
-	servers.un('gotServer', this.showTagsDelegate);
-	servers.un('addedTag', this.updateTagsDelegate);
-	servers.un('destroyedTag', this.updateTagsDelegate);
-	servers.un('updatedTags', this.updateTagsDelegate);
+    initHandlers: function() {
+	this.setDynamicHandlers({
+	    target: servers,
+	    handlers: [{
+		event: 'gotServer',
+		fn: this.showTags
+	    }, {
+		event: 'addedTag',
+		fn: this.updateTags
+	    }, {
+		event: 'destroyedTag',
+		fn: this.updateTags
+	    }, {
+		event: 'updatedTag',
+		fn: this.updateTags
+	    }]
+	});
     },
 
     showTags: function(item) {
@@ -130,8 +129,7 @@ Servers.Subcontent.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.addEvents('destroyTag');
 	this.enableBubble('destroyTag');
 
-	this.addRecordDelegate =  this.addRecord.createDelegate(this);
-	this.destroyRecordDelegate =  this.destroyRecord.createDelegate(this);
+	this.initHandlers();
     },
 
     makeComponents: function(config) {
@@ -150,9 +148,7 @@ Servers.Subcontent.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 		    grid.getSelectionModel().selectRow(row);
 		    e.stopEvent();
 		    grid.contextMenu.showAt(e.getXY());
-		},
-		added: this.addEventHandlers.createDelegate(this),
-		beforedestroy: this.removeEventHandlers.createDelegate(this)
+		}
 	    }
 	});
     },
@@ -198,26 +194,18 @@ Servers.Subcontent.TagsGrid = Ext.extend(Ext.grid.GridPanel, {
 	});
     },
 
-    addEventHandlers: function() {
-	servers.on('addedTag', this.addRecordDelegate);
-	servers.on('destroyedTag', this.destroyRecordDelegate);
-    },
-
-    removeEventHandlers: function() {
-	servers.un('addedTag', this.addRecordDelegate);
-	servers.un('destroyedTag', this.destroyRecordDelegate);
-    },
-
-    addRecord: function(item) {
-	var RecordType = this.store.recordType;
-	var record = new RecordType(item);
-	this.store.add(record);
-    },
-
-    destroyRecord: function(item) {
-	var ri = this.store.findExact('id', item.id);
-	if (ri != -1)
-	    this.store.removeAt(ri);
+    initHandlers: function() {
+	this.setDynamicHandlers({
+	    target: servers,
+	    handlers: [{
+		event: 'addedTag',
+		fn: this.store.addRecord
+	    }, {
+		event: 'destroyedTag',
+		fn: this.store.destroyRecord
+	    }],
+	    scope: this.store
+	});
     }
 
 });

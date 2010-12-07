@@ -2,8 +2,7 @@ Servers.Subcontent.Monitoring = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
-
-	this.showChartDelegate =  this.showChart.createDelegate(this);
+	this.initHandlers();
     },
 
     makeComponents: function() {
@@ -21,20 +20,18 @@ Servers.Subcontent.Monitoring = Ext.extend(Ext.Panel, {
 		itemId: 'container',
 		width: 400,
 		height: 250
-	    }],
-	    listeners: {
-		added: this.addEventHandlers.createDelegate(this),
-		beforedestroy: this.removeEventHandlers.createDelegate(this)
-	    }
+	    }]
 	});
     },
 
-    addEventHandlers: function() {
-	servers.on('gotServer', this.showChartDelegate);
-    },
-
-    removeEventHandlers: function() {
-	servers.un('gotServer', this.showChartDelegate);
+    initHandlers: function() {
+	this.setDynamicHandlers({
+	    target: servers,
+	    handlers: {
+		event: 'gotServer',
+		fn: this.showChart
+	    }
+	});
     },
 
     showChart: function(item) {

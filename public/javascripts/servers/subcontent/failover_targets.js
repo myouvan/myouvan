@@ -2,8 +2,7 @@ Servers.Subcontent.FailoverTargets = Ext.extend(Ext.Panel, {
 
     constructor: function() {
 	this.makeComponents();
-
-	this.showFailoverTargetsDelegate = this.showFailoverTargets.createDelegate(this);
+	this.initHandlers();
     },
 
     makeComponents: function() {
@@ -25,11 +24,7 @@ Servers.Subcontent.FailoverTargets = Ext.extend(Ext.Panel, {
 		    itemId: 'container'
 		},
 		this.addComponents
-	    ],
-	    listeners: {
-		added: this.addEventHandlers.createDelegate(this),
-		beforedestroy: this.removeEventHandlers.createDelegate(this)
-	    }
+	    ]
 	});
   },
 
@@ -82,12 +77,14 @@ Servers.Subcontent.FailoverTargets = Ext.extend(Ext.Panel, {
 	};
     },
 
-    addEventHandlers: function() {
-	servers.on('gotServer', this.showFailoverTargetsDelegate);
-    },
-
-    removeEventHandlers: function() {
-	servers.un('gotServer', this.showFailoverTargetsDelegate);
+    initHandlers: function() {
+	this.setDynamicHandlers({
+	    target: servers,
+	    handlers: {
+		event: 'gotServer',
+		fn: this.showFailoverTargets
+	    }
+	});
     },
 
     showFailoverTargets: function(item) {
@@ -119,7 +116,7 @@ Servers.Subcontent.FailoverTargets = Ext.extend(Ext.Panel, {
 	    params: item,
 	    success: function(res, opts) {
 		var item = Ext.decode(res.responseText).item;
-		this.failoverTargetsGrid.addRecord(item);
+		this.failoverTargetsGrid.store.addRecord(item);
 	    },
 	    failure: function(res, opts) {
 		Ext.MessageBox.alert('Error', 'Failed to add failover target');
@@ -134,7 +131,7 @@ Servers.Subcontent.FailoverTargets = Ext.extend(Ext.Panel, {
 	    method: 'DELETE',
 	    success: function(res, opts) {
 		var item = Ext.decode(res.responseText).item;
-		this.failoverTargetsGrid.destroyRecord(item);
+		this.failoverTargetsGrid.store.destroyRecord(item);
 	    },
 	    failure: function(res, opts) {
 		Ext.MessageBox.alert('Error', 'Failed to destroy failover target');
@@ -151,7 +148,7 @@ Servers.Subcontent.FailoverTargets = Ext.extend(Ext.Panel, {
 	    params: item,
 	    success: function(res, opts) {
 		var items = Ext.decode(res.responseText).items;
-		this.failoverTargetsGrid.updateRecords(items);
+		this.failoverTargetsGrid.store.updateRecords(items);
 	    },
 	    failure: function(res, opts) {
 		Ext.MessageBox.alert('Error', 'Failed to change priority');
@@ -253,30 +250,6 @@ Servers.Subcontent.FailoverTargetsGrid = Ext.extend(Ext.grid.GridPanel, {
 		scope: this
 	    }]
 	});
-    },
-
-    addRecord: function(item) {
-	var RecordType = this.store.recordType;
-	var record = new RecordType(item);
-	this.store.add(record);
-    },
-
-    destroyRecord: function(item) {
-	var ri = this.store.findExact('id', item.id);
-	if (ri != -1)
-	    this.store.removeAt(ri);
-    },
-
-    updateRecords: function(items) {
-	for (var i = 0; i < items.length; ++i) {
-	    var item = items[i];
-	    var ri = this.store.findExact('id', item.id);
-	    if (ri != -1) {
-		var record = this.store.getAt(ri);
-		for (var field in item)
-		    record.set(field, item[field]);
-	    }
-	}
     }
 
 });

@@ -2,6 +2,7 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 
     constructor: function() {
 	this.makeComponents();
+	this.initHandlers();
 
 	var events = [
 	    'updateImage',
@@ -9,8 +10,6 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	];
 	this.addEvents(events);
 	this.enableBubble(events);
-
-	this.initHandlers();
     },
 
     makeComponents: function() {

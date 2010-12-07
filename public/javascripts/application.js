@@ -119,10 +119,16 @@ Ext.ux.ItemsStore = Ext.extend(Ext.data.JsonStore, {
 	if (ri != -1) {
 	    var record = this.getAt(ri);
 	    for (var field in item)
-		if (record.containsKey(field))
+		if (record.fields.containsKey(field))
 		    record.set(field, item[field]);
 	}
 	this.commitChanges();
+    },
+
+    updateRecords: function(items) {
+	Ext.each(items, function(item) {
+	    this.updateRecord(item);
+	}, this);
     },
 
     destroyRecord: function(item) {
