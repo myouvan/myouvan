@@ -18,7 +18,7 @@ class ServersController < ApplicationController
           :success => true,
           :items => servers.collect {|server|
             tags = server.tags.collect {|tag| tag.value }
-            attributes_with_paths(server).merge(:tags => tags)
+            server.as_json(:methods => :paths).merge(:tags => tags)
           }
         }
       }
@@ -68,7 +68,7 @@ class ServersController < ApplicationController
       end
     end
 
-    render :json => { :success => true, :items => items }
+    render_json :items, items
   end
 
   def tags
@@ -103,7 +103,7 @@ class ServersController < ApplicationController
     server = Server.includes(:interfaces).find(params[:id])
     render :json => {
       :success => true,
-      :item => attributes_with_paths(server).merge(
+      :item => server.as_json(:methods => :paths).merge(
         :mac_address0 => server.interfaces[0].mac_address,
         :ip_address0 => server.interfaces[0].ip_address,
         :mac_address1 => server.interfaces[1].mac_address,
@@ -114,7 +114,7 @@ class ServersController < ApplicationController
 
   def zones
     zones = Settings.physical_server.collect {|ps| ps['zone'] }
-    render :json => { :success => true }.merge(combo_items(zones))
+    render_combo_items_json zones
   end
 
   def physical_servers
@@ -122,17 +122,17 @@ class ServersController < ApplicationController
     physical_servers = ps ? ps['physical_servers'] : Array.new
     physical_servers = physical_servers.dup
     physical_servers.delete(params[:except])
-    render :json => { :success => true }.merge(combo_items(physical_servers))
+    render_combo_items_json physical_servers
   end
 
   def pools
     pools = Settings.pools_for_instance
-    render :json => { :success => true }.merge(combo_items(pools))
+    render_combo_items_json pools
   end
 
   def virtualizations
     virtualizations = ['KVM FullVirtualization']
-    render :json => { :success => true }.merge(combo_items(virtualizations))
+    render_combo_items_json virtualizations
   end
 
   def create
@@ -177,7 +177,7 @@ class ServersController < ApplicationController
       tags = server.tags.collect {|tag| tag.value }
       render :json => {
         :success => true,
-        :item => attributes_with_paths(server).merge(:tags => tags)
+        :item => server.as_json(:methods => :paths).merge(:tags => tags)
       }
       server
     else
@@ -227,7 +227,7 @@ class ServersController < ApplicationController
 
     render :json => {
       :success => true,
-      :item => attributes_with_paths(server).merge(
+      :item => server.as_json(:methods => :paths).merge(
         :mac_address0 => server.interfaces[0].mac_address,
         :ip_address0 => server.interfaces[0].ip_address,
         :mac_address1 => server.interfaces[1].mac_address,
@@ -249,10 +249,7 @@ class ServersController < ApplicationController
     server.status = 'Suspending'
     server.save
 
-    render :json => {
-      :success => true,
-      :item => { :id => server.id, :status => server.status }
-    }
+    render_json :item, server, :only => [:id, :status]
 
     set_starling(:command => 'suspend_server',
                  :server_id => server.id)
@@ -263,10 +260,7 @@ class ServersController < ApplicationController
     server.status = 'Resuming'
     server.save
 
-    render :json => {
-      :success => true,
-      :item => { :id => server.id, :status => server.status }
-    }
+    render_json :item, server, :only => [:id, :status]
 
     set_starling(:command => 'resume_server',
                  :server_id => server.id)
@@ -277,10 +271,7 @@ class ServersController < ApplicationController
     server.status = 'Rebooting'
     server.save
 
-    render :json => {
-      :success => true,
-      :item => { :id => server.id, :status => server.status }
-    }
+    render_json :item, server, :only => [:id, :status]
 
     set_starling(:command => 'reboot_server',
                  :server_id => server.id)
@@ -293,15 +284,8 @@ class ServersController < ApplicationController
     server.allow_restart = true
     server.save
 
-    render :json => {
-      :success => true,
-      :item => {
-        :id => server.id,
-        :status => server.status,
-        :user_terminate => server.user_terminate,
-        :allow_restart => server.allow_restart
-      }
-    }
+    render_json :item, server,
+                :only => [:id, :status, :user_terminate, :allow_restart]
 
     set_starling(:command => 'shutdown_server',
                  :server_id => server.id)
@@ -314,15 +298,8 @@ class ServersController < ApplicationController
     server.allow_restart = false
     server.save
 
-    render :json => {
-      :success => true,
-      :item => {
-        :id => server.id,
-        :status => server.status,
-        :user_terminate => server.user_terminate,
-        :allow_restart => server.allow_restart
-      }
-    }
+    render_json :item, server,
+                :only => [:id, :status, :user_terminate, :allow_restart]
 
     set_starling(:command => 'restart_server',
                  :server_id => server.id)
@@ -345,10 +322,7 @@ class ServersController < ApplicationController
     server.status = 'Migrating'
     server.save
 
-    render :json => {
-      :success => true,
-      :item => { :id => server.id, :status => server.status }
-    }
+    render_json :item, server, :only => [:id, :status]
 
     set_starling(:command => 'migrate_server',
                  :server_id => server.id,
@@ -361,15 +335,8 @@ class ServersController < ApplicationController
     server.user_terminate = true
     server.save
 
-    render :json => {
-      :success => true,
-      :item => {
-        :id => server.id,
-        :status => server.status,
-        :user_terminate => server.user_terminate,
-        :allow_restart => server.allow_restart
-      }
-    }
+    render_json :item, server,
+                :only => [:id, :status, :user_terminate, :allow_restart]
 
     set_starling(:command => 'terminate_server',
                  :server_id => server.id)
@@ -377,30 +344,8 @@ class ServersController < ApplicationController
 
   def destroy
     server = Server.find(params[:id])
-    attrs = server.attributes
     server.destroy
-    render :json => { :success => true, :item => attrs }
-  end
-
-  def attributes_with_paths(server)
-    avatar = Avatar.select(:id).where(:server_id => server.id).first
-    server.attributes.merge(
-      :paths => {
-        :server => server_path(server),
-        :monitor => monitor_server_path(server),
-        :tags => tags_server_path(server),
-        :failover_targets => failover_targets_server_path(server),
-        :suspend => suspend_server_path(server),
-        :resume => resume_server_path(server),
-        :reboot => reboot_server_path(server),
-        :shutdown => shutdown_server_path(server),
-        :restart => restart_server_path(server),
-        :migrate => migrate_server_path(server),
-        :terminate => terminate_server_path(server),
-        :avatarThumb => thumb_avatar_path(avatar.id),
-        :avatarIcon => icon_avatar_path(avatar.id)
-      }
-    )
+    render_json :item, server
   end
 
   def set_starling(item)

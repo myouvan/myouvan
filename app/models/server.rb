@@ -63,4 +63,27 @@ class Server < ActiveRecord::Base
     Hash[hs]
   end
 
+  self.include_root_in_json = false
+  include Rails.application.routes.url_helpers
+
+  def paths
+    avatar = Avatar.select(:id).where(:server_id => self.id).first
+
+    {
+      :server => server_path(self),
+      :monitor => monitor_server_path(self),
+      :tags => tags_server_path(self),
+      :failover_targets => failover_targets_server_path(self),
+      :suspend => suspend_server_path(self),
+      :resume => resume_server_path(self),
+      :reboot => reboot_server_path(self),
+      :shutdown => shutdown_server_path(self),
+      :restart => restart_server_path(self),
+      :migrate => migrate_server_path(self),
+      :terminate => terminate_server_path(self),
+      :avatarThumb => thumb_avatar_path(avatar.id),
+      :avatarIcon => icon_avatar_path(avatar.id)
+    }
+  end
+
 end
