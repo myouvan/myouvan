@@ -10,9 +10,7 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.addEvents(events);
 	this.enableBubble(events);
 
-	this.addRecordDelegate = this.addRecord.createDelegate(this);
-	this.updateRecordDelegate = this.updateRecord.createDelegate(this);
-	this.destroyRecordDelegate = this.destroyRecord.createDelegate(this);
+	this.initHandlers();
     },
 
     makeComponents: function() {
@@ -33,9 +31,7 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		    this.getSelectionModel().selectRow(row);
 		    e.stopEvent();
 		    this.contextMenu.showAt(e.getXY());
-		},
-		added: this.addEventHandlers.createDelegate(this),
-		beforedestroy: this.removeEventHandlers.createDelegate(this)
+		}
 	    }
 	});
     },
@@ -107,38 +103,21 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	});
     },
 
-    addEventHandlers: function() {
-	images.on('createdImage', this.addRecordDelegate);
-	images.on('updatedImage', this.updateRecordDelegate);
-	images.on('destroyedImage', this.destroyRecordDelegate);
-    },
-
-    removeEventHandlers: function() {
-	images.un('createdImage', this.addRecordDelegate);
-	images.un('updatedImage', this.updateRecordDelegate);
-	images.un('destroyedImage', this.destroyRecordDelegate);
-    },
-
-    addRecord: function(item) {
-	var RecordType = this.store.recordType;
-	var record = new RecordType(item);
-	this.store.add(record);
-    },
-
-    updateRecord: function(item) {
-	var ri = this.store.findExact('id', item.id);
-	if (ri != -1) {
-	    var record = this.store.getAt(ri);
-	    for (var field in item)
-		record.set(field, item[field]);
-	}
-	this.store.commitChanges();
-    },
-
-    destroyRecord: function(item) {
-	var ri = this.store.findExact('id', item.id);
-	if (ri != -1)
-	    this.store.removeAt(ri);
+    initHandlers: function() {
+	this.setDynamicHandlers({
+	    target: images,
+	    handlers: [{
+		event: 'createdImage',
+		fn: this.store.addRecord
+	    }, {
+		event: 'updatedImage',
+		fn: this.store.updateRecord
+	    }, {
+		event: 'destroyedImage',
+		fn: this.store.destroyRecord
+	    }],
+	    scope: this
+	});
     }
 
 });
