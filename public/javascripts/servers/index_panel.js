@@ -9,7 +9,7 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 	    'reloadServer'
 	]);
 
-	this.updateTagsDelegate = this.updateTags.createDelegate(this);
+	this.initHandlers();
     },
 
     makeComponents: function() {
@@ -76,24 +76,24 @@ Servers.IndexPanel = Ext.extend(Ext.Panel, {
 		layout: 'fit',
 		border: false,
 		items: this.indexGrid
-	    },
-	    listeners: {
-		added: this.addEventHandlers,
-		beforedestroy: this.removeEventHandlers
 	    }
 	});
     },
 
-    addEventHandlers: function() {
-	servers.on('addedTag', this.updateTagsDelegate);
-	servers.on('destroyedTag', this.updateTagsDelegate);
-	servers.on('updatedTags', this.updateTagsDelegate);
-    },
-
-    removeEventHandlers: function() {
-	servers.un('addedTag', this.updateTagsDelegate);
-	servers.un('destroyedTag', this.updateTagsDelegate);
-	servers.un('updatedTags', this.updateTagsDelegate);
+    initHandlers: function() {
+	this.setDynamicHandlers({
+	    target: servers,
+	    handlers: [{
+		event: 'addedTag',
+		fn: this.updateTags
+	    }, {
+		event: 'destroyedTag',
+		fn: this.updateTags
+	    }, {
+		event: 'updatedTag',
+		fn: this.updateTags
+	    }]
+	});
     },
 
     updateTags: function() {

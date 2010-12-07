@@ -109,25 +109,31 @@ Ext.ux.ItemsStore = Ext.extend(Ext.data.JsonStore, {
     },
 
     addRecord: function(item) {
-	var RecordType = this.recordType;
-	var record = new RecordType(item);
-	this.add(record);
+	var ri = this.findExact('id', item.id);
+	if (ri == -1) {
+	    var RecordType = this.recordType;
+	    var record = new RecordType(item);
+	    this.add(record);
+	}
     },
 
-    updateRecord: function(item) {
+    updateRecord: function(item, callback) {
 	var ri = this.findExact('id', item.id);
 	if (ri != -1) {
 	    var record = this.getAt(ri);
 	    for (var field in item)
 		if (record.fields.containsKey(field))
 		    record.set(field, item[field]);
+
+	    if (callback)
+		callback.call(this, item);
 	}
 	this.commitChanges();
     },
 
-    updateRecords: function(items) {
+    updateRecords: function(items, callback) {
 	Ext.each(items, function(item) {
-	    this.updateRecord(item);
+	    this.updateRecord(item, callback);
 	}, this);
     },
 
