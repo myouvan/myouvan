@@ -10,9 +10,9 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.addEvents(events);
 	this.enableBubble(events);
 
-	this.addRecordDelegate = this.store.addRecord.createDelegate(this.store);
-	this.updateRecordDelegate = this.store.updateRecord.createDelegate(this.store);
-	this.destroyRecordDelegate = this.store.destroyRecord.createDelegate(this.store);
+	this.addRecordDelegate = this.addRecord.createDelegate(this);
+	this.updateRecordDelegate = this.updateRecord.createDelegate(this);
+	this.destroyRecordDelegate = this.destroyRecord.createDelegate(this);
     },
 
     makeComponents: function() {
@@ -72,7 +72,6 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	this.store = new Ext.ux.ItemsStore({
 	    url: paths.images.index,
 	    autoLoad: true,
-	    root: 'images',
 	    fields: [
 		'id',
 		'title',
@@ -118,6 +117,28 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	images.un('createdImage', this.addRecordDelegate);
 	images.un('updatedImage', this.updateRecordDelegate);
 	images.un('destroyedImage', this.destroyRecordDelegate);
+    },
+
+    addRecord: function(item) {
+	var RecordType = this.store.recordType;
+	var record = new RecordType(item);
+	this.store.add(record);
+    },
+
+    updateRecord: function(item) {
+	var ri = this.store.findExact('id', item.id);
+	if (ri != -1) {
+	    var record = this.store.getAt(ri);
+	    for (var field in item)
+		record.set(field, item[field]);
+	}
+	this.store.commitChanges();
+    },
+
+    destroyRecord: function(item) {
+	var ri = this.store.findExact('id', item.id);
+	if (ri != -1)
+	    this.store.removeAt(ri);
     }
 
 });

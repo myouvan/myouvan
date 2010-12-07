@@ -26,39 +26,6 @@ Ext.ux.reloadImg = function(id) {
     });
 };
 
-
-//------------------------------
-//   store
-//------------------------------
-
-Ext.override(Ext.data.Store, {
-
-    addRecord: function(item) {
-	var RecordType = this.recordType;
-	var record = new RecordType(item);
-	this.add(record);
-    },
-
-    updateRecord: function(item) {
-	var ri = this.findExact('id', item.id);
-	if (ri != -1) {
-	    var record = this.getAt(ri);
-	    for (var field in item)
-		if (record.fields.containsKey(field))
-		    record.set(field, item[field]);
-	}
-	this.commitChanges();
-    },
-
-    destroyRecord: function(item) {
-	var ri = this.findExact('id', item.id);
-	if (ri != -1)
-	    this.removeAt(ri);
-    }
-
-});
-
-
 //------------------------------
 //   extended JsonStore
 //------------------------------
@@ -88,7 +55,6 @@ Ext.ux.ItemsStore = Ext.extend(Ext.data.JsonStore, {
 	Ext.ux.ItemsStore.superclass.constructor.call(this, config);
     }
 });
-
 
 //------------------------------
 //   extended ComboBox

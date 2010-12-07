@@ -11,13 +11,4 @@ class Image < ActiveRecord::Base
     Hash[h]
   end
 
-  include Rails.application.routes.url_helpers
-  self.include_root_in_json = false
-
-  def paths
-    {
-      :image => image_path(self)
-    }
-  end
-
 end

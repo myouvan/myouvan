@@ -32,7 +32,7 @@ class Equallogic
         r.expect(@prompt, 20) {|m|
           w.cmd "logout"
         }
-        if s.confirm_on_operation
+        if s.confirm_on_logout
           r.expect(/^Do you really want to logout\? \(y\/n\) \[n\]/, 20) {|m|
             w.cmd "y"
           }
@@ -84,11 +84,9 @@ class Equallogic
       r.expect(@prompt, 20) {|m|
         w.cmd "volume delete #{volume}"
       }
-      if Settings.storage.confirm_on_operation
-        r.expect(/^Do you really want to delete the volume and destroy \S+ of data\? \(y\/n\) \[n\]/, 20) {|m|
-          w.cmd "y"
-        }
-      end
+      r.expect(/^Do you really want to delete the volume and destroy \S+ of data\? \(y\/n\) \[n\]/, 20) {|m|
+        w.cmd "y"
+      }
     }
 
     @logger.info "deleted volume #{server.name}"
