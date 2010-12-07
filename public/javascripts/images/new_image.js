@@ -7,7 +7,7 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
 
 	this.makeComponents();
 	if (config.item)
-	    this.setValues(config.item);
+	    this.form.getForm().setValues(config.item);
     },
 
     makeComponents: function() {
@@ -28,7 +28,11 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
 	    buttons: [{
 		text: actionStr,
 		handler: function() {
-		    this.form.getForm().submit(this.submitConfig);
+		    if (this.form.getForm().isValid()) {
+			this.form.getForm().submit(this.submitConfig);
+		    } else {
+			Ext.Msg.alert('Error', 'Some of fields are invalid');
+		    }
 		},
 		scope: this
 	    }, {
@@ -48,6 +52,8 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
 	    itemId: 'title',
 	    fieldLabel: 'Title',
 	    width: 200,
+	    allowBlank: false,
+	    blankText: "can't be blank",
 	    msgTarget: 'qtip'
 	}, {
 	    xtype: 'storecombobox',
@@ -55,6 +61,8 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
 	    fieldLabel: 'OS',
 	    itemId: 'os',
 	    width: 200,
+	    allowBlank: false,
+	    blankText: "can't be blank",
 	    storeConfig: {
 		url: paths.images.oss
 	    }
@@ -64,6 +72,8 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
 	    fieldLabel: 'IQN',
 	    itemId: 'iqn',
 	    width: 500,
+	    allowBlank: false,
+	    blankText: "can't be blank",
 	    storeConfig: {
 		url: paths.images.iqns
 	    }
@@ -99,14 +109,6 @@ Images.NewImageWindow = Ext.extend(Ext.Window, {
 		items: this.formItems
 	    }
 	});
-    },
-
-    setValues: function(image) {
-	for (var field in image) {
-	    var cmp = this.form.get(0).getComponent(field);
-	    if (cmp)
-		cmp.setValue(image[field]);
-	}
     }
 
 });
