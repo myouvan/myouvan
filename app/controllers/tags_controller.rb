@@ -4,14 +4,14 @@ class TagsController < ApplicationController
 
   def index
     tags = Tag.select('distinct value').all.collect {|tag| tag.value }
-    render :json => { :success => true }.merge(combo_items(tags))
+    render_combo_items_json tags
   end
 
   def create
     tag = Tag.new(params[:tag])
 
     if tag.save
-      render :json => { :success => true, :item => attributes_with_paths(tag) }
+      render_json :item, tag, :methods => :paths
     else
       render :json => { :success => false }
     end
@@ -19,17 +19,8 @@ class TagsController < ApplicationController
 
   def destroy
     tag = Tag.find(params[:id])
-    attrs = tag.attributes
     tag.destroy
-    render :json => { :success => true, :item => attrs }
-  end
-
-  def attributes_with_paths(tag)
-    tag.attributes.merge({
-      :paths => {
-        :tag => tag_path(tag)
-      }
-    })
+    render_json :item, tag
   end
 
 end
