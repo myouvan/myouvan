@@ -29,41 +29,51 @@ var showViewport = function() {
 
     new Ext.Viewport({
 	layout: 'fit',
+	border: false,
 	items: {
 	    layout: 'border',
 	    items: [{
-		region: 'west',
-		split: true,
-		title: 'Navigation',
-		headerCssClass: 'ec2-panel-header',
-		width: 150,
-		margins: '5 0 5 5',
-		padding: 5,
-		defaults: {
-		    padding: 5,
-		    border: false
-		},
-		items: [{
-		    html: navLink('nav-images', 'Images')
-		}, {
-		    html: navLink('nav-servers', 'Servers')
-		}]
+		region: 'north',
+		height: 66,
+		border: false,
+		html: '<img src="/images/logo.gif" />'
 	    }, {
-		xtype: 'container',
-		id: 'content-container',
-		layout: 'border',
 		region: 'center',
-		margins: '5 5 5 0',
+		layout: 'border',
 		items: [{
-		    id: 'content',
-		    region: 'center',
-		    layout: 'fit'
-		}, {
-		    id: 'subcontent',
+		    region: 'west',
 		    split: true,
-		    region: 'south',
-		    height: 200,
-		    layout: 'fit'
+		    title: 'Navigation',
+		    headerCssClass: 'ec2-panel-header',
+		    width: 150,
+		    margins: '5 0 5 5',
+		    padding: 5,
+		    defaults: {
+			padding: 5,
+			border: false
+		    },
+		    items: [{
+			html: navLink('nav-images', 'Images')
+		    }, {
+			html: navLink('nav-servers', 'Servers')
+		    }]
+		}, {
+		    xtype: 'container',
+		    id: 'content-container',
+		    layout: 'border',
+		    region: 'center',
+		    margins: '5 5 5 0',
+		    items: [{
+			id: 'content',
+			region: 'center',
+			layout: 'fit'
+		    }, {
+			id: 'subcontent',
+			split: true,
+			region: 'south',
+			height: 200,
+			layout: 'fit'
+		    }]
 		}]
 	    }]
 	}

@@ -22,7 +22,8 @@ class ServersController < ApplicationController
     servers = Server.filtered(params[:filter_value])
 
     render_json :items, servers,
-                :only => [:id, :status, :physical_server, :user_terminate, :allow_restart]
+                :only => [:id, :status, :physical_server,
+                          :user_terminate, :allow_restart, :message]
   end
 
   def monitor

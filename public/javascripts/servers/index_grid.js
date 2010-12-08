@@ -64,6 +64,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    Restarting: 'status_changing.gif',
 	    Migrating: 'status_changing.gif',
 	    Error: 'status_error.gif',
+	    Unknown: 'status_unknown.gif'
 	};
 
 	this.colModel = new Ext.grid.ColumnModel([{

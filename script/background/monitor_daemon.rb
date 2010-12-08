@@ -19,6 +19,36 @@ require 'simple-daemon'
 require 'libvirt'
 class MonitorDaemon < SimpleDaemon::Base
   SimpleDaemon::WORKING_DIRECTORY = Rails.root.join 'log'
+
+  class Connector
+
+    def initialize(physical_server, logger)
+      @physical_server, @logger = physical_server, logger
+    end
+
+    def connect
+      unless @conn
+        return false if @time_check_down and Time.now.to_f - @time_check_down < 30
+        @logger.debug "connecting #{@physical_server}"
+        begin 
+          @conn = Libvirt::open_read_only("qemu+ssh://root@#{@physical_server}/system")
+          @time_check_down = nil
+        rescue Libvirt::ConnectionError => err
+          @logger.info "#{err.class}: #{err.message}"
+          @time_check_down = Time.now.to_f
+          return false
+        end
+      end
+      true
+    end
+
+    def reset_conn
+      @conn = nil
+    end
+
+    attr_reader :conn
+
+  end
   
   def self.start
     STDOUT.sync = true
@@ -34,7 +64,10 @@ class MonitorDaemon < SimpleDaemon::Base
     @starling = Starling.new(Settings.starling.server)
     @memcache = MemCache.new(Settings.memcached.server)
     @monitoring = Hash.new
-    @conn_pool = Hash.new
+
+    @connectors = Hash.new {|hash, key|
+      hash[key] = Connector.new(key, @logger)
+    }
         
     loop do
       begin
@@ -64,25 +97,20 @@ class MonitorDaemon < SimpleDaemon::Base
   end
 
   def self.get_domain_info(server)
+    connector = @connectors[server.physical_server]
+
     begin
-      if @conn_pool.has_key?(server.physical_server)
-        conn = @conn_pool[server.physical_server]
-      else
-        @logger.debug "connecting #{server.physical_server}"
-        conn = Libvirt::open_read_only("qemu+ssh://root@#{server.physical_server}/system")
-        @conn_pool[server.physical_server] = conn
+      unless connector.connect
+        server.status = 'Unknown'
+        server.message = 'physical server may be down'
+        server.save
+        return nil
       end
 
-      domain = conn.lookup_domain_by_name(server.name)
+      domain = connector.conn.lookup_domain_by_name(server.name)
       domain_info = domain.info
 
       return domain_info
-    rescue Libvirt::ConnectionError => err
-      @logger.info "#{err.class}: #{err.message}"
-      server.status = 'Unknown'
-      server.message = 'physical server may be down'
-      server.save
-      return nil
     rescue Libvirt::RetrieveError => err
       @logger.info "#{err.class}: #{err.message}"
       case err.message
@@ -91,8 +119,8 @@ class MonitorDaemon < SimpleDaemon::Base
         server.message = 'domain may be disappeared'
         server.save
         return nil
-      when /Broken Pipe/
-        @conn_pool.delete server.physical_server
+      when /Broken pipe/
+        connector.reset_conn
         retry
       end
       return nil
