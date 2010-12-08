@@ -4,42 +4,58 @@ require 'rexml/document'
 class ImportTargetsController < ApplicationController
 
   def index
-    server_names = Server.all.collect {|server| server.name }
+    @server_names = Server.all.collect {|server| server.name }
 
-    import_targets = Array.new
+    @import_targets = Hash.new
+    threads = Array.new
+
     Settings.physical_server.each do |ps|
       ps['physical_servers'].each do |physical_server|
-        conn = Libvirt.open("qemu+ssh://root@#{physical_server}/system")
-        begin
-          domains = conn.list_domains.collect {|domain_id|
-            conn.lookup_domain_by_id(domain_id)
-          }.select {|domain|
-            not server_names.include?(domain.name) and
-            domain.info.state == Libvirt::Domain::RUNNING
-          }.sort_by {|domain|
-            domain.name
-          }
-
-          domains.each do |domain|
-            import_target = {
-              :zone => ps['zone'],
-              :physical_server => physical_server,
-            }
-            import_target.merge!(parse_xml_desc(domain.xml_desc))
-            import_target.merge!({
-              :paths => {
-                :import_target => import_target_path(import_target[:name])
-              }
-            })
-            import_targets << import_target
-          end
-        ensure
-          conn.close
-        end
+        threads << Thread.new {
+          get_import_target(ps['zone'], physical_server)
+        }
       end
     end
+    threads.each &:join
 
-    render :json => { :success => true, :items => import_targets }
+    import_targets = @import_targets.keys.sort.collect {|physical_server|
+      @import_targets[physical_server]
+    }.flatten
+
+    render_json :items, import_targets
+  end
+
+  def get_import_target(zone, physical_server)
+    begin
+      conn = Libvirt.open("qemu+ssh://root@#{physical_server}/system")
+    rescue Libvirt::ConnectionError
+      return
+    end
+
+    begin
+      domains = conn.list_domains.collect {|domain_id|
+        conn.lookup_domain_by_id(domain_id)
+      }.select {|domain|
+        not @server_names.include?(domain.name) and
+        domain.info.state == Libvirt::Domain::RUNNING
+      }.sort_by &:name
+
+      import_targets = Array.new
+      domains.each do |domain|
+        import_target = {
+          :zone => zone,
+          :physical_server => physical_server,
+        }
+        import_target.merge! parse_xml_desc(domain.xml_desc)
+        import_target.merge! :paths => {
+          :import_target => import_target_path(import_target[:name])
+        }
+        import_targets << import_target
+      end
+      @import_targets[physical_server] = import_targets
+    ensure
+      conn.close
+    end
   end
 
   def parse_xml_desc(xml)
@@ -61,7 +77,7 @@ class ImportTargetsController < ApplicationController
     mac_address0 = REXML::XPath.first(doc, '/domain/devices/interface[source/@bridge="br0"]/mac/@address').value
     mac_address1 = REXML::XPath.first(doc, '/domain/devices/interface[source/@bridge="br1"]/mac/@address').value
 
-    return {
+    {
       :name => name.to_s,
       :uuid => uuid.to_s,
       :virtualization => virtualization,
