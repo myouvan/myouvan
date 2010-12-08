@@ -52,8 +52,9 @@ class Equallogic
       r.expect(@prompt, 20) {|m|
         w.cmd "volume select #{src_volume} clone #{dst_volume} snap-reserve 0%"
       }
-      r.expect(/^iSCSI target name is (.*)[\r\n]/, 20) {|m|
-        dst_iqn = m[1]
+      r.expect(/^(?:% Error - (.*)|iSCSI target name is (.*))[\r\n]/, 20) {|m|
+        raise EquallogicError, m[1] if m[1]
+        dst_iqn = m[2]
       }
       r.expect(@prompt, 20) {|m|
         w.cmd "volume select #{dst_volume} pool #{server.pool}"
@@ -121,4 +122,8 @@ class Equallogic
     pool
   end
 
+end
+
+
+class EquallogicError < RuntimeError
 end

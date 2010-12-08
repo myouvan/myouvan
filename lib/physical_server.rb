@@ -16,9 +16,18 @@ class PhysicalServer
   def create_server(server, domain_xml)
     @logger.info "start creating server #{server.name}"
 
-    el = Equallogic.new(@logger)
-    server.storage_iqn = el.clone_volume(server)
-    server.save
+    begin
+      el = Equallogic.new(@logger)
+      server.storage_iqn = el.clone_volume(server)
+      server.save
+    rescue EquallogicError => err
+      @logger.error "#{err.class}: #{err.message}"
+      @logger.error "error creating server #{server.name}"
+      server.status = 'Error'
+      server.message = "Storage error: #{err.message}\nServer was not created.\nDestroy this meta data."
+      server.save
+      return
+    end
 
     iscsi_login(server.physical_server, server.storage_iqn)
 

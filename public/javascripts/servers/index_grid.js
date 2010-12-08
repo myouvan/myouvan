@@ -103,8 +103,10 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    sortable: true,
 	    renderer: function(value, metadata, record) {
 		var message = record.get('message');
-		if (message)
-		    metadata.attr = 'ext:qtip="' + message + '"';
+		if (message) {
+		    var text = message.replace("\n", '<br />', 'g');
+		    metadata.attr = 'ext:qtip="' + text + '"';
+		}
 		return Ext.ux.createImg({
 		    src: '/images/' + imagePaths[value],
 		    size: 16,
