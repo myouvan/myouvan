@@ -23,7 +23,8 @@ xml.domain :type => 'kvm' do
     xml.emulator '/usr/libexec/qemu-kvm'
     xml.disk :type => 'block', :device => 'disk' do
       xml.driver :name => 'qemu', :cache => 'none'
-      xml.source :dev => '%%device%%'
+      storage_iqn = @server.storage_iqn.blank? ? '%%storage_iqn%%' : @server.storage_iqn
+      xml.source :dev => "/dev/disk/by-path/ip-#{Settings.storage.server}:3260-iscsi-#{storage_iqn}-lun-0"
       xml.target :dev => 'vda', :bus => 'virtio'
     end
     @server.interfaces.each do |interface|

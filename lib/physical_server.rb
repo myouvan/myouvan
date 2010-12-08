@@ -22,9 +22,7 @@ class PhysicalServer
 
     iscsi_login(server.physical_server, server.storage_iqn)
 
-    device = "/dev/disk/by-path/ip-#{Settings.storage.server}:3260-iscsi-#{server.storage_iqn}-lun-0"
-    domain_xml.sub!('%%device%%', device)
-
+    domain_xml.sub!('%%storage_iqn%%', server.storage_iqn)
     virt_create_server(server, domain_xml)
 
     virtual_server = Centos.new(@logger)
@@ -160,6 +158,22 @@ class PhysicalServer
 
     @logger.info "destroyed server record"
   end
+
+  def failover_server(server, domain_xml)
+    @logger.info "start failing over server #{server.name}"
+
+    iscsi_login(server.physical_server, server.storage_iqn)
+
+    virt_create_server(server, domain_xml)
+    virtual_server = Centos.new(@logger)
+    virtual_server.wait_login_prompt(server)
+
+    server.status = 'Running'
+    server.save
+
+    @logger.info "finished failing over server #{server.name}"
+  end
+
   
   #------------------------------
   #   iscsi
@@ -202,6 +216,7 @@ class PhysicalServer
     @logger.info "logged out iscsi #{iqn} on #{physical_server}"
   end
 
+
   #------------------------------
   #   virt base
   #------------------------------
@@ -224,6 +239,7 @@ class PhysicalServer
       @logger.debug err.message
     end
   end
+
 
   #------------------------------
   #   virt methods

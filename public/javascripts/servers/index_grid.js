@@ -101,6 +101,9 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	    width: 100,
 	    sortable: true,
 	    renderer: function(value, metadata, record) {
+		var message = record.get('message');
+		if (message)
+		    metadata.attr = 'ext:qtip="' + message + '"';
 		return Ext.ux.createImg({
 		    src: '/images/' + imagePaths[value],
 		    size: 16,
@@ -145,6 +148,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		'comment',
 		'user_terminate',
 		'allow_restart',
+		'message',
 		'tags',
 		'paths'
 	    ]

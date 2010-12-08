@@ -115,9 +115,11 @@ class MonitorDaemon < SimpleDaemon::Base
       @logger.info "#{err.class}: #{err.message}"
       case err.message
       when /Domain not found/
-        server.status = 'Unknown'
-        server.message = 'domain may be disappeared'
-        server.save
+        unless %w(Creating Terminated Migrating Error).include?(server.status)
+          server.status = 'Unknown'
+          server.message = 'domain may be disappeared'
+          server.save
+        end
         return nil
       when /Broken pipe/
         connector.reset_conn
@@ -167,7 +169,7 @@ class MonitorDaemon < SimpleDaemon::Base
       @starling.set(Settings.starling.queue, item)
     end
 
-    if %(Running Paused Shut\ down).include?(server.status) and server.status != STATES[state]
+    if %w(Running Paused Shut\ down).include?(server.status) and server.status != STATES[state]
       server.status = STATES[state]
       server.save
     elsif server.status == 'Unknown'

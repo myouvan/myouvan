@@ -1,5 +1,7 @@
 class ServersController < ApplicationController
 
+  skip_before_filter :verify_authenticity_token ,:only=>[:failover]
+
   def index
     respond_to do |format|
       format.html
@@ -304,6 +306,33 @@ class ServersController < ApplicationController
     server = Server.find(params[:id])
     server.destroy
     render_json :item, server
+  end
+
+  def failover
+    physical_server = params[:physical_server]
+    servers = Server.
+      where(:physical_server => physical_server).
+      includes(:failover_targets)
+
+    servers.each do |server|
+      unless server.failover_targets.empty?
+        failover_target = server.failover_targets.first
+        server.status = 'Failing over'
+        server.physical_server = failover_target.physical_server
+        server.save
+        failover_target.destroy
+
+        @server = server
+        domain_xml = '' # because render_to_string returns ActionView::Buffer
+        domain_xml << (render_to_string :template => 'servers/domain.xml.builder', :layout => false)
+
+        set_starling(:command => 'failover_server',
+                     :server_id => server.id,
+                     :domain_xml => domain_xml)
+      end
+    end
+
+    render :json => { :success => true }
   end
 
   def set_starling(item)

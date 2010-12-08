@@ -23,6 +23,7 @@ Provisioning::Application.routes.draw do
 
     collection do
       post :import
+      post :failover
       get :status
       get :zones
       get :physical_servers

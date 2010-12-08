@@ -45,7 +45,7 @@ class ServerDaemon < SimpleDaemon::Base
           pid = Process.fork {
             server = Server.find(item[:server_id])
             begin
-              @logger.info item.inspect
+              @logger.debug item.inspect
               ps = PhysicalServer.new(@logger)
 
               case item[:command]
@@ -67,6 +67,8 @@ class ServerDaemon < SimpleDaemon::Base
                 ps.migrate_server(server, item[:new_physical_server])
               when 'terminate_server'
                 ps.terminate_server(server)
+              when 'failover_server'
+                ps.failover_server(server, item[:domain_xml])
               end
             rescue Exception => e
               server.status = 'Error'
