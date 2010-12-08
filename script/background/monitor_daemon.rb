@@ -34,28 +34,17 @@ class MonitorDaemon < SimpleDaemon::Base
     @starling = Starling.new(Settings.starling.server)
     @memcache = MemCache.new(Settings.memcached.server)
     @monitoring = Hash.new
-    conn_pool = Hash.new
+    @conn_pool = Hash.new
         
     loop do
       begin
         servers = Server.all
         servers.each do |server|
-          if conn_pool.has_key?(server.physical_server)
-            conn = conn_pool[server.physical_server]
-          else
-            @logger.debug "connect #{server.physical_server}"
-            conn = Libvirt::open_read_only("qemu+ssh://root@#{server.physical_server}/system")
-            conn_pool[server.physical_server] = conn
-          end
+          domain_info = get_domain_info(server)
+          next unless domain_info
 
-          begin
-            domain = conn.lookup_domain_by_name(server.name)
-          rescue Libvirt::RetrieveError
-            next
-          end
-
-          set_monitor(server, domain)
-          set_status(server, domain)
+          set_monitor(server, domain_info)
+          set_status(server, domain_info)
         end
         
         # Optional. Sleep between tasks.
@@ -74,7 +63,43 @@ class MonitorDaemon < SimpleDaemon::Base
     end
   end
 
-  def self.set_monitor(server, domain)
+  def self.get_domain_info(server)
+    begin
+      if @conn_pool.has_key?(server.physical_server)
+        conn = @conn_pool[server.physical_server]
+      else
+        @logger.debug "connecting #{server.physical_server}"
+        conn = Libvirt::open_read_only("qemu+ssh://root@#{server.physical_server}/system")
+        @conn_pool[server.physical_server] = conn
+      end
+
+      domain = conn.lookup_domain_by_name(server.name)
+      domain_info = domain.info
+
+      return domain_info
+    rescue Libvirt::ConnectionError => err
+      @logger.info "#{err.class}: #{err.message}"
+      server.status = 'Unknown'
+      server.message = 'physical server may be down'
+      server.save
+      return nil
+    rescue Libvirt::RetrieveError => err
+      @logger.info "#{err.class}: #{err.message}"
+      case err.message
+      when /Domain not found/
+        server.status = 'Unknown'
+        server.message = 'domain may be disappeared'
+        server.save
+        return nil
+      when /Broken Pipe/
+        @conn_pool.delete server.physical_server
+        retry
+      end
+      return nil
+    end
+  end
+
+  def self.set_monitor(server, domain_info)
     if @monitoring.has_key?(server.id)
       monitors = @memcache.get("#{Settings.memcached.key.monitor}:#{server.id}") || Array.new
     else
@@ -84,11 +109,7 @@ class MonitorDaemon < SimpleDaemon::Base
     end
 
     time = Time.now
-    begin
-      monitors << { :time => time.to_i, :usec => time.usec, :cpu_time => domain.info.cpu_time }
-    rescue Libvirt::RetrieveError
-      return
-    end
+    monitors << { :time => time.to_i, :usec => time.usec, :cpu_time => domain_info.cpu_time }
 
     monitors.shift if monitors.size > Settings.monitor_caches
     @memcache.set("#{Settings.memcached.key.monitor}:#{server.id}", monitors)
@@ -100,12 +121,8 @@ class MonitorDaemon < SimpleDaemon::Base
     Libvirt::Domain::SHUTOFF => 'Shut down'
   }
 
-  def self.set_status(server, domain)
-    begin
-      state = domain.info.state
-    rescue Libvirt::RetrieveError
-      return
-    end
+  def self.set_status(server, domain_info)
+    state = domain_info.state
 
     if state == Libvirt::Domain::SHUTOFF and
         server.status == 'Running' and
@@ -122,9 +139,12 @@ class MonitorDaemon < SimpleDaemon::Base
       @starling.set(Settings.starling.queue, item)
     end
 
-    if %(Running Paused Shut\ down).include?(server.status) and
-        STATES[state] != server.status
+    if %(Running Paused Shut\ down).include?(server.status) and server.status != STATES[state]
       server.status = STATES[state]
+      server.save
+    elsif server.status == 'Unknown'
+      server.status = STATES[state]
+      server.message = nil
       server.save
     end
   end

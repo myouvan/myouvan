@@ -115,7 +115,7 @@ Images.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 		event: 'destroyedImage',
 		fn: this.store.destroyRecord
 	    }],
-	    scope: this
+	    scope: this.store
 	});
     }
 

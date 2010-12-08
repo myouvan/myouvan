@@ -63,6 +63,7 @@ ActiveRecord::Schema.define(:version => 20101206030421) do
     t.boolean  "auto_restart"
     t.boolean  "user_terminate"
     t.boolean  "allow_restart"
+    t.string   "message"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
