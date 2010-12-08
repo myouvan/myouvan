@@ -201,7 +201,11 @@ class PhysicalServer
   def iscsi_login(physical_server, iqn)
     iscsi_connect(physical_server) {|conn|
       conn.run "/sbin/iscsiadm -m node -o new -p #{Settings.storage.server} -T #{iqn}"
-      conn.run "/sbin/iscsiadm -m node -T #{iqn} --login"
+      begin
+        conn.run "/sbin/iscsiadm -m node -T #{iqn} --login"
+      rescue RuntimeError => err
+        raise unless err.message =~ /15 - already exists/
+      end
     }
 
     @logger.info "logged in iscsi #{iqn} on #{physical_server}"
