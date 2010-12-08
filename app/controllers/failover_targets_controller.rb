@@ -1,7 +1,5 @@
 class FailoverTargetsController < ApplicationController
 
-  include ApplicationHelper
-
   def index
     server_id = params[:server_id]
     render_json :items, FailoverTarget.belongs_server(server_id), :methods => :paths

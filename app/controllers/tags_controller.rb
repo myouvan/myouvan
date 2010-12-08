@@ -1,7 +1,5 @@
 class TagsController < ApplicationController
 
-  include ApplicationHelper
-
   def index
     server_id = params[:server_id]
     render_json :items, Tag.belongs_server(server_id), :methods => :paths

@@ -359,7 +359,7 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	var ri = this.store.findExact('id', item.server_id);
 	if (ri != -1) {
 	    var record = this.store.getAt(ri);
-	    record.get('tags').push(item.value);
+	    record.get('tags').push(item);
 	}
     },
 
@@ -367,12 +367,16 @@ Servers.IndexGrid = Ext.extend(Ext.grid.GridPanel, {
 	var ri = this.store.findExact('id', item.server_id);
 	if (ri != -1) {
 	    var record = this.store.getAt(ri);
-	    var ti = record.get('tags').indexOf(item.value);
-	    if (ti != -1) {
+	    var ti = Ext.each(record.get('tags'), function(_tag) {
+		return item.id != _tag.id;
+	    });
+	    if (Ext.isDefined(ti)) {
 		record.get('tags').splice(ti, 1);
 		if (this.filterValue == item.value) {
-		    ti = record.get('tags').indexOf(item.value);
-		    if (ti == -1) {
+		    var ti = Ext.each(record.get('tags'), function(_tag) {
+			return item.id != _tag.id;
+		    });
+		    if (!Ext.isDefined(ti)) {
 			this.store.removeAt(ri);
 			if (!this.getSelectionModel().hasSelection())
 			    this.fireEvent('unshowServer');

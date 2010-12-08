@@ -11,6 +11,15 @@ defaults: &defaults
 
   monitor_caches: 50
 
+  virtual_server:
+    centos:
+      account: root
+      password: iwroot
+
+
+development:
+  <<: *defaults
+
   max_cpus: 16
   min_memory: 512
   max_memory: 4096
@@ -33,16 +42,49 @@ defaults: &defaults
         - pmiw-kvm018
         - pmiw-kvm019
 
-  virtual_server:
-    centos:
-      account: root
-      password: iwroot
-
-development:
-  <<: *defaults
-
-test:
-  <<: *defaults
 
 production:
   <<: *defaults
+
+  max_cpus: 16
+  min_memory: 1024
+  max_memory: 16384
+
+  storage:
+    server: stoiw-grp01
+    confirm_on_operation: false
+    account: grpadmin
+    password: stoadmin
+    chap_user: vmconnector
+    allow_ipaddress: 172.29.*.*
+
+  pools_for_instance:
+    - instance-pool01
+    - instance-pool02
+    - instance-pool03
+
+  physical_server:
+    - zone: Iwamizawa
+      physical_servers:
+        - pmiw-kvm001
+        - pmiw-kvm002
+        - pmiw-kvm003
+        - pmiw-kvm004
+        - pmiw-kvm005
+        - pmiw-kvm006
+        - pmiw-kvm007
+        - pmiw-kvm008
+        - pmiw-kvm009
+        - pmiw-kvm010
+        - pmiw-kvm011
+        - pmiw-kvm012
+        - pmiw-kvm013
+        - pmiw-kvm014
+        - pmiw-kvm015
+        - pmiw-kvm016
+        - pmiw-kvm017
+        - pmiw-kvm018
+        - pmiw-kvm019
+        - pmiw-kvm020
+        - pmiw-kvm021
+        - pmiw-kvm022

@@ -1,7 +1,5 @@
 class ServersController < ApplicationController
 
-  include ApplicationHelper
-
   def index
     respond_to do |format|
       format.html
@@ -14,13 +12,8 @@ class ServersController < ApplicationController
           servers = filtered_server.find(JSON.parse(params[:ids]))
         end
 
-        render :json => {
-          :success => true,
-          :items => servers.collect {|server|
-            tags = server.tags.collect {|tag| tag.value }
-            server.as_json(:methods => :paths).merge(:tags => tags)
-          }
-        }
+        render_json :items, servers,
+                    :methods => :paths, :include => :tags
       }
     end
   end
@@ -28,14 +21,8 @@ class ServersController < ApplicationController
   def status
     servers = Server.filtered(params[:filter_value])
 
-    render :json => {
-      :success => true,
-      :items => servers.collect {|server|
-        server.attributes.reject {|key, value|
-          not %w(id status physical_server user_terminate allow_restart).include?(key)
-        }
-      }
-    }
+    render_json :items, servers,
+                :only => [:id, :status, :physical_server, :user_terminate, :allow_restart]
   end
 
   def monitor
@@ -147,13 +134,11 @@ class ServersController < ApplicationController
 
     if server.save
       tags = server.tags.collect {|tag| tag.value }
-      render :json => {
-        :success => true,
-        :item => server.as_json(:methods => :paths).merge(:tags => tags)
-      }
+      render_json :item, server,
+                  :methods => :paths, :include => :tags
       server
     else
-      render :json => { :success => false, :errors => server.errors_for_ext }
+      render :json => { :success => false, :errors => server.errors }
       nil
     end
   end
