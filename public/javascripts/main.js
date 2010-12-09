@@ -32,10 +32,11 @@ var showViewport = function() {
 	border: false,
 	items: {
 	    layout: 'border',
+	    bbar: [
+		'->', '&copy; Cross Marketing'
+	    ],
 	    items: [{
 		region: 'north',
-		height: 66,
-		border: false,
 		html: '<img src="/images/logo.gif" />'
 	    }, {
 		region: 'center',
