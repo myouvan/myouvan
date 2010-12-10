@@ -101,10 +101,12 @@ class MonitorDaemon < SimpleDaemon::Base
 
     begin
       unless connector.connect
-        server.status = 'Unknown'
-        server.message = 'physical server may be down'
-        server.save
-        return nil
+        unless %w(Creating Terminated Migrating Failing\ over Error).include?(server.status)
+          server.status = 'Unknown'
+          server.message = 'physical server may be down'
+          server.save
+          return nil
+        end
       end
 
       domain = connector.conn.lookup_domain_by_name(server.name)

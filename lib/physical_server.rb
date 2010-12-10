@@ -29,7 +29,16 @@ class PhysicalServer
       return
     end
 
-    iscsi_login(server.physical_server, server.storage_iqn)
+    begin
+      iscsi_login(server.physical_server, server.storage_iqn)
+    rescue Errno::ECONNREFUSED => err
+      @logger.error "#{err.class}: #{err.message}"
+      @logger.error "error creating server #{server.name}"
+      el.delete_volume(server)
+      server.status = 'Error'
+      server.message = "Server error: #{err.message}\nServer was not created.\nDestroy this meta data."
+      return
+    end
 
     domain_xml.sub!('%%storage_iqn%%', server.storage_iqn)
     virt_create_server(server, domain_xml)
@@ -171,7 +180,24 @@ class PhysicalServer
   def failover_server(server, domain_xml)
     @logger.info "start failing over server #{server.name}"
 
-    iscsi_login(server.physical_server, server.storage_iqn)
+    begin
+      failover_target = server.failover_targets.shift
+      server.physical_server = failover_target.physical_server
+      server.save
+      failover_target.destroy
+
+      iscsi_login(server.physical_server, server.storage_iqn)
+    rescue Errno::ECONNREFUSED => err
+      @logger.error "#{err.class}: #{err.message}"
+
+      if server.failover_targets.empty?
+        server.status = 'Error'
+        server.message = 'cannot find available failover target'
+        return
+      end
+
+      retry
+    end
 
     virt_create_server(server, domain_xml)
     virtual_server = Centos.new(@logger)

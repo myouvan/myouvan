@@ -316,11 +316,8 @@ class ServersController < ApplicationController
 
     servers.each do |server|
       unless server.failover_targets.empty?
-        failover_target = server.failover_targets.first
         server.status = 'Failing over'
-        server.physical_server = failover_target.physical_server
         server.save
-        failover_target.destroy
 
         @server = server
         domain_xml = '' # because render_to_string returns ActionView::Buffer
