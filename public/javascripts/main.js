@@ -37,7 +37,9 @@ var showViewport = function() {
 	    ],
 	    items: [{
 		region: 'north',
-		html: '<img src="/images/logo.gif" />'
+		html: '<img src="/images/logo.gif" width="148" height="66" />',
+		height: 66,
+		border: false
 	    }, {
 		region: 'center',
 		layout: 'border',
