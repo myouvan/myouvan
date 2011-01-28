@@ -14,7 +14,7 @@ defaults: &defaults
   virtual_server:
     centos:
       account: root
-      password: iwroot
+      password: ******
 
 
 development:
@@ -25,22 +25,22 @@ development:
   max_memory: 4096
 
   storage:
-    server: stoiw-grp02
+    server: storage-server01
     confirm_on_operation: true
-    account: shigitani
-    password: 69H96Cb5
+    account: devuser
+    password: *******
     chap_user: vmconnector
-    allow_ipaddress: 172.29.*.*
+    allow_ipaddress: 172.25.*.*
 
   pools_for_instance:
-    - backup-pool02
+    - development-pool01
 
   physical_server:
     - zone: Iwamizawa
       physical_servers:
-        - pmiw-kvm017
-        - pmiw-kvm018
-        - pmiw-kvm019
+        - physical_server001
+        - physical_server002
+        - physical_server003
 
 
 production:
@@ -51,12 +51,12 @@ production:
   max_memory: 16384
 
   storage:
-    server: stoiw-grp01
+    server: storage-server01
     confirm_on_operation: false
-    account: grpadmin
-    password: stoadmin
+    account: prouser
+    password: *******
     chap_user: vmconnector
-    allow_ipaddress: 172.29.*.*
+    allow_ipaddress: 172.25.*.*
 
   pools_for_instance:
     - instance-pool01
@@ -66,25 +66,25 @@ production:
   physical_server:
     - zone: Iwamizawa
       physical_servers:
-        - pmiw-kvm001
-        - pmiw-kvm002
-        - pmiw-kvm003
-        - pmiw-kvm004
-        - pmiw-kvm005
-        - pmiw-kvm006
-        - pmiw-kvm007
-        - pmiw-kvm008
-        - pmiw-kvm009
-        - pmiw-kvm010
-        - pmiw-kvm011
-        - pmiw-kvm012
-        - pmiw-kvm013
-        - pmiw-kvm014
-        - pmiw-kvm015
-        - pmiw-kvm016
-        - pmiw-kvm017
-        - pmiw-kvm018
-        - pmiw-kvm019
-        - pmiw-kvm020
-        - pmiw-kvm021
-        - pmiw-kvm022
+        - physical_server001
+        - physical_server002
+        - physical_server003
+        - physical_server004
+        - physical_server005
+        - physical_server006
+        - physical_server007
+        - physical_server008
+        - physical_server009
+        - physical_server010
+        - physical_server011
+        - physical_server012
+        - physical_server013
+        - physical_server014
+        - physical_server015
+        - physical_server016
+        - physical_server017
+        - physical_server018
+        - physical_server019
+        - physical_server020
+        - physical_server021
+        - physical_server022
